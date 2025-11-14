@@ -1,0 +1,112 @@
+/* info-page.css */
+
+:root {
+    --primary-color: #4fa690;
+    --bg-dark: #1b1c1c;
+    --bg-light: #2a2c2c;
+    --text-light: #e0e7f1;
+    --text-dark: #a0aec0;
+    --border-color: rgba(79, 166, 144, 0.2);
+}
+
+
+.info-page-main {
+    padding: 4rem 2rem;
+    background: radial-gradient(circle, var(--bg-light) 0%, var(--bg-dark) 100%);
+}
+
+.info-page-container {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.info-page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.info-page-header h2 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.info-page-header::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background-color: var(--primary-color);
+    margin: 1rem auto 0;
+    border-radius: 2px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.info-card {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.info-card__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-card__icon {
+    background-color: var(--primary-color);
+    color: var(--bg-dark);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem; 
+    flex-shrink: 0;
+}
+
+.info-card h3 {
+    font-size: 1.5rem;
+    color: var(--text-light);
+    margin: 0;
+}
+
+.info-card p, .info-card ul {
+    color: var(--text-dark);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.info-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.info-card ul li {
+    padding-left: 1.5rem;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.info-card ul li::before {
+    content: '✔';
+    color: var(--primary-color);
+    position: absolute;
+    left: 0;
+}

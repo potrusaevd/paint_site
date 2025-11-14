@@ -1,0 +1,882 @@
+/*Lime Ditails(osn_css).css*/
+/* ===================================
+   RESET & БАЗОВЫЕ СТИЛИ
+   =================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+:root {
+    --primary-color: #4fa690;
+    --primary-hover: #3e8e7e;
+    --bg-dark: #121212;
+    --bg-medium: #1b1c1c;
+    --bg-light: #222831;
+    --text-light: #ffffff;
+    --text-medium: #ccc;
+    --text-dark: #aaa;
+    --border-color: #2d2d2d;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg-medium);
+    color: var(--text-light);
+    line-height: 1.6;
+    display: grid;
+    grid-template-rows: auto 1fr auto; /* Шапка, Main, Подвал */
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--primary-hover);
+}
+
+/* Общий заголовок секции */
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: var(--text-light);
+    position: relative;
+    padding-bottom: 1rem;
+}
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+/* Общий заголовок для секций */
+.section-title {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    position: relative;
+    padding-bottom: 1rem;
+}
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+/* Секция 1: Главный экран (Hero) */
+.hero {
+    position: relative;
+    height: 60vh;
+    min-height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    background: url('images/hero-background.webp') no-repeat center center/cover;
+    color: white;
+}
+.hero__overlay {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+.hero__content { position: relative; z-index: 2; }
+.hero__title {
+    font-size: clamp(2rem, 5vw, 3rem); /* Адаптивный размер шрифта */
+    font-weight: 700;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    margin-bottom: 1rem;
+}
+.hero__subtitle { font-size: 1.2rem; margin-bottom: 2rem; opacity: 0.9; }
+.hero__search-form {
+    display: flex; max-width: 600px; 
+    margin: 0 auto;
+    background-color: white; border-radius: 8px;
+    overflow: hidden; 
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+.hero__search-form input {
+    flex-grow: 1; border: none; padding: 1rem 1.5rem;
+    font-size: 1rem; outline: none; color: #333;
+}
+.hero__search-form button { /* Используем общие стили кнопок */
+    border-radius: 0 6px 6px 0;
+    padding: 0 2rem; 
+    font-size: 1rem;
+    background-color: var(--primary-color); 
+    color: white;
+    border: none; 
+    cursor: pointer;
+}
+
+
+
+/* Секция 2: Преимущества (Benefits) */
+.benefits { padding: 4rem 0; }
+.benefits__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+.benefit-item {
+    text-align: center; padding: 2rem;
+    background-color: var(--bg-light); border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Убираем подчеркивание у заголовков внутри ссылок-карточек */
+.benefit-item, .category-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+.benefit-item:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+.benefit-item__icon { font-size: 2.5rem; line-height: 1; margin-bottom: 1.5rem; color: var(--primary-color); }
+.benefit-item__title { font-size: 1.2rem; margin-bottom: 0.5rem; }
+.benefit-item__text { color: var(--text-dark); }
+
+/* Секция 3: Карусель акций - ИСПРАВЛЕННЫЕ СТИЛИ */
+.promo-carousel {
+    padding: 4rem 0;
+    background-color: var(--bg-light);
+}
+.promo-carousel__title {
+    text-align: center; font-size: 2.2rem; font-weight: 700;
+    margin-bottom: 3rem; color: var(--text-light);
+}
+.promo-carousel__wrapper {
+    position: relative; display: flex; align-items: center;
+}
+.promo-carousel__track-wrapper {
+    overflow: hidden;
+    flex-grow: 1;
+}
+.promo-carousel__track {
+    display: flex; gap: 1.5rem; /* Увеличим отступ */
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    list-style: none; /* <--- ДОБАВЬТЕ ЭТУ СТРОКУ */
+    padding: 0; /* Также добавим сброс внутреннего отступа на всякий случай */
+    margin: 0;  /* И сброс внешнего отступа */
+}
+.promo-carousel__item {
+    flex: 0 0 100%; /* По умолчанию 1 элемент */
+}
+@media (min-width: 576px) { .promo-carousel__item { flex-basis: calc((100% - 1.5rem) / 2); } } /* 2 элемента */
+@media (min-width: 768px) { .promo-carousel__item { flex-basis: calc((100% - 3rem) / 3); } } /* 3 элемента */
+@media (min-width: 1200px) { .promo-carousel__item { flex-basis: calc((100% - 4.5rem) / 4); } } /* 4 элемента */
+
+
+
+.promo-carousel__btn {
+    background-color: rgba(30, 30, 30, 0.5);
+    backdrop-filter: blur(4px); /* Эффект размытого стекла */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1.5rem; /* Уменьшим немного размер символа */
+    cursor: pointer;
+    user-select: none;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.promo-carousel__btn:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-50%) scale(1.1); /* Эффект приподнятия */
+}
+
+/* Точное позиционирование с помощью calc() */
+.promo-carousel__btn--prev {
+    left: calc(-44px / 2); /* Сдвигаем влево на половину своей ширины */
+}
+
+.promo-carousel__btn--next {
+    right: calc(-44px / 2); /* Сдвигаем вправо на половину своей ширины */
+}
+
+
+/* Секция 4: Популярные категории */
+.popular-categories { padding: 4rem 0; }
+.categories__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+.category-card {
+    position: relative; border-radius: 12px; overflow: hidden;
+    height: 350px; display: flex; align-items: flex-end;
+    justify-content: center; text-decoration: none; color: white;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.category-card:hover { transform: scale(1.05); }
+.category-card img {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    z-index: 1; transition: transform 0.4s ease;
+}
+.category-card:hover img { transform: scale(1.1); }
+.category-card__overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%); z-index: 2;
+}
+.category-card h3 {
+    position: relative; z-index: 3; font-size: 1.4rem; padding: 1.5rem;
+    text-align: center; text-shadow: 1px 1px 4px black;
+}
+.category-card--all { background-color: var(--primary-color); align-items: center; }
+.category-card--all:hover { background-color: var(--primary-hover); }
+
+/* Секция 5: О нас и Контакты */
+.about-contacts { padding: 4rem 0; background-color: var(--bg-light); }
+.about-contacts__container {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr;
+    gap: 4rem; align-items: start;
+}
+.about-info .section-title, .contacts-info .section-title { text-align: left; }
+.about-info .section-title::after, .contacts-info .section-title::after { left: 0; transform: none; }
+.about-info p { color: var(--text-dark); }
+
+.contacts-info__title { font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--primary-color); }
+.contacts-info p { margin-bottom: 1rem; }
+.contacts-info a:hover { text-decoration: underline; }
+.contacts__socials { margin-top: 1.5rem; display: flex; gap: 1rem; }
+.contacts__socials a img { width: 32px; height: 32px; transition: opacity 0.2s; }
+.contacts__socials a:hover img { opacity: 0.8; }
+
+/* Подвал */
+.footer {
+    background-color: var(--bg-dark);
+    padding: 2rem 0;
+    border-top: 1px solid var(--border-color);
+}
+.footer__content { text-align: center; color: var(--text-dark); }
+.footer a { color: var(--primary-color); }
+
+
+/* Адаптивность */
+@media (max-width: 992px) {
+    .about-contacts__container { grid-template-columns: 1fr; gap: 3rem; }
+    .promo-carousel__btn { display: none; } /* Скрываем стрелки на планшетах */
+}
+
+@media (max-width: 768px) {
+    .section-title { font-size: 1.8rem; }
+    .hero__search-form { flex-direction: column; background: none; box-shadow: none; }
+    .hero__search-form input { border-radius: 8px; margin-bottom: 1rem; text-align: center;}
+    .hero__search-form button { border-radius: 8px; padding: 1rem; }
+    .benefits { padding: 3rem 0; }
+    .promo-carousel, .popular-categories, .about-contacts { padding: 3rem 0; }
+}
+ 
+    /* ===================================
+   ОПТИМИЗАЦИЯ ТЕНЕЙ
+   =================================== */
+
+/* Тень для основной кнопки при наведении */
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(79, 166, 144, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.btn-primary:hover::before {
+    opacity: 1;
+}
+
+/* Тень для аватара в шапке */
+.user-avatar::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(79, 166, 144, 0.4);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.user-avatar:hover::before {
+    opacity: 1;
+}
+
+/* Статичные (не анимированные) тени для других элементов */
+/* Мы возвращаем их, так как они не должны вызывать тормозов, если не меняются */
+.auth-wrapper, .delivery-block, .faq-section {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.user-dropdown {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.promo-carousel__item {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Стили для модального окна адреса */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+.modal {
+    background: #2a2c2c;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    max-height: 90vh; /* Максимальная высота - 90% от высоты экрана */
+    overflow-y: auto; /* Добавить прокрутку, если контент не помещается */
+}
+.modal-close {
+    position: absolute;
+    top: 10px; right: 15px;
+    background: none; border: none;
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+}
+.modal h3 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+/* Более светлый бордер в личных данных */
+#personal .form-group input, #personal .form-group select {
+    border-color: #5a5c65; /* Светлее чем #3a3c3c */
+}
+
+/* Разделитель в секции Безопасность */
+.form-divider {
+    border: none;
+    border-top: 1px solid #3a3c3c;
+    margin: 2.5rem 0;
+}
+.security-options .link {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/* Стили для кнопок */
+.btn-primary, .btn-secondary {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    z-index: 7;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background-color: #4fa690;
+    color: #121212;
+    border: 2px solid #4fa690;
+}
+
+.btn-primary:hover {
+    background-color: #3e8e7e;
+    border-color: #3e8e7e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 166, 144, 0.4);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: #4fa690;
+    border: 2px solid #4fa690;
+}
+
+.btn-secondary:hover {
+    background-color: #4fa690;
+    color: #121212;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 166, 144, 0.3);
+}
+
+.help-section {
+    text-align: left;
+    max-width: 350px;
+    margin-top: 1rem;
+}
+
+.help-section h3 {
+    color: #4fa690;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.help-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.help-list li {
+    padding: 0.5rem 0;
+    color: #ccc;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+}
+
+.help-list li::before {
+    content: '•';
+    color: #4fa690;
+    font-weight: bold;
+    margin-right: 0.8rem;
+    font-size: 1.2rem;
+}
+
+/* ===================================
+   КАСТОМНЫЙ СКРОЛЛБАР ДЛЯ ЗАКАЗОВ
+   =================================== */
+.orders-list::-webkit-scrollbar {
+    width: 8px; /* Ширина скроллбара */
+}
+
+.orders-list::-webkit-scrollbar-track {
+    background: #3a3c3c; /* Цвет фона дорожки */
+    border-radius: 4px;
+}
+
+.orders-list::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color); /* Цвет самого ползунка */
+    border-radius: 4px;
+    border: 2px solid #3a3c3c; /* Отступ вокруг ползунка */
+}
+
+.orders-list::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-hover); /* Цвет при наведении */
+}
+
+/* Для Firefox */
+.orders-list {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) #3a3c3c;
+}
+
+/* ===================================
+   СТИЛИ ДЛЯ ПРОКРУЧИВАЕМОГО КОНТЕНТА В ПРОФИЛЕ
+   =================================== */
+
+.scrollable-content {
+    max-height: 570px; /* Та же высота, что и у заказов */
+    overflow-y: auto;  /* Включаем прокрутку по вертикали */
+    padding: 10px;     /* Небольшой внутренний отступ, чтобы контент не прилипал */
+    margin: -10px;     /* Компенсируем padding, чтобы сохранить выравнивание */
+}
+
+/* Кастомный скроллбар для этого блока */
+.scrollable-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+    background: #3a3c3c;
+    border-radius: 4px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 4px;
+    border: 2px solid #3a3c3c;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Для Firefox */
+.scrollable-content {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) #3a3c3c;
+}
+
+
+/* ===================================
+   КАСТОМНЫЕ УВЕДОМЛЕНИЯ (АЛЕРТЫ) - ИСПРАВЛЕННАЯ ВЕРСИЯ
+   =================================== */
+.custom-alert-container {
+    position: fixed; /* Обязательно fixed, чтобы быть поверх всего */
+    top: 80px;      /* Отступ от верха, чтобы не перекрывать шапку */
+    right: 20px;
+    z-index: 10000;  /* Максимально возможный z-index */
+    width: auto;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+    pointer-events: none; /* Контейнер не блокирует события */
+}
+
+.custom-alert {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    background-color: #3a3c3c; /* Базовый фон */
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    min-width: 250px; /* Минимальная ширина для видимости */
+    opacity: 1; /* ИСПРАВЛЕНО: Начинаем с видимого состояния */
+    transform: translateX(100%); /* Начинает за экраном */
+    animation: slideInAndFadeOut 5s forwards ease-out; /* Анимация на 5 секунд */
+    pointer-events: auto; /* Алерт принимает события */
+}
+
+/* ИСПРАВЛЕННАЯ АНИМАЦИЯ: четкие этапы */
+@keyframes slideInAndFadeOut {
+    0% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    5% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    95% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* Стили для разных типов уведомлений */
+.custom-alert.success {
+    background-color: #27ae60;
+    border-left: 5px solid #2ecc71;
+}
+.custom-alert.error {
+    background-color: #c0392b;
+    border-left: 5px solid #e74c3c;
+}
+.custom-alert.info {
+    background-color: #2980b9;
+    border-left: 5px solid #3498db;
+}
+.custom-alert.warning {
+    background-color: #f39c12;
+    border-left: 5px solid #e67e22;
+}
+
+.custom-alert-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    line-height: 1;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    padding: 0 0 0 10px;
+    flex-shrink: 0; /* Кнопка не сжимается */
+}
+.custom-alert-close-btn:hover {
+    opacity: 1;
+}
+
+/* Альтернативный стиль без анимации для тестирования */
+.custom-alert.no-animation {
+    animation: none;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+
+
+/* ===================================
+   КАСТОМНОЕ ОКНО ПОДТВЕРЖДЕНИЯ (CONFIRM)
+   =================================== */
+
+/* Фон остается тот же (.modal-overlay) */
+
+.confirm-modal {
+    text-align: center;
+    max-width: 400px; /* Более компактное окно */
+}
+
+.confirm-modal h4 {
+    font-size: 1.4rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.confirm-modal p {
+    font-size: 1rem;
+    color: var(--text-medium);
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.modal-actions .btn {
+    flex-grow: 1; /* Кнопки занимают равное пространство */
+}
+
+.hero__search-form .btn-primary:hover {
+    transform: none; /* Отменяем сдвиг */
+    box-shadow: none; /* Отменяем тень, чтобы не было артефактов */
+    background-color: var(--primary-hover); /* Оставляем только смену цвета */
+}
+
+/* 
+  Возвращаем стандартное поведение для кнопки при клике,
+  так как мы его тоже могли затронуть.
+*/
+.hero__search-form .btn-primary:active {
+    transform: translateY(1px);
+}
+
+/* ===================================
+   ЕДИНЫЙ СТИЛЬ КАРТОЧКИ ТОВАРА (Unified Product Card)
+   =================================== */
+
+.unified-product-card {
+    background: var(--bg-medium);
+    border: 1px solid var(--border-color);
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 12px;
+}
+.unified-product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    border-color: var(--primary-color);
+}
+
+.unified-product-card .product-img {
+    overflow: hidden; /* Важно для эффекта увеличения */
+    position: relative;
+    background: #2a2c2c;
+}
+
+.unified-product-card .product-img img {
+    display: block;
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+.unified-product-card:hover .product-img img {
+    transform: scale(1.1);
+}
+
+.unified-product-card .product-list {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Позволяет блоку занимать все доступное место */
+}
+
+.unified-product-card .product-list h3 {
+    font-weight: 600;
+    color: var(--text-light);
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    font-size: 1rem;
+    line-height: 1.4;
+    flex-grow: 1; /* Заголовок занимает доступное место, выталкивая цену вниз */
+}
+.unified-product-card .product-list h3 a {
+    text-decoration: none;
+    color: inherit;
+}
+.unified-product-card:hover .product-list h3 {
+    color: var(--primary-color);
+}
+
+/* Цена */
+.unified-product-card .price-container {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    text-align: right;
+}
+
+.unified-product-card .price {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.unified-product-card .old-price {
+    color: var(--text-dark);
+    text-decoration: line-through;
+    font-size: 1rem;
+    margin-right: 0.5rem;
+    display: inline-block;
+}
+
+/* Действия */
+.unified-product-card .actions {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+    margin-top: auto; /* Прижимает блок к низу карточки */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.unified-product-card .add-to-cart .cart-button {
+    text-decoration: none;
+    color: var(--text-medium);
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+.unified-product-card .add-to-cart .cart-button:hover {
+    color: var(--primary-color);
+}
+
+.unified-product-card .add-to-links a {
+    color: var(--text-medium);
+    padding: 0 0.5rem;
+    font-size: 1.2rem; /* Увеличим иконки */
+    transition: color 0.3s ease;
+}
+.unified-product-card .add-to-links a:hover {
+    color: var(--primary-color);
+}
+
+/* Специальная карточка "Смотреть все" */
+.view-all-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-light);
+    color: var(--primary-color);
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+.view-all-card:hover {
+    background: var(--primary-color);
+    color: var(--bg-dark);
+}
+
+/* ===================================
+   СТИЛИ ДЛЯ ИЗБРАННОГО (CHECKBOX-ЛОГИКА)
+   =================================== */
+
+.favorite-toggle {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+}
+
+/* Скрываем сам чекбокс */
+.favorite-checkbox {
+    display: none;
+}
+
+/* Стилизуем label, который выглядит как сердечко */
+.wishlist-label {
+    display: inline-block;
+    font-size: 1.5rem; /* Размер иконки-сердечка */
+    color: var(--text-dark); /* Цвет неактивного сердечка */
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+/* При наведении на сердечко - легкое увеличение */
+.wishlist-label:hover {
+    transform: scale(1.15);
+}
+
+/* ГЛАВНАЯ МАГИЯ: Когда чекбокс ВЫБРАН, меняем стиль СЛЕДУЮЩЕГО за ним label */
+.favorite-checkbox:checked + .wishlist-label {
+    color: #e74c3c; /* Ярко-красный цвет для активного сердечка */
+    transform: scale(1.1);
+    animation: bounce 0.4s ease;
+}
+
+/* Простая анимация "подпрыгивания" при добавлении */
+@keyframes bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1.1); }
+}
+
+/* Убираем лишние стили у кнопок, если они остались */
+.unified-product-card .add-to-links button {
+    background: none;
+    border: none;
+}
+
+
