@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Профиль пользователя - Lime Details</title>
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/userProfile.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/privacy.css">
+    <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/profile.css">
+</head>
+<body>
+
+    <%- include('partials/_header') %>
+
+<main class="profile-main">
+    <div class="container">
+        <div class="profile-container">
+            
+            <aside class="profile-sidebar">
+                <div class="profile-avatar">
+                    <img src="images/аватары/default-avatar.png" alt="Аватар пользователя" id="avatarImg">
+                    <button class="avatar-upload-btn" id="avatarUpload">
+                        <img src="images/иконки/upload_ico.webp" alt="Загрузить фото">
+                    </button>
+                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <div class="profile-username">
+                    <h2 id="usernameDisplay">Иван Петров</h2>
+                    <p class="user-email" id="profileUserEmail">ivan.petrov@email.com</p>
+                </div>
+
+                <nav class="profile-nav">
+                    <ul>
+                        <li><a href="#" class="nav-item active" data-tab="personal">Личные данные</a></li>
+                        <li><a href="#" class="nav-item" data-tab="orders">Мои заказы</a></li>
+                        <li><a href="#" class="nav-item" data-tab="favorites">Избранное</a></li>
+                        <li><a href="#" class="nav-item" data-tab="addresses">Адреса доставки</a></li>
+                        <li><a href="#" class="nav-item" data-tab="notifications">Уведомления</a></li>
+                        <li><a href="#" class="nav-item" data-tab="security">Безопасность</a></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <section class="profile-content">
+                
+                <div class="tab-content active" id="personal">
+                    <div class="content-header">
+                        <h3>Личные данные</h3>
+                        <button class="btn btn-secondary" id="editProfileBtn">Редактировать</button>
+                    </div>
+                    
+                    <form class="profile-form" id="personalDataForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">Имя</label>
+                                <input type="text" id="firstName" value="Иван" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Фамилия</label>
+                                <input type="text" id="lastName" value="Петров" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" value="ivan.petrov@email.com" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="birthDate">Дата рождения</label>
+                                <input type="date" id="birthDate" value="1990-05-15" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                             <div class="form-group">
+                                <label for="gender">Пол</label>
+                                <select id="gender" disabled>
+                                    <option value="male" selected>Мужской</option>
+                                    <option value="female">Женский</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions" id="formActions" style="display: none;">
+                            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                            <button type="button" class="btn btn-secondary" id="cancelEditBtn">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-content" id="orders">
+                    <div class="content-header">
+                        <h3>Мои заказы</h3>
+                        <div class="orders-filter">
+                            <select id="orderStatusFilter">
+                                <option value="all">Все заказы</option>
+                                <option value="processing">В обработке</option>
+                                <option value="shipped">Отправлен</option>
+                                <option value="delivered">Доставлен</option>
+                                <option value="cancelled">Отменен</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="orders-list" id="ordersListContainer">
+                        
+                    </div>
+                </div>
+
+                <div class="tab-content" id="favorites">
+                    <div class="content-header">
+                        <h3>Избранные товары</h3>
+                        <button class="btn btn-secondary" id="clearFavoritesBtn">Очистить избранное</button>
+                    </div>
+                    <div class="favorites-grid">
+                        <div class="favorite-item">
+                            <img src="images/карусель/5w-30_ravenol.webp" alt="Товар">
+                            <div class="favorite-info">
+                                <h4>Масло Ravenol 5W-30</h4>
+                                <p class="favorite-price">8700 ₽</p>
+                                <div class="favorite-actions">
+                                    <button class="btn btn-primary">В корзину</button>
+                                    <button class="btn btn-outline favorite-remove">Удалить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="addresses">
+                    <div class="content-header">
+                        <h3>Адреса доставки</h3>
+                        <button class="btn btn-primary" id="addAddressBtn">Добавить адрес</button>
+                    </div>
+                    <div class="addresses-list" id="addressesListContainer">
+
+                    </div>
+                </div>
+
+                <div class="tab-content" id="notifications">
+                    <div class="content-header">
+                        <h3>Настройки уведомлений</h3>
+                    </div>
+                    <div class="notifications-settings">
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Email уведомления</h4>
+                                <p>Получать уведомления о статусе заказов и акциях</p>
+                            </div>
+                            <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Push-уведомления в браузере</h4>
+                                <p>Получать мгновенные оповещения (скоро)</p>
+                            </div>
+                            <label class="toggle-switch"><input type="checkbox" ><span class="slider"></span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="security">
+                    <div class="content-header">
+                        <h3>Безопасность</h3>
+                    </div>
+                    <div class="scrollable-content">
+                    <form class="profile-form" id="passwordChangeForm">
+                        <h4>Смена пароля</h4>
+                        <div class="form-group">
+                            <label for="currentPassword">Текущий пароль</label>
+                            <input type="password" id="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">Новый пароль</label>
+                            <input type="password" id="newPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmNewPassword">Подтвердите новый пароль</label>
+                            <input type="password" id="confirmNewPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Сменить пароль</button>
+                    </form>
+                    <hr class="form-divider">
+                    <div class="security-options">
+                        <h4>Дополнительные настройки</h4>
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Номер телефона</h4>
+                                <p>Не привязан. <a href="#" class="link">Привязать номер</a></p>
+                            </div>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Двухфакторная аутентификация</h4>
+                                <p>Защитите свой аккаунт (скоро)</p>
+                            </div>
+                            <label class="toggle-switch"><input type="checkbox" disabled><span class="slider"></span></label>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </div>
+</main>
+
+   
+<%- include('partials/_modals') %>
+<%- include('partials/_cart') %>
+<%- include('partials/_privacy') %>
+
+    <footer class="footer">
+        <div class="container footer__content">
+            <p>&copy; 2025 Lime Details. Все права защищены.</p>
+            <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
+        </div>
+    </footer>
+    
+    <script src="/js/Lime Ditails(osn_js).js" defer></script> 
+    <script src="/js/userAuth.js" defer></script>
+    <script src="/js/global-utils.js" defer></script>
+    <script src="/js/profile.js" defer></script> 
+    <script src="/js/clickSpark.js" defer></script>
+<script>
+    setTimeout(() => {
+        try {
+            if (typeof ClickSpark !== 'undefined') {
+                new ClickSpark(document.body, {
+                    sparkColor: "#4fa690",
+                    sparkSize: 10,
+                    sparkRadius: 20,
+                    sparkCount: 8,
+                    duration: 400,
+                    easing: "ease-out",
+                    extraScale: 1.0,
+                });
+                console.log('ClickSpark initialized with delay.');
+            }
+        } catch (error) {
+            console.error('Error initializing ClickSpark with delay:', error);
+        }
+    }, 2000); 
+</script>
+</body>
+</html>

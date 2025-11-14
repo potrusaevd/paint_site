@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Товары - Lime Details</title>
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/userProfile.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/privacy.css">
+    <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/products.css"> 
+</head>
+<body>
+    <%- include('partials/_header') %>
+
+    <main class="products-page-main">
+        <div class="container">
+            <nav class="breadcrumbs">
+                <a href="/">Главная</a>
+                <span class="breadcrumb-separator">→</span>
+                <a href="/catalog">Каталог</a>
+                <span class="breadcrumb-separator">→</span>
+                <span class="breadcrumb-current" id="pageTitle">Загрузка...</span>
+            </nav>
+
+            <div class="products-layout">
+                <aside class="products-filters">
+                    <h3>Фильтры</h3>
+                    <div class="filter-group">
+                        <h4>Бренд</h4>
+                        <div id="brandsFilterContainer" class="filter-options">
+                            <div class="filter-loader"></div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <h4>Цена</h4>
+                        <div class="price-filter">
+                            <input type="number" placeholder="от" id="priceFrom">
+                            <input type="number" placeholder="до" id="priceTo">
+                        </div>
+                    </div>
+                    <button id="applyFiltersBtn" class="btn btn-primary">Применить</button>
+                    <button id="resetFiltersBtn" class="btn btn-secondary">Сбросить</button>
+                </aside>
+
+                <section class="products-grid-container">
+                    <div class="products-toolbar">
+                        <span id="productCount">Загрузка товаров...</span>
+                        <select id="sortSelect">
+                            <option value="Rating_DESC">По популярности</option>
+                            <option value="Price_ASC">Сначала дешевые</option>
+                            <option value="Price_DESC">Сначала дорогие</option>
+                            <option value="ProductName_ASC">По названию (А-Я)</option>
+                        </select>
+                    </div>
+                    <div class="products-grid" id="productsGrid">
+                        
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/_modals') %>
+    <%- include('partials/_cart') %>
+<%- include('partials/_privacy') %>
+
+    <footer class="footer">
+        <div class="container footer__content">
+            <p>&copy; 2025 Lime Details. Все права защищены.</p>
+            <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
+        </div>
+    </footer>
+
+
+    <script src="/js/userAuth.js" defer></script>
+    <script src="/js/global-utils.js" defer></script>
+    <script src="/js/Lime Ditails(osn_js).js" defer></script> 
+    <script src="/js/products.js" defer></script>          
+    <script src="/js/clickSpark.js" defer></script>
+<script>
+    setTimeout(() => {
+        try {
+            if (typeof ClickSpark !== 'undefined') {
+                new ClickSpark(document.body, {
+                    sparkColor: "#4fa690",
+                    sparkSize: 10,
+                    sparkRadius: 20,
+                    sparkCount: 8,
+                    duration: 400,
+                    easing: "ease-out",
+                    extraScale: 1.0,
+                });
+                console.log('ClickSpark initialized with delay.');
+            }
+        } catch (error) {
+            console.error('Error initializing ClickSpark with delay:', error);
+        }
+    }, 2000);
+</script>
+</body>
+</html>

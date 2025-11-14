@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гарантия — Lime Details</title>
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/userProfile.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/privacy.css">
+    <link rel="stylesheet" href="/css/cart.css">s
+    <link rel="stylesheet" href="/css/info-page.css">
+</head>
+<body>
+    
+    <%- include('partials/_header') %>
+
+    <main class="info-page-main">
+        <div class="info-page-container">
+            <div class="info-page-header">
+                <h2>Гарантия на товары</h2>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-card__header">
+                        <div class="info-card__icon">🛡️</div>
+                        <h3>Общие условия</h3>
+                    </div>
+                    <p>Мы предоставляем официальную гарантию на весь ассортимент товаров сроком от 6 до 24 месяцев, в зависимости от производителя.</p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card__header">
+                        <div class="info-card__icon">✅</div>
+                        <h3>Что входит в гарантию?</h3>
+                    </div>
+                    <ul>
+                        <li>Заводские дефекты материалов и сборки</li>
+                        <li>Отказ изделия при соблюдении условий эксплуатации</li>
+                        <li>Бесплатный обмен или ремонт товара</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card__header">
+                        <div class="info-card__icon">❌</div>
+                        <h3>Что не входит?</h3>
+                    </div>
+                    <ul>
+                        <li>Повреждения из-за неправильной установки</li>
+                        <li>Использование не по назначению</li>
+                        <li>Механические и термические повреждения</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card__header">
+                        <div class="info-card__icon">📞</div>
+                        <h3>Как воспользоваться?</h3>
+                    </div>
+                    <p>Свяжитесь с нашей службой поддержки. Обязательно сохраните чек. Мы рассмотрим обращение в течение 3 рабочих дней.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<%- include('partials/_modals') %>
+<%- include('partials/_cart') %>
+<%- include('partials/_privacy') %>
+
+    <footer class="footer">
+        <div class="container footer__content">
+            <p>&copy; 2025 Lime Details. Все права защищены.</p>
+            <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
+        </div>
+    </footer>
+
+    <script src="/js/userAuth.js" defer></script>
+    <script src="/js/global-utils.js" defer></script>
+    <script src="/js/Lime Ditails(osn_js).js" defer></script>
+    <script src="/js/clickSpark.js" defer></script>
+<script>
+    setTimeout(() => {
+        try {
+            if (typeof ClickSpark !== 'undefined') {
+                new ClickSpark(document.body, {
+                    sparkColor: "#4fa690",
+                    sparkSize: 10,
+                    sparkRadius: 20,
+                    sparkCount: 8,
+                    duration: 400,
+                    easing: "ease-out",
+                    extraScale: 1.0,
+                });
+                console.log('ClickSpark initialized with delay.');
+            }
+        } catch (error) {
+            console.error('Error initializing ClickSpark with delay:', error);
+        }
+    }, 2000); 
+</script>
+</body>
+</html>

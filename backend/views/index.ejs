@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lime Details — Магазин автозапчастей</title>
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/userProfile.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/privacy.css">
+    <link rel="stylesheet" href="/css/cart.css">
+
+</head>
+<body>
+
+    <%- include('partials/_header') %>
+
+    <main>
+        <section class="hero">
+            <div class="hero__overlay"></div>
+            <div class="container hero__content">
+                <h1 class="hero__title">Надежные автозапчасти для вашего автомобиля</h1>
+                <p class="hero__subtitle">Подбор по VIN, артикулу или названию</p>
+                <form class="hero__search-form">
+                    <input type="text" placeholder="Введите VIN, артикул или название детали...">
+                    <button type="submit" class="btn-primary">Найти</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="benefits" id="delivery">
+    <div class="container">
+         <h2 class="section-title">Почему выбирают нас</h2>
+        <div class="benefits__grid">
+            
+            <a href="/Delivery" class="benefit-item">
+                <div class="benefit-item__icon">🚚</div>
+                <h3 class="benefit-item__title">Быстрая доставка</h3>
+                <p class="benefit-item__text">По всей стране в кратчайшие сроки.</p>
+            </a>
+
+            <a href="/Warranty" class="benefit-item">
+                <div class="benefit-item__icon">🛡️</div>
+                <h3 class="benefit-item__title">Гарантия качества</h3>
+                <p class="benefit-item__text">Только проверенные производители.</p>
+            </a>
+            
+            <a href="#about" class="benefit-item"> <!-- Якорная ссылка на блок "О нас" -->
+                <div class="benefit-item__icon">💸</div>
+                <h3 class="benefit-item__title">Выгодные цены</h3>
+                <p class="benefit-item__text">Лучшие предложения на рынке.</p>
+            </a>
+
+            <a href="/Support" class="benefit-item">
+                <div class="benefit-item__icon">🎧</div>
+                <h3 class="benefit-item__title">Поддержка 24/7</h3>
+                <p class="benefit-item__text">Наши эксперты всегда на связи.</p>
+            </a>
+            
+        </div>
+    </div>
+</section>
+
+        <section class="promo-carousel">
+            <div class="container">
+                <h2 class="promo-carousel__title">Акции и спецпредложения</h2>
+                <div class="promo-carousel__wrapper">
+                    <button class="promo-carousel__btn promo-carousel__btn--prev" aria-label="Назад">‹</button>
+                    <div class="promo-carousel__track-wrapper">
+                        <ul class="promo-carousel__track">
+                            
+                        </ul>
+                    </div>
+                    <button class="promo-carousel__btn promo-carousel__btn--next" aria-label="Вперед">›</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="popular-categories" id="categories">
+            <div class="container">
+                <h2 class="section-title">Популярные категории</h2>
+                <div class="categories__grid">
+                    <a href="/products?category=oils" class="category-card">
+                        <img src="images/каталог/masla.webp" alt="Масла и автохимия" />
+                        <div class="category-card__overlay"></div>
+                        <h3>Масла и автохимия</h3>
+                    </a>
+                    <a href="/products?category=tires" class="category-card">
+                        <img src="images/каталог/шины.webp" alt="Шины и диски" />
+                        <div class="category-card__overlay"></div>
+                        <h3>Шины и диски</h3>
+                    </a>
+                    <a href="/products?category=electronics" class="category-card">
+                        <img src="images/каталог/автоэлектроника.webp" alt="Автоэлектроника" />
+                        <div class="category-card__overlay"></div>
+                        <h3>Автоэлектроника</h3>
+                    </a>
+                    <a href="/catalog" class="category-card category-card--all">
+                        <div class="category-card__overlay"></div>
+                        <h3>Смотреть все →</h3>
+                    </a>
+                </div>
+            </div>
+        </section>
+        
+        <section class="about-contacts" id="about">
+            <div class="container about-contacts__container">
+                <div class="about-info">
+                    <h2 class="section-title">О компании Lime Details</h2>
+                    <p>
+                        Lime Details — надежный магазин автозапчастей с широким ассортиментом и выгодными ценами.
+                        Мы работаем для вас уже более 10 лет, предлагая качественные товары от проверенных производителей.
+                        Наша команда профессионалов всегда готова помочь с выбором и ответить на любые вопросы.
+                    </p>
+                </div>
+                <div class="contacts-info" id="contacts">
+                    <h3 class="contacts-info__title">Связаться с нами</h3>
+                    <p><strong>Адрес:</strong> <a href="https://yandex.ru/maps/-/CLEOeV9h" target="_blank">Липецк, Пр. Победы, 12</a></p>
+                    <p><strong>Email:</strong> <a href="mailto:info@limedetails.by">info@limedetails.by</a></p>
+                    <p><strong>Телефон:</strong> <a href="tel:+79999999999">+7 (999) 999-99-99</a></p>
+                    <div class="contacts__socials">
+                        <a href="#" aria-label="Facebook"><img src="images/ico_контакты/Facebook.webp" alt="Facebook" /></a>
+                        <a href="#" aria-label="Instagram"><img src="images/ico_контакты/instagram.webp" alt="Instagram" /></a>
+                        <a href="#" aria-label="VK"><img src="images/ico_контакты/VK.webp" alt="VK" /></a>
+                        <a href="#" aria-label="Telegram"><img src="images/ico_контакты/Telegram.webp" alt="Telegram" /></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+<%- include('partials/_modals') %> 
+   <%- include('partials/_cart') %>
+   <%- include('partials/_privacy') %>
+
+    <footer class="footer">
+        <div class="container footer__content">
+            <p>© 2025 Lime Details. Все права защищены.</p>
+            <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
+        </div>
+    </footer>
+
+    <script src="/js/userAuth.js" defer></script>
+    <script src="/js/global-utils.js" defer></script>
+    <script src="/js/Lime Ditails(osn_js).js" defer></script>
+    <script src="/js/clickSpark.js" defer></script>
+    <script>
+        setTimeout(() => {
+            try {
+                if (typeof ClickSpark !== 'undefined') {
+                    new ClickSpark(document.body, { /* ... */ });
+                }
+            } catch (error) {
+                console.error('Error initializing ClickSpark:', error);
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
