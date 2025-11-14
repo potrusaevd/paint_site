@@ -1,0 +1,48 @@
+    <div class="custom-alert-container" id="customAlertContainer"></div>
+
+<div class="modal-overlay" id="addressModalOverlay" style="display: none;">
+    <div class="modal">
+        <button class="modal-close" id="closeAddressModalBtn">×</button>
+        <h3>Новый адрес доставки</h3>
+        <form id="addressForm">
+            <div class="form-group">
+                <label for="addressType">Тип адреса</label>
+                <input type="text" id="addressType" required placeholder="Например, Домашний">
+            </div>
+            <div class="form-group">
+                <label for="city">Город</label>
+                <input type="text" id="city" required placeholder="Минск">
+            </div>
+            <div class="form-group">
+                <label for="street">Улица</label>
+                <input type="text" id="street" required placeholder="ул. Ленина">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="house">Дом</label>
+                    <input type="text" id="house" required>
+                </div>
+                <div class="form-group">
+                    <label for="apartment">Квартира</label>
+                    <input type="text" id="apartment">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="postalCode">Индекс</label>
+                <input type="text" id="postalCode" placeholder="220000">
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить адрес</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay confirm-overlay" id="confirmModalOverlay" style="display: none;">
+    <div class="modal confirm-modal">
+        <h4 id="confirmModalTitle">Подтвердите действие</h4>
+        <p id="confirmModalText">Вы уверены?</p>
+        <div class="modal-actions">
+            <button class="btn btn-danger" id="confirmModalYes">Да, уверен</button>
+            <button class="btn btn-secondary" id="confirmModalNo">Отмена</button>
+        </div>
+    </div>
+</div>
