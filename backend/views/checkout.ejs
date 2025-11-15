@@ -1,19 +1,3 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Оформление заказа - Lime Details</title>
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/userProfile.css">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/privacy.css">
-    <link rel="stylesheet" href="/css/cart.css">
-    <link rel="stylesheet" href="/css/checkout.css">
-</head>
-<body>
-    
-    <%- include('partials/_header') %>
 
     <main class="checkout-main">
         <div class="container">
@@ -80,9 +64,6 @@
         </div>
     </main>
 
-    <%- include('partials/_modals') %>
-    <%- include('partials/_cart') %>
-    <%- include('partials/_privacy') %>
 
     <footer class="footer">
         <div class="container footer__content">
@@ -90,23 +71,3 @@
             <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
         </div>
     </footer>
-
-    <script src="/js/userAuth.js" defer></script>
-    <script src="/js/global-utils.js" defer></script>
-    <script src="/js/Lime Ditails(osn_js).js" defer></script>
-    <script src="/js/checkout.js" defer></script> 
-    <script src="/js/clickSpark.js" defer></script>
-    <script>
-        setTimeout(() => {
-            try {
-                if (typeof ClickSpark !== 'undefined') {
-                    new ClickSpark(document.body, { /* ... */ });
-                }
-            } catch (error) {
-                console.error('Error initializing ClickSpark:', error);
-            }
-        }, 2000);
-    </script>
-
-</body>
-</html>
