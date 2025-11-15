@@ -1,0 +1,187 @@
+/* checkout.css - Adapted for :root variables */
+
+.checkout-main {
+    padding: 3rem 0;
+}
+
+.checkout-title {
+    text-align: center;
+    color: var(--dark-theme-primary);
+    margin-bottom: 3rem;
+    font-family: var(--cerabold);
+}
+
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+/* Левая колонка: форма */
+.form-block {
+    background: var(--dark-theme-gray300);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.form-block h3 {
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--medium);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: var(--medium);
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"] {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--dark-theme-bg);
+    border: 1px solid var(--border);
+    color: var(--dark-theme-text);
+    border-radius: 6px;
+    font-family: var(--regular);
+}
+
+.payment-options label {
+    display: block;
+    background: var(--dark-theme-bg);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+.payment-options input {
+    margin-right: 1rem;
+}
+
+/* Правая колонка: состав заказа */
+.checkout-summary-section .summary-block {
+    background: var(--dark-theme-gray300);
+    padding: 2rem;
+    border-radius: 12px;
+    position: sticky;
+    top: 2rem;
+}
+
+.summary-block h3 {
+    margin-top: 0;
+    font-family: var(--medium);
+}
+
+.summary-items {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-bottom: 1rem;
+}
+
+.summary-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-item-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.summary-item-info {
+    flex-grow: 1;
+}
+
+.summary-item-info h4 {
+    margin: 0 0 0.25rem;
+    font-size: 0.9rem;
+    font-family: var(--medium);
+}
+
+.summary-item-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--dark-theme-gray500);
+}
+
+.summary-item-price {
+    font-family: var(--cerabold);
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.3rem;
+    font-family: var(--cerabold);
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.btn-place-order {
+    width: 100%;
+    /* Assuming .btn styles are defined elsewhere */
+}
+
+.loader {
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Стили для блока с сохраненными адресами */
+.saved-addresses {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.saved-address-label {
+    display: block;
+    background: var(--dark-theme-bg);
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.saved-address-label:hover {
+    border-color: var(--dark-theme-primary);
+}
+
+.saved-address-label input[type="radio"] {
+    margin-right: 0.75rem;
+}
+
+.saved-address-label.selected {
+    border-color: var(--dark-theme-primary);
+    box-shadow: var(--dark-theme-box-shadow);
+}
+
+.address-type {
+    font-family: var(--cerabold);
+    color: var(--dark-theme-text);
+}
+
+.address-details {
+    font-size: 0.9rem;
+    color: var(--dark-theme-gray500);
+}

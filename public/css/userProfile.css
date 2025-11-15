@@ -1,0 +1,220 @@
+/* userProfile.css - Adapted for :root variables */
+
+.user-profile {
+    position: relative;
+    display: inline-block;
+    z-index: 1002;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--dark-theme-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    border: 2px solid transparent;
+    position: relative;
+    z-index: 10;
+    will-change: transform, border-color;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.user-avatar:hover {
+    border-color: var(--dark-theme-primary);
+    transform: scale(1.05);
+    box-shadow: var(--dark-theme-box-shadow);
+    will-change: transform, border-color;
+}
+
+.user-initial {
+    color: var(--white);
+    font-family: var(--cerabold);
+    font-size: 16px;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.user-dropdown {
+    position: absolute;
+    background: var(--dark-theme-gray300);
+    border: 1px solid var(--dark-theme-primary);
+    border-radius: 8px;
+    min-width: 220px;
+    box-shadow: var(--dark-theme-box-shadow);
+    z-index: 9999;
+    display: none;
+    overflow: hidden;
+}
+
+.user-dropdown.show {
+    display: block;
+    animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-info {
+    padding: 15px;
+    background: var(--dark-theme-primary-100);
+    border-bottom: 1px solid var(--border);
+}
+
+.user-name {
+    color: var(--dark-theme-primary);
+    font-family: var(--cerabold);
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.user-email {
+    color: var(--gray800);
+    font-size: 12px;
+    word-break: break-all;
+    opacity: 0.8;
+}
+
+.dropdown-divider {
+    border: none;
+    border-top: 1px solid var(--dark-theme-gray400);
+    margin: 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: var(--dark-theme-text);
+    text-decoration: none;
+    transition: all var(--transition);
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    will-change: transform, border-color;
+}
+
+.dropdown-item:hover {
+    background-color: var(--dark-theme-gray400);
+    color: var(--dark-theme-primary);
+    transform: translateX(3px);
+    will-change: transform, border-color;
+}
+
+.dropdown-item.logout:hover {
+    background-color: rgba(180, 36, 26, 0.2);
+    color: var(--error);
+    will-change: transform, border-color;
+}
+
+.dropdown-item span {
+    margin-right: 10px;
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+    transition: transform var(--transition);
+    will-change: transform, border-color;
+}
+
+.dropdown-item:hover span {
+    transform: scale(1.1);
+    will-change: transform, border-color;
+}
+
+.user-avatar.active {
+    background: var(--dark-theme-primary-hover);
+    box-shadow: var(--dark-theme-box-shadow);
+}
+
+.header .user-profile {
+    margin-left: 1rem;
+}
+
+.user-avatar::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background: var(--error);
+    border-radius: 50%;
+    border: 2px solid var(--dark-theme-gray300);
+    display: none;
+}
+
+.user-avatar.has-notifications::after {
+    display: block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .user-dropdown {
+        right: -20px;
+        min-width: 200px;
+    }
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+    }
+    .user-initial {
+        font-size: 14px;
+    }
+    .dropdown-item {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    .user-info {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-dropdown {
+        right: -50px;
+        min-width: 180px;
+    }
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    .user-initial {
+        font-size: 12px;
+    }
+}

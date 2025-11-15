@@ -1,0 +1,340 @@
+/* header.css - Adapted for :root variables */
+
+.header {
+    background-color: var(--dark-theme-gray300);
+    border-bottom: 1px solid var(--border);
+    z-index: 9999;
+}
+
+.header__wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    position: relative;
+    /* добавлено для корректного позиционирования поиска */
+}
+
+/* Контент шапки кроме поиска */
+.header__content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+    justify-content: space-between;
+    transition: opacity var(--transition);
+    will-change: transform, border-color;
+}
+
+/*<--- поиск --->*/
+.header__search button.search-icon {
+    font-size: 1.8rem;
+    background: none;
+    border: none;
+    color: var(--dark-theme-primary);
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    transition: color var(--transition);
+    will-change: transform, border-color;
+}
+
+.header__search button.search-icon:hover {
+    color: var(--dark-theme-primary-hover);
+    will-change: transform, border-color;
+}
+
+.search-expanded {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: hidden;
+    max-width: 0;
+    opacity: 0;
+    transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    transform: translateY(-50%);
+    background-color: var(--dark-theme-gray50);
+    padding: 0.3rem 0.5rem;
+    border-radius: 6px;
+    box-shadow: var(--dark-theme-box-shadow);
+    z-index: 20;
+    color: var(--dark-theme-text);
+    will-change: transform, border-color;
+}
+
+.header__wrapper.search-active .search-expanded {
+    max-width: 100%;
+    opacity: 1;
+}
+
+.header__wrapper.search-active .header__content,
+.header__wrapper.search-active .header__search {
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity var(--transition);
+    will-change: transform, border-color;
+}
+
+.search-expanded__input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    color: var(--gray800);
+    background-color: transparent;
+    font-family: var(--regular);
+}
+
+.search-expanded__close {
+    font-size: 1.8rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--dark-theme-text);
+    font-family: var(--cerabold);
+    padding: 0 0.5rem;
+    transition: color var(--transition);
+    will-change: transform, border-color;
+}
+
+.search-expanded__close:hover {
+    color: var(--dark-theme-primary-hover);
+    will-change: transform, border-color;
+}
+
+/*<--- НАВИГАЦИЯ И МЕНЮ --->*/
+.dropdown {
+    position: relative;
+    display: inline-block;
+    z-index: 1000;
+}
+
+.dropbtn {
+    background-color: var(--dark-theme-primary);
+    color: var(--dark-theme-text);
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color var(--transition);
+    font-family: var(--medium);
+    will-change: transform, border-color;
+}
+
+.dropbtn:hover {
+    background-color: var(--dark-theme-primary-hover);
+    will-change: transform, border-color;
+}
+
+.dropbtn.has-submenu::after {
+    content: "▸";
+    display: inline-block;
+    margin-left: 0.5rem;
+    transition: transform var(--transition);
+    will-change: transform, border-color;
+}
+
+.dropdown:hover > a.has-submenu::after {
+    transform: rotate(90deg);
+    will-change: transform, border-color;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: var(--dark-theme-gray50);
+    min-width: 280px;
+    padding: 0.5rem 0;
+    box-shadow: var(--dark-theme-box-shadow);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: var(--dark-theme-text);
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1100;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+    max-height: 1000px;
+    opacity: 1;
+    pointer-events: auto;
+    will-change: transform, border-color;
+}
+
+.dropdown-content ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 0;
+}
+
+.dropdown-content > ul > li {
+    position: relative;
+}
+
+.dropdown-content a {
+    display: block;
+    padding: 0.5rem 1.2rem;
+    color: var(--dark-theme-text);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--transition);
+    will-change: transform, border-color;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--dark-theme-primary-hover);
+    color: var(--primary-100);
+    will-change: transform, border-color;
+}
+
+.submenu {
+    display: none;
+    padding-left: 1rem;
+    background-color: var(--dark-theme-primary-100);
+    border-left: 2px solid var(--dark-theme-primary);
+    margin-top: 0.2rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: max-height 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+    z-index: 1110;
+    will-change: transform, border-color;
+}
+
+.has-submenu::after {
+    content: "▸";
+    float: right;
+    transition: transform var(--transition);
+    color: var(--dark-theme-primary);
+    font-family: var(--cerabold);
+    will-change: transform, border-color;
+}
+
+li.open > .submenu {
+    display: block;
+    max-height: 500px;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+li.open > a.has-submenu::after {
+    transform: rotate(90deg);
+}
+
+.main-nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.main-nav a,
+.dropdown > a {
+    color: var(--dark-theme-text);
+    font-family: var(--medium);
+    transition: color var(--transition);
+    will-change: transform, border-color;
+}
+
+.main-nav a:hover,
+.dropdown > a:hover {
+    color: var(--dark-theme-primary-hover);
+    will-change: transform, border-color;
+}
+
+/*<--- ЭЛЕМЕНТЫ ШАПКИ --->*/
+
+.logo {
+    font-size: 1.5rem;
+    font-family: var(--cerabold);
+    color: var(--dark-theme-primary);
+    user-select: none;
+}
+
+.work-time {
+    color: var(--dark-theme-text);
+    font-size: 0.9rem;
+    user-select: none;
+}
+
+.phone a {
+    color: var(--dark-theme-primary);
+    font-family: var(--cerabold);
+    transition: color var(--transition);
+    will-change: transform, border-color;
+}
+
+.phone a:hover {
+    color: var(--dark-theme-primary-hover);
+    will-change: transform, border-color;
+}
+
+.account-login {
+    margin-left: 1rem;
+    user-select: none;
+}
+
+.login-link {
+    color: var(--dark-theme-primary);
+    font-family: var(--medium);
+    padding: 0.4rem 0.8rem;
+    border: 2px solid var(--dark-theme-primary);
+    border-radius: 6px;
+    transition: background-color var(--transition), color var(--transition);
+    text-decoration: none;
+    font-size: 1rem;
+    will-change: transform, border-color;
+}
+
+.login-link:hover,
+.login-link:focus {
+    background-color: var(--dark-theme-primary);
+    color: var(--dark-theme-bg);
+    outline: none;
+    will-change: transform, border-color;
+}
+
+.cart a {
+    font-size: 1.5rem;
+    color: var(--dark-theme-text);
+    padding: 0.3rem;
+    transition: color var(--transition);
+    will-change: transform, border-color;
+}
+
+.cart a:hover {
+    color: var(--dark-theme-primary-hover);
+    will-change: transform, border-color;
+}
+
+/* Иконки в шапке */
+.search-icon img,
+.cart img {
+    width: 24px;
+    height: 24px;
+    display: block;
+    object-fit: contain;
+    filter: brightness(1.1);
+    transition: transform 0.3s ease, filter 0.3s ease;
+    pointer-events: none;
+    will-change: transform, border-color;
+}
+
+.search-icon:hover img,
+.cart:hover img {
+    transform: scale(1.1);
+    filter: brightness(1.4);
+    will-change: transform, border-color;
+}
