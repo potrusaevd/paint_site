@@ -8,17 +8,24 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const { sql, poolPromise } = require('./db');
 const { sendVerificationEmail } = require('./mailer');
+const ejsLayouts = require('express-ejs-layouts');
 
 const app = express();
+console.log("A: Express создан");
 const port = 3000;
 
 // ===========================================
 // --- Настройки Express и Middleware ---
 // ===========================================
 
+app.use(ejsLayouts); 
+app.set('layout', 'partials/_layout'); 
+
 // 1. Настройка шаблонизатора EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+
 
 // 2. Настройка раздачи статических файлов 
 app.use(express.static(path.join(__dirname, '..', 'public')));
@@ -60,40 +67,71 @@ const authenticateToken = (req, res, next) => {
 // ===========================================
 // --- НОВЫЙ РАЗДЕЛ: Маршруты для рендеринга страниц ---
 // ===========================================
-app.get('/', (req, res) => {
-    res.render('index');
+app.get("/", (req, res) => {
+    res.render("index", { 
+        title: "Lime Details — Магазин автозапчастей"
+    });
 });
 
-app.get('/catalog', (req, res) => {
-    res.render('catalog');
+app.get("/catalog", (req, res) => {
+    res.render("catalog", { 
+        title: "Каталог товаров - Lime Details",
+        pageStyles: ['/css/catalog.css'], 
+        pageScripts: ['/js/catalog.js']
+    });
 });
 
-app.get('/products', (req, res) => {
-    res.render('products');
+app.get("/products", (req, res) => {
+    res.render("products", { 
+        title: "Товары - Lime Details",
+        pageStyles: ['/css/products.css'], 
+        pageScripts: ['/js/products.js']
+    });
 });
 
 app.get('/auth', (req, res) => {
-    res.render('auth');
+    res.render('auth', { 
+        title: 'Вход в аккаунт | Lime Details',
+        layout: false 
+    });
 });
 
-app.get('/profile', (req, res) => {
-    res.render('profile');
+app.get("/profile", (req, res) => {
+    res.render("profile", { 
+        title: "Профиль пользователя - Lime Details",
+        pageStyles: ['/css/profile.css'], 
+        pageScripts: ['/js/profile.js']
+    });
 });
 
-app.get('/delivery', (req, res) => {
-    res.render('Delivery');
+app.get("/delivery", (req, res) => {
+    res.render("delivery", { 
+        title: "Оплата и доставка — Lime Details",
+        pageStyles: ['/css/info-page.css']
+    });
 });
 
-app.get('/warranty', (req, res) => {
-    res.render('Warranty');
+app.get("/warranty", (req, res) => {
+    res.render("warranty", { 
+        title: "Гарантия — Lime Details",
+        pageStyles: ['/css/info-page.css']
+    });
 });
 
-app.get('/support', (req, res) => {
-    res.render('Support');
+app.get("/support", (req, res) => {
+    res.render("support", { 
+        title: "Поддержка | Lime Details",
+        pageStyles: ['/css/support.css'],
+        pageScripts: ['/js/support.js']
+    });
 });
 
-app.get('/checkout', (req, res) => {
-    res.render('checkout'); 
+app.get("/checkout", (req, res) => {
+    res.render("checkout", { 
+        title: "Оформление заказа - Lime Details",
+        pageStyles: ['/css/checkout.css'],
+        pageScripts: ['/js/checkout.js']
+    });
 });
 
 
@@ -750,9 +788,14 @@ app.delete('/api/addresses/:addressId', authenticateToken, async (req, res) => {
 // ===========================================
 
 app.use((req, res, next) => {
-    res.status(404).render('404');
+    res.status(404).render('404', {
+        title: 'Страница не найдена | Lime Details',
+        layout: false
+    });
 });
+console.log("B: Перед app.listen");
 
 app.listen(port, () => {
+    console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
