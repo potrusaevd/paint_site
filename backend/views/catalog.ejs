@@ -1,18 +1,3 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Каталог товаров - Lime Details</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/catalog.css"> 
-    <link rel="stylesheet" href="/css/privacy.css">
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/userProfile.css">
-    <link rel="stylesheet" href="/css/cart.css">
-</head>
-<body>
-        <%- include('partials/_header') %>
 
     <main class="catalog-main">
         <div class="container">
@@ -33,10 +18,6 @@
             </div>
         </div>
     </main>
-    
-    <%- include('partials/_modals') %>
-    <%- include('partials/_cart') %>
-    <%- include('partials/_privacy') %>
 
     <footer class="footer">
         <div class="container footer__content">
@@ -44,10 +25,3 @@
             <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
         </div>
     </footer>
-
-    <script src="/js/userAuth.js" defer></script>
-    <script src="/js/global-utils.js" defer></script>
-    <script src="/js/Lime Ditails(osn_js).js" defer></script>
-    <script src="/js/catalog.js" defer></script>
-</body>
-</html>
