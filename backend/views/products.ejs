@@ -1,18 +1,3 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Товары - Lime Details</title>
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/userProfile.css">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/privacy.css">
-    <link rel="stylesheet" href="/css/cart.css">
-    <link rel="stylesheet" href="/css/products.css"> 
-</head>
-<body>
-    <%- include('partials/_header') %>
 
     <main class="products-page-main">
         <div class="container">
@@ -62,42 +47,9 @@
         </div>
     </main>
 
-    <%- include('partials/_modals') %>
-    <%- include('partials/_cart') %>
-<%- include('partials/_privacy') %>
-
     <footer class="footer">
         <div class="container footer__content">
             <p>&copy; 2025 Lime Details. Все права защищены.</p>
             <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
         </div>
     </footer>
-
-
-    <script src="/js/userAuth.js" defer></script>
-    <script src="/js/global-utils.js" defer></script>
-    <script src="/js/Lime Ditails(osn_js).js" defer></script> 
-    <script src="/js/products.js" defer></script>          
-    <script src="/js/clickSpark.js" defer></script>
-<script>
-    setTimeout(() => {
-        try {
-            if (typeof ClickSpark !== 'undefined') {
-                new ClickSpark(document.body, {
-                    sparkColor: "#4fa690",
-                    sparkSize: 10,
-                    sparkRadius: 20,
-                    sparkCount: 8,
-                    duration: 400,
-                    easing: "ease-out",
-                    extraScale: 1.0,
-                });
-                console.log('ClickSpark initialized with delay.');
-            }
-        } catch (error) {
-            console.error('Error initializing ClickSpark with delay:', error);
-        }
-    }, 2000);
-</script>
-</body>
-</html>
