@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title><%= title %></title>
+    <!-- Подключаем ОБЩИЕ стили, которые нужны ВЕЗДЕ -->
+<link rel="stylesheet" href="/css/root.css">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/userProfile.css">
+<link rel="stylesheet" href="/css/main.css">
+<link rel="stylesheet" href="/css/privacy.css">
+<link rel="stylesheet" href="/css/cart.css">
+
+<!-- Сюда вставятся УНИКАЛЬНЫЕ стили для конкретной страницы -->
+<% if (typeof pageStyles !== 'undefined' && pageStyles && pageStyles.length > 0) { %>
+    <% pageStyles.forEach(style => { %>
+        <link rel="stylesheet" href="<%= style %>">
+    <% }); %>
+<% } %>
+</head>
+<body>
+<%- include('_header') %>
+<div class="main-container">
+    
+
+    <main class="content">
+        <%- body %>
+    </main>
+</div>
+
+
+<%- include('_modals') %>
+<%- include('_cart') %>
+<%- include('_privacy') %>
+
+<!-- Подключаем ОБЩИЕ скрипты -->
+<script src="/js/userAuth.js" defer></script>
+<script src="/js/global-utils.js" defer></script>
+<script src="/js/Lime Ditails(osn_js).js" defer></script>
+<script src="/js/clickSpark.js" defer></script>
+<script>
+    setTimeout(() => {
+        try {
+            if (typeof ClickSpark !== 'undefined') {
+                new ClickSpark(document.body, {
+                    sparkColor: "#4fa690",
+                    sparkSize: 10,
+                    sparkRadius: 20,
+                    sparkCount: 8,
+                    duration: 400,
+                    easing: "ease-out",
+                    extraScale: 1.0,
+                });
+                console.log('ClickSpark initialized with delay.');
+            }
+        } catch (error) {
+            console.error('Error initializing ClickSpark with delay:', error);
+        }
+    }, 2000);
+</script>
+
+
+<!-- Сюда вставятся УНИКАЛЬНЫЕ скрипты для конкретной страницы -->
+<% if (typeof pageScripts !== 'undefined' && pageScripts && pageScripts.length > 0) { %>
+    <% pageScripts.forEach(script => { %>
+        <script src="<%= script %>"></script>
+    <% }); %>
+<% } %>
+</body> 
+</html> 
