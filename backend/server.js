@@ -497,7 +497,16 @@ app.get('/api/cart', authenticateToken, async (req, res) => {
         const result = await pool.request()
             .input('UserID', sql.Int, req.user.userId)
             .query(`
-                SELECT ci.ProductID, ci.Quantity, p.ProductName, p.Price, p.DiscountPrice, p.ImageURL
+                SELECT 
+                    ci.ProductID, 
+                    ci.Quantity, 
+                    p.ProductName, 
+                    p.Price, 
+                    p.DiscountPrice, 
+                    p.ImageURL,
+                    p.ProductSeries, -- ДОБАВЛЕНО
+                    p.RalColor,      -- ДОБАВЛЕНО
+                    p.VolumeLiters as Volume -- ДОБАВЛЕНО и переименовано
                 FROM CartItems ci
                 JOIN Products p ON ci.ProductID = p.ProductID
                 WHERE ci.UserID = @UserID
