@@ -1,21 +1,23 @@
-<!-- МОДАЛЬНОЕ ОКНО КОРЗИНЫ -->
-<div id="cartModal" class="cart-modal-overlay" style="display: none;">
+<!-- МОДАЛЬНОЕ ОКНО КОРЗИНЫ (НОВЫЙ ДИЗАЙН) -->
+<div id="cartModal" class="cart-modal-overlay">
     <div class="cart-modal">
         <div class="cart-modal-header">
-            <h3>Ваша корзина</h3>
-            <button id="closeCartBtn" class="cart-modal-close">×</button>
+            <h3>Ваша заявка</h3>
+            <button id="closeCartBtn" class="cart-modal-close">&times;</button>
         </div>
         <div id="cartModalBody" class="cart-modal-body">
-            
-            <p class="cart-empty-message">В корзине пока пусто.</p>
+            <!-- Содержимое загружается через JS -->
+            <p class="cart-empty-message">Здесь пока пусто.</p>
         </div>
         <div class="cart-modal-footer">
             <div class="cart-total">
                 <span>Итого:</span>
                 <span id="cartTotalSum">0 ₽</span>
             </div>
-            <button class="btn btn-primary btn-checkout">Оформить заказ</button>
-            <button id="continueShoppingBtn" class="btn btn-secondary">Продолжить покупки</button>
+            <div class="btn-actions">
+                <button id="continueShoppingBtn" class="btn btn-secondary">Продолжить</button>
+                <button class="btn btn-primary btn-checkout">Оформить</button>
+            </div>
         </div>
     </div>
 </div>
