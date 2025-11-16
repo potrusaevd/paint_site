@@ -172,43 +172,38 @@ app.get('/api/search', async (req, res) => {
 });
 
 app.post('/api/register', async (req, res) => {
-    // ИЗМЕНЕНИЕ: Теперь принимаем и название компании
     const { username, email, password, companyName } = req.body;
 
     if (!username || !email || !password || !companyName) {
         return res.status(400).json({ message: 'Все поля (Имя, Email, Пароль, Название компании) обязательны.' });
     }
 
-    // ИЗМЕНЕНИЕ: Используем транзакцию для безопасного создания двух записей
     let pool;
     try {
         pool = await poolPromise;
+
         const transaction = new sql.Transaction(pool);
         await transaction.begin();
 
         try {
             let request = new sql.Request(transaction);
-            // Проверяем, существует ли уже пользователь с таким email
+
             const existingUser = await request.input('Email', sql.NVarChar, email).query('SELECT UserID FROM Users WHERE Email = @Email');
             if (existingUser.recordset.length > 0) {
-                // Если пользователь есть, отменяем транзакцию
-                await transaction.rollback();
+                await transaction.rollback(); 
                 return res.status(409).json({ message: 'Пользователь с таким email уже существует.' });
             }
 
-            // 1. Создаем компанию
             request = new sql.Request(transaction);
             const companyResult = await request
                 .input('CompanyName', sql.NVarChar, companyName)
                 .query('INSERT INTO Companies (CompanyName) OUTPUT INSERTED.CompanyID VALUES (@CompanyName)');
             const newCompanyId = companyResult.recordset[0].CompanyID;
 
-            // 2. Хешируем пароль и создаем токен верификации
             const passwordHash = await bcrypt.hash(password, 10);
             const verificationToken = crypto.randomBytes(32).toString('hex');
-            const tokenExpiry = new Date(Date.now() + 3600000); // 1 час на подтверждение
+            const tokenExpiry = new Date(Date.now() + 3600000); 
 
-            // 3. Создаем пользователя, привязывая его к новой компании
             request = new sql.Request(transaction);
             await request
                 .input('Username', sql.NVarChar, username)
@@ -216,23 +211,20 @@ app.post('/api/register', async (req, res) => {
                 .input('PasswordHash', sql.NVarChar, passwordHash)
                 .input('VerificationToken', sql.NVarChar, verificationToken)
                 .input('TokenExpiry', sql.DateTime, tokenExpiry)
-                .input('CompanyID', sql.Int, newCompanyId) // ИЗМЕНЕНИЕ: Передаем ID компании
+                .input('CompanyID', sql.Int, newCompanyId) 
                 .query('INSERT INTO Users (Username, Email, PasswordHash, VerificationToken, TokenExpiry, CompanyID) VALUES (@Username, @Email, @PasswordHash, @VerificationToken, @TokenExpiry, @CompanyID)');
 
-            // Подтверждаем транзакцию
             await transaction.commit();
 
-            // Отправляем письмо для верификации
             await sendVerificationEmail(email, verificationToken);
-            res.status(201).json({ message: 'Регистрация прошла успешно! Пожалуйста, проверьте вашу почту для подтверждения аккаунта.' });
+            res.status(201).json({ message: 'Регистрация прошла успешно! Проверьте почту для подтверждения аккаунта.' });
 
         } catch (err) {
-            // Если на любом этапе возникла ошибка, откатываем все изменения
             await transaction.rollback();
-            throw err; // Передаем ошибку в следующий catch
+            throw err; 
         }
     } catch (err) {
-        console.error('Ошибка регистрации:', err);
+        console.error('Критическая ошибка при регистрации в транзакции:', err);
         res.status(500).json({ message: 'Внутренняя ошибка сервера.' });
     }
 });
