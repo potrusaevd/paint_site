@@ -69,7 +69,9 @@ const authenticateToken = (req, res, next) => {
 // ===========================================
 app.get("/", (req, res) => {
     res.render("index", { 
-        title: "Lime Details — Магазин автозапчастей"
+        title: "Прайм Топ - Производитель красок",
+        pageStyles: ['/css/main.css'], 
+        pageScripts: ['/js/index.js']
     });
 });
 
