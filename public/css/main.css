@@ -126,6 +126,10 @@ body.menu-expanded .page-container {
     transform: translateY(-9px) rotate(-45deg);
 }
 
+.logo-image{
+    padding-left: 10 px;
+}
+
 /* Section Navigation */
 .section-nav {
     position: absolute;
