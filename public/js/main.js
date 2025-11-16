@@ -143,45 +143,64 @@ document.getElementById("closePrivacyBtn").addEventListener("click", () => {
         
         // Полная отрисовка товаров в модальном окне
         renderCartModal(items) {
-            const modalBody = document.getElementById('cartModalBody');
-            const totalSumEl = document.getElementById('cartTotalSum');
-            if (!modalBody || !totalSumEl) return;
+        const modalBody = document.getElementById('cartModalBody');
+        const totalSumEl = document.getElementById('cartTotalSum');
+        if (!modalBody || !totalSumEl) return;
 
-            if (items.length === 0) {
-                modalBody.innerHTML = '<p class="cart-empty-message">В корзине пока пусто.</p>';
-                totalSumEl.textContent = '0 ₽';
-                return;
-            }
+        if (items.length === 0) {
+            modalBody.innerHTML = '<p class="cart-empty-message">Здесь пока пусто.</p>';
+            totalSumEl.textContent = '0 ₽';
+            return;
+        }
 
-            let totalSum = 0;
-            modalBody.innerHTML = items.map(item => {
-                const price = item.DiscountPrice || item.Price;
-                totalSum += price * item.Quantity;
-                const imageSrc = item.ImageURL ? `/${item.ImageURL.replace(/\\/g, '/')}` : '/images/placeholder.png';
-                return `
-                <div class="cart-item" data-product-id="${item.ProductID}">
-                    <img src="${imageSrc}" alt="${item.ProductName}" class="cart-item-img">
-                    <div class="cart-item-info">
-                        <h4>${item.ProductName}</h4>
-                        <span class="price">${price.toFixed(2)} ₽</span>
-                        <div class="quantity-control">
-                            <button class="quantity-btn decrease-qty">-</button>
-                            <input type="number" class="quantity-input" value="${item.Quantity}" min="1">
-                            <button class="quantity-btn increase-qty">+</button>
-                        </div>
-                    </div>
-                    <button class="cart-item-remove">Удалить</button>
+        let totalSum = 0;
+        modalBody.innerHTML = items.map(item => {
+            const price = item.DiscountPrice || item.Price;
+            totalSum += price * item.Quantity;
+            const imageSrc = item.ImageURL ? `/${item.ImageURL.replace(/\\/g, '/')}` : '/images/placeholder.png'; // плейсхолдер
+            
+            // Формируем строку с деталями товара
+            const details = [
+                item.ProductSeries ? `Серия: ${item.ProductSeries}` : '',
+                item.RalColor ? `RAL: ${item.RalColor}` : '',
+                item.Volume ? `Объем: ${item.Volume} л` : ''
+            ].filter(Boolean).join(' | '); // Собираем только существующие детали
+
+            return `
+            <div class="cart-item" data-product-id="${item.ProductID}">
+                <div class="cart-item-img-wrapper">
+                    <img src="${imageSrc}" alt="${item.ProductName}">
                 </div>
-                `;
-            }).join('');
-            totalSumEl.textContent = `${totalSum.toFixed(2)} ₽`;
-        },
+                <div class="cart-item-info">
+                    <div class="product-name">${item.ProductName}</div>
+                    <div class="product-details">
+                        <span>${details}</span>
+                    </div>
+                    <div class="price">${price.toFixed(2)} ₽</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn decrease-qty">-</button>
+                        <input type="number" class="quantity-input" value="${item.Quantity}" min="1">
+                        <button class="quantity-btn increase-qty">+</button>
+                    </div>
+                </div>
+                <button class="cart-item-remove" title="Удалить товар">&times;</button>
+            </div>
+            `;
+        }).join('');
+        totalSumEl.textContent = `${totalSum.toFixed(2)} ₽`;
+    },
 
-        // Показать/скрыть модальное окно
-        toggleModal(show) {
-            const modal = document.getElementById('cartModal');
-            if(modal) modal.style.display = show ? 'flex' : 'none';
-        },
+    // Также замените функцию toggleModal для плавной анимации
+    toggleModal(show) {
+        const modal = document.getElementById('cartModal');
+        if(modal) {
+            if (show) {
+                modal.classList.add('show');
+            } else {
+                modal.classList.remove('show');
+            }
+        }
+    },
 
         // --- НОВЫЕ ФУНКЦИИ ---
 
