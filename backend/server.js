@@ -93,7 +93,7 @@ app.get("/products", (req, res) => {
 
 app.get('/auth', (req, res) => {
     res.render('auth', { 
-        title: 'Вход в аккаунт | Lime Details',
+        title: 'Вход - Прайм Топ',
         layout: false 
     });
 });
