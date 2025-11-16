@@ -1,123 +1,33 @@
-<header class="header">
-    <div class="container header__wrapper">
-        <div class="header__search">
-            <button id="searchToggle" class="search-icon" aria-label="Открыть поиск">
-                <img src="/images/иконки/search.webp" alt="Поиск">
-            </button>
-        </div>
-        <div class="search-expanded" aria-hidden="true">
-            <input type="text" placeholder="Введите запрос..." class="search-expanded__input" />
-            <button id="searchClose" class="search-expanded__close" aria-label="Закрыть поиск">×</button>
-        </div>
-        <div class="header__content">
-            <div class="dropdown">
-                <a href="/catalog" class="has-submenu">Каталог</a>
-                <div class="dropdown-content vertical-menu">
-                    <ul>
-                        <li>
-                            <a href="/catalog" class="has-submenu">Все каталоги</a>
-                            <ul class="submenu">
-                                <li><a href="/products?category=all">Общий каталог</a></li>
-                                <li><a href="/products?category=original">Оригинальный каталог</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="/catalog#oils" class="has-submenu">Масла и автохимия</a>
-                            <ul class="submenu">
-                                <li><a href="/products?subcategory=motor-oils">Моторные масла</a></li>
-                                <li><a href="/products?subcategory=transmission-oils">Трансмиссионные масла</a></li>
-                                <li><a href="/products?subcategory=brake-fluids">Тормозные жидкости</a></li>
-                                <li><a href="/products?subcategory=coolants">Охлаждающие жидкости</a></li>
-                                <li><a href="/products?subcategory=washer-fluids">Жидкости для омывателя</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="/catalog#tires" class="has-submenu">Шины и диски</a>
-                            <ul class="submenu">
-                                <li><a href="/products?subcategory=summer-tires">Летние шины</a></li>
-                                <li><a href="/products?subcategory=winter-tires">Зимние шины</a></li>
-                                <li><a href="/products?subcategory=moto-tires">Шины мотоциклетные</a></li>
-                                <li><a href="/products?subcategory=alloy-wheels">Литые диски</a></li>
-                                <li><a href="/products?subcategory=stamped-wheels">Штампованные диски</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="/catalog#electronics" class="has-submenu">Автоэлектроника</a>
-                            <ul class="submenu">
-                                <li><a href="/products?subcategory=bulbs">Лампы</a></li>
-                                <li><a href="/products?subcategory=batteries">Аккумуляторы</a></li>
-                                <li><a href="/products?subcategory=rear-view-cameras">Камеры заднего вида</a></li>
-                                <li><a href="/products?subcategory=fuses">Предохранители</a></li>
-                                <li><a href="/products?subcategory=parking-radars">Парковочные радары</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="/catalog#tools" class="has-submenu">Инструмент</a>
-                            <ul class="submenu">
-                                <li><a href="/products?subcategory=garden-tools">Все для сада</a></li>
-                                <li><a href="/products?subcategory=tooling">Оснастка</a></li>
-                                <li><a href="/products?subcategory=pneumatic-tools">Пневматический инструмент</a></li>
-                                <li><a href="/products?subcategory=hand-tools">Ручной инструмент</a></li>
-                                <li><a href="/products?subcategory=power-tools">Электроинструмент</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="/products?category=accessories">Аксессуары</a></li>
-                        <li>
-                            <a href="/catalog#service" class="has-submenu">Все для автосервиса</a>
-                            <ul class="submenu">
-                                <li><a href="/products?subcategory=service-equipment">Оборудование для сервиса</a></li>
-                                <li><a href="/products?subcategory=pro-chemistry">Профессиональная автохимия</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="/products?category=clothing">Одежда и экипировка</a></li>
-                        <li>
-                            <a href="/catalog#vehicles" class="has-submenu">Велосипеды и самокаты</a>
-                            <ul class="submenu">
-                                <li><a href="/products?subcategory=bicycles">Велосипеды</a></li>
-                                <li><a href="/products?subcategory=scooters">Самокаты</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <nav class="main-nav">
-                <a href="/#delivery">Оплата и доставка</a>
-                <a href="/#about">О нас</a>
-                <a href="/#contacts">Контакты</a>
-            </nav>
-            <div class="logo">
-                <a href="/" aria-label="Перейти на главную">Lime Details</a>
-            </div>
-            <div class="work-time">Пн–Вс: 10:00–20:00</div>
-            <div class="phone">
-                <a href="tel:+79999999999">+7 (999) 999-99-99</a>
-            </div>
-            <div class="account-container">
-                <div class="account-login">
-                    <a href="/auth" class="login-link">Вход в аккаунт</a>
-                </div>
-                <div class="user-profile" style="display: none;">
-                    <div class="user-avatar"></div>
-                    <div class="user-dropdown">
-                        <div class="user-info">
-                            <div class="user-name"></div>
-                            <div class="user-email"></div>
-                        </div>
-                        <hr class="dropdown-divider">
-                        <a href="/profile" class="dropdown-item"><span>👤</span>Профиль</a>
-                        <a href="/profile#orders" class="dropdown-item"><span>📦</span>Мои заказы</a>
-                        <a href="/profile#security" class="dropdown-item"><span>⚙️</span>Настройки</a>
-                        <hr class="dropdown-divider">
-                        <a href="#" class="dropdown-item logout"><span>🚪</span>Выйти</a>
-                    </div>
-                </div>
-            </div>
-            <div class="cart-container">
-                <button id="cartIconBtn" class="cart-icon-btn" aria-label="Открыть корзину">
-                    <img src="/images/иконки/cart.webp" alt="Корзина">
-                    <span id="cartCounter" class="cart-counter" style="display: none;">0</span>
-                </button>
-            </div>
-        </div>
+<!-- Center Menu -->
+    <div class="center-menu">
+        <button class="center-menu-btn search-btn" title="Поиск">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+        </button>
+        <button class="center-menu-btn catalog-btn" title="Каталог">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Каталог</span>
+        </button>
+        <button class="center-menu-btn about-btn" title="О нас">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>О нас</span>
+        </button>
+        <button class="center-menu-btn cabinet-btn" title="Личный кабинет">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span>Кабинет</span>
+        </button>
     </div>
-</header>
