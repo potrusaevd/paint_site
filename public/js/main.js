@@ -232,7 +232,10 @@ document.getElementById("closePrivacyBtn").addEventListener("click", () => {
     };
 
     // --- Обработчики событий для корзины ---
-    document.getElementById('cartIconBtn')?.addEventListener('click', () => window.CartManager.toggleModal(true));
+    const cartButton = document.querySelector('.cart_button'); // Ищем кнопку по новому классу
+    if (cartButton) {
+        cartButton.addEventListener('click', () => window.CartManager.toggleModal(true));
+    }
     document.getElementById('closeCartBtn')?.addEventListener('click', () => window.CartManager.toggleModal(false));
     document.getElementById('continueShoppingBtn')?.addEventListener('click', () => window.CartManager.toggleModal(false));
     document.getElementById('cartModal')?.addEventListener('click', (e) => {
