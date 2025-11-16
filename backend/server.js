@@ -170,28 +170,65 @@ app.get('/api/search', async (req, res) => {
 });
 
 app.post('/api/register', async (req, res) => {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
-        return res.status(400).json({ message: 'Все поля обязательны для заполнения.' });
+    // ИЗМЕНЕНИЕ: Теперь принимаем и название компании
+    const { username, email, password, companyName } = req.body;
+
+    if (!username || !email || !password || !companyName) {
+        return res.status(400).json({ message: 'Все поля (Имя, Email, Пароль, Название компании) обязательны.' });
     }
+
+    // ИЗМЕНЕНИЕ: Используем транзакцию для безопасного создания двух записей
+    let pool;
     try {
-        const pool = await poolPromise;
-        const existingUser = await pool.request().input('Email', sql.NVarChar, email).query('SELECT * FROM Users WHERE Email = @Email');
-        if (existingUser.recordset.length > 0) {
-            return res.status(409).json({ message: 'Пользователь с таким email уже существует.' });
+        pool = await poolPromise;
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
+
+        try {
+            let request = new sql.Request(transaction);
+            // Проверяем, существует ли уже пользователь с таким email
+            const existingUser = await request.input('Email', sql.NVarChar, email).query('SELECT UserID FROM Users WHERE Email = @Email');
+            if (existingUser.recordset.length > 0) {
+                // Если пользователь есть, отменяем транзакцию
+                await transaction.rollback();
+                return res.status(409).json({ message: 'Пользователь с таким email уже существует.' });
+            }
+
+            // 1. Создаем компанию
+            request = new sql.Request(transaction);
+            const companyResult = await request
+                .input('CompanyName', sql.NVarChar, companyName)
+                .query('INSERT INTO Companies (CompanyName) OUTPUT INSERTED.CompanyID VALUES (@CompanyName)');
+            const newCompanyId = companyResult.recordset[0].CompanyID;
+
+            // 2. Хешируем пароль и создаем токен верификации
+            const passwordHash = await bcrypt.hash(password, 10);
+            const verificationToken = crypto.randomBytes(32).toString('hex');
+            const tokenExpiry = new Date(Date.now() + 3600000); // 1 час на подтверждение
+
+            // 3. Создаем пользователя, привязывая его к новой компании
+            request = new sql.Request(transaction);
+            await request
+                .input('Username', sql.NVarChar, username)
+                .input('Email', sql.NVarChar, email)
+                .input('PasswordHash', sql.NVarChar, passwordHash)
+                .input('VerificationToken', sql.NVarChar, verificationToken)
+                .input('TokenExpiry', sql.DateTime, tokenExpiry)
+                .input('CompanyID', sql.Int, newCompanyId) // ИЗМЕНЕНИЕ: Передаем ID компании
+                .query('INSERT INTO Users (Username, Email, PasswordHash, VerificationToken, TokenExpiry, CompanyID) VALUES (@Username, @Email, @PasswordHash, @VerificationToken, @TokenExpiry, @CompanyID)');
+
+            // Подтверждаем транзакцию
+            await transaction.commit();
+
+            // Отправляем письмо для верификации
+            await sendVerificationEmail(email, verificationToken);
+            res.status(201).json({ message: 'Регистрация прошла успешно! Пожалуйста, проверьте вашу почту для подтверждения аккаунта.' });
+
+        } catch (err) {
+            // Если на любом этапе возникла ошибка, откатываем все изменения
+            await transaction.rollback();
+            throw err; // Передаем ошибку в следующий catch
         }
-        const passwordHash = await bcrypt.hash(password, 10);
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-        const tokenExpiry = new Date(Date.now() + 3600000); 
-        await pool.request()
-            .input('Username', sql.NVarChar, username)
-            .input('Email', sql.NVarChar, email)
-            .input('PasswordHash', sql.NVarChar, passwordHash)
-            .input('VerificationToken', sql.NVarChar, verificationToken)
-            .input('TokenExpiry', sql.DateTime, tokenExpiry)
-            .query('INSERT INTO Users (Username, Email, PasswordHash, VerificationToken, TokenExpiry) VALUES (@Username, @Email, @PasswordHash, @VerificationToken, @TokenExpiry)');
-        await sendVerificationEmail(email, verificationToken);
-        res.status(201).json({ message: 'Регистрация прошла успешно! Пожалуйста, проверьте вашу почту для подтверждения аккаунта.' });
     } catch (err) {
         console.error('Ошибка регистрации:', err);
         res.status(500).json({ message: 'Внутренняя ошибка сервера.' });
@@ -209,15 +246,20 @@ app.post('/api/login', async (req, res) => {
         const isPasswordMatch = await bcrypt.compare(password, user.PasswordHash);
         if (!isPasswordMatch) return res.status(401).json({ message: 'Неверные учетные данные.' });
 
-        const accessToken = jwt.sign({ userId: user.UserID, email: user.Email }, SECRET_KEY, { expiresIn: '1h' });
-        
-        res.status(200).json({
-            accessToken,
-            userId: user.UserID,
-            username: user.Username,
-            email: user.Email,
-            avatarUrl: user.AvatarURL
-        });
+        const accessToken = jwt.sign(
+    { userId: user.UserID, email: user.Email, companyId: user.CompanyID }, 
+        SECRET_KEY, 
+        { expiresIn: '6h' }
+    );
+            
+    res.status(200).json({
+        accessToken,
+        userId: user.UserID,
+        username: user.Username,
+        email: user.Email,
+        avatarUrl: user.AvatarURL,
+        companyId: user.CompanyID // ИЗМЕНЕНИЕ: Возвращаем companyId на фронтенд
+    });
     } catch (err) {
         console.error('Ошибка входа:', err);
         res.status(500).json({ message: 'Внутренняя ошибка сервера.' });
@@ -254,6 +296,15 @@ app.get('/api/products', async (req, res) => {
         if (subcategory) {
             conditions.push(`SubCategory = @SubCategory`);
             request.input('SubCategory', sql.NVarChar, subcategory);
+        }
+        const { ralColor, coatingType } = req.query;
+        if (ralColor) {
+            conditions.push(`RalColor = @RalColor`);
+            request.input('RalColor', sql.NVarChar, ralColor);
+        }
+        if (coatingType) {
+            conditions.push(`CoatingType = @CoatingType`);
+            request.input('CoatingType', sql.NVarChar, coatingType);
         }
         if (brands) {
             const brandList = brands.split(',');
@@ -370,8 +421,9 @@ app.post('/api/orders/create', authenticateToken, async (req, res) => {
         request = new sql.Request(transaction);
         const orderResult = await request
             .input('UserID_Order', sql.Int, userId)
+            .input('CompanyID_Order', sql.Int, companyId) // ИЗМЕНЕНИЕ: Передаем CompanyID
             .input('Total', sql.Decimal(10, 2), total)
-            .query('INSERT INTO Orders (UserID, Status, Total) OUTPUT INSERTED.OrderID VALUES (@UserID_Order, \'processing\', @Total)');
+            .query('INSERT INTO Orders (UserID, CompanyID, Status, Total) OUTPUT INSERTED.OrderID VALUES (@UserID_Order, @CompanyID_Order, \'processing\', @Total)');
         const newOrderId = orderResult.recordset[0].OrderID;
 
         // 4. Переносим товары из корзины в OrderItems
@@ -527,17 +579,17 @@ app.post('/api/user/change-password', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/orders', authenticateToken, async (req, res) => {
-    const userId = req.user.userId;
+    const companyId = req.user.companyId; // ИЗМЕНЕНИЕ: Используем companyId
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('UserID', sql.Int, userId)
+            .input('CompanyID', sql.Int, companyId) // ИЗМЕНЕНИЕ: Передаем CompanyID в запрос
             .query(`
                 SELECT o.OrderID as id, o.OrderDate as date, o.Status as status, o.Total as total,
                     (SELECT oi.ProductName as name, oi.Quantity as quantity, oi.Price as price, oi.ImageURL as img
                      FROM OrderItems oi WHERE oi.OrderID = o.OrderID FOR JSON PATH) as items
                 FROM Orders o
-                WHERE o.IsHidden = 0 AND o.UserID = @UserID
+                WHERE o.IsHidden = 0 AND o.CompanyID = @CompanyID -- ИЗМЕНЕНИЕ: Фильтруем по CompanyID
                 ORDER BY CASE o.Status WHEN 'processing' THEN 1 WHEN 'shipped' THEN 2 WHEN 'delivered' THEN 3 WHEN 'cancelled' THEN 4 ELSE 5 END, o.OrderDate DESC
             `);
         res.json(result.recordset);
@@ -701,12 +753,12 @@ app.put('/api/orders/:id/hide', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/addresses', authenticateToken, async (req, res) => {
-    const userId = req.user.userId;
+    const companyId = req.user.companyId; // ИЗМЕНЕНИЕ
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('UserID', sql.Int, userId)
-            .query('SELECT * FROM Addresses WHERE UserID = @UserID');
+            .input('CompanyID', sql.Int, companyId) // ИЗМЕНЕНИЕ
+            .query('SELECT * FROM Addresses WHERE CompanyID = @CompanyID'); // ИЗМЕНЕНИЕ
         res.json(result.recordset);
     } catch (err) {
         res.status(500).send(err.message);
@@ -714,7 +766,7 @@ app.get('/api/addresses', authenticateToken, async (req, res) => {
 });
 
 app.post('/api/addresses', authenticateToken, async (req, res) => {
-    const userId = req.user.userId;
+    const companyId = req.user.companyId;
     const { AddressType, City, Street, House, Apartment, PostalCode } = req.body;
     if (!AddressType || !City || !Street || !House) {
         return res.status(400).json({ message: 'Не все обязательные поля были заполнены.' });
@@ -722,14 +774,14 @@ app.post('/api/addresses', authenticateToken, async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('UserID', sql.Int, userId)
+            .input('CompanyID', sql.Int, companyId)
             .input('AddressType', sql.NVarChar, AddressType)
             .input('City', sql.NVarChar, City)
             .input('Street', sql.NVarChar, Street)
             .input('House', sql.NVarChar, House)
             .input('Apartment', sql.NVarChar, Apartment || null)
             .input('PostalCode', sql.NVarChar, PostalCode || null)
-            .query('INSERT INTO Addresses (UserID, AddressType, City, Street, House, Apartment, PostalCode, IsDefault) OUTPUT INSERTED.* VALUES (@UserID, @AddressType, @City, @Street, @House, @Apartment, @PostalCode, 0)');
+            .query('INSERT INTO Addresses (CompanyID, AddressType, City, Street, House, Apartment, PostalCode, IsDefault) OUTPUT INSERTED.* VALUES (@CompanyID, @AddressType, @City, @Street, @House, @Apartment, @PostalCode, 0)');
         res.status(201).json(result.recordset[0]);
     } catch (err) {
         console.error('SQL Error in POST /api/addresses:', err.message); 
@@ -739,7 +791,7 @@ app.post('/api/addresses', authenticateToken, async (req, res) => {
 
 app.put('/api/addresses/:addressId', authenticateToken, async (req, res) => {
     const { addressId } = req.params;
-    const userId = req.user.userId;
+    const companyId = req.user.companyId;
     const { AddressType, City, Street, House, Apartment, PostalCode } = req.body;
     if (!AddressType || !City || !Street || !House) {
         return res.status(400).json({ message: 'Не все обязательные поля были заполнены.' });
@@ -748,14 +800,14 @@ app.put('/api/addresses/:addressId', authenticateToken, async (req, res) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('AddressID', sql.Int, addressId)
-            .input('UserID', sql.Int, userId)
+            .input('CompanyID', sql.Int, companyId)
             .input('AddressType', sql.NVarChar, AddressType)
             .input('City', sql.NVarChar, City)
             .input('Street', sql.NVarChar, Street)
             .input('House', sql.NVarChar, House)
             .input('Apartment', sql.NVarChar, Apartment || null)
             .input('PostalCode', sql.NVarChar, PostalCode || null)
-            .query(`UPDATE Addresses SET AddressType = @AddressType, City = @City, Street = @Street, House = @House, Apartment = @Apartment, PostalCode = @PostalCode WHERE AddressID = @AddressID AND UserID = @UserID`);
+            .query(`UPDATE Addresses SET AddressType = @AddressType, City = @City, Street = @Street, House = @House, Apartment = @Apartment, PostalCode = @PostalCode WHERE AddressID = @AddressID AND CompanyID = @CompanyID`);
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Адрес не найден или не принадлежит вам.' });
         res.status(200).json({ message: 'Адрес успешно обновлен.' });
     } catch (error) {
@@ -766,19 +818,81 @@ app.put('/api/addresses/:addressId', authenticateToken, async (req, res) => {
 
 app.delete('/api/addresses/:addressId', authenticateToken, async (req, res) => {
     const { addressId } = req.params;
-    const userId = req.user.userId;
+    const companyId = req.user.companyId;
     try {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('AddressID', sql.Int, addressId)
-            .input('UserID', sql.Int, userId)
-            .query('DELETE FROM Addresses WHERE AddressID = @AddressID AND IsDefault = 0 AND UserID = @UserID');
+            .input('CompanyID', sql.Int, companyId)
+            .query('DELETE FROM Addresses WHERE AddressID = @AddressID AND IsDefault = 0 AND CompanyID = @CompanyID');
         if (result.rowsAffected[0] === 0) {
             return res.status(404).json({ message: 'Адрес не найден, является основным или не принадлежит вам.' });
         }
         res.status(200).json({ message: 'Адрес успешно удален.' });
     } catch (err) {
         res.status(500).send(err.message);
+    }
+});
+
+
+// ===========================================
+// --- НОВЫЕ API для B2B Портала ---
+// ===========================================
+
+// Получение информации о компании пользователя
+app.get('/api/company-info', authenticateToken, async (req, res) => {
+    const companyId = req.user.companyId;
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('CompanyID', sql.Int, companyId)
+            .query('SELECT * FROM Companies WHERE CompanyID = @CompanyID');
+        
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ message: 'Компания не найдена.' });
+        }
+        res.json(result.recordset[0]);
+    } catch (error) {
+        console.error('Ошибка получения информации о компании:', error);
+        res.status(500).json({ message: 'Ошибка сервера' });
+    }
+});
+
+
+// Получение остатков на складе
+app.get('/api/stock-levels', authenticateToken, async (req, res) => {
+    const companyId = req.user.companyId;
+    try {
+        const pool = await poolPromise;
+
+        // Запрос 1: Получаем зарезервированные остатки для этой компании
+        // (Здесь мы предполагаем, что вы создали и наполнили таблицу StockLevels, как обсуждали)
+        const reservedStockResult = await pool.request()
+            .input('CompanyID', sql.Int, companyId)
+            .query(`
+                SELECT p.ProductName, p.RalColor, p.CoatingType, s.Quantity 
+                FROM StockLevels s
+                JOIN Products p ON s.ProductID = p.ProductID
+                WHERE s.CompanyID = @CompanyID AND s.StockType = 'Reserved'
+            `);
+
+        // Запрос 2: Получаем свободные остатки
+        const freeStockResult = await pool.request()
+            .query(`
+                SELECT p.ProductName, p.RalColor, p.CoatingType, s.Quantity 
+                FROM StockLevels s
+                JOIN Products p ON s.ProductID = p.ProductID
+                WHERE s.StockType = 'Free'
+            `);
+        
+        res.json({
+            reserved: reservedStockResult.recordset,
+            free: freeStockResult.recordset
+        });
+
+    } catch (error) {
+        console.error('Ошибка получения складских остатков:', error);
+        res.status(500).json({ message: 'Ошибка сервера' });
     }
 });
 
