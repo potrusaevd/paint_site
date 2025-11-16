@@ -1,120 +1,311 @@
+<!-- Search Input (hidden by default) -->
+    <div class="center-menu search-mode" style="display: none;">
+        <input type="text" class="search-input-inline" placeholder="Поиск по каталогу...">
+        <button class="search-close-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
 
-        <section class="hero">
-            <div class="hero__overlay"></div>
-            <div class="container hero__content">
-                <h1 class="hero__title">Надежные автозапчасти для вашего автомобиля</h1>
-                <p class="hero__subtitle">Подбор по VIN, артикулу или названию</p>
-                <form class="hero__search-form">
-                    <input type="text" placeholder="Введите VIN, артикул или название детали...">
-                    <button type="submit" class="btn-primary">Найти</button>
-                </form>
-            </div>
-        </section>
-
-        <section class="benefits" id="delivery">
-    <div class="container">
-         <h2 class="section-title">Почему выбирают нас</h2>
-        <div class="benefits__grid">
-            
-            <a href="/Delivery" class="benefit-item">
-                <div class="benefit-item__icon">🚚</div>
-                <h3 class="benefit-item__title">Быстрая доставка</h3>
-                <p class="benefit-item__text">По всей стране в кратчайшие сроки.</p>
+    <!-- Left Menu -->
+    <div class="left-menu">
+        <div class="left-menu-top">
+            <button class="menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="left-menu-middle">
+            <div class="logo">PT</div>
+        </div>
+        <div class="section-nav">
+            <a class="section-nav-item active" data-index="0">
+                <span class="section-nav-item-number">01</span>
+                <span>О компании</span>
             </a>
-
-            <a href="/Warranty" class="benefit-item">
-                <div class="benefit-item__icon">🛡️</div>
-                <h3 class="benefit-item__title">Гарантия качества</h3>
-                <p class="benefit-item__text">Только проверенные производители.</p>
+            <a class="section-nav-item" data-index="1">
+                <span class="section-nav-item-number">02</span>
+                <span>Направления</span>
             </a>
-            
-            <a href="#about" class="benefit-item"> <!-- Якорная ссылка на блок "О нас" -->
-                <div class="benefit-item__icon">💸</div>
-                <h3 class="benefit-item__title">Выгодные цены</h3>
-                <p class="benefit-item__text">Лучшие предложения на рынке.</p>
+            <a class="section-nav-item" data-index="2">
+                <span class="section-nav-item-number">03</span>
+                <span>Оборудование</span>
             </a>
-
-            <a href="/Support" class="benefit-item">
-                <div class="benefit-item__icon">🎧</div>
-                <h3 class="benefit-item__title">Поддержка 24/7</h3>
-                <p class="benefit-item__text">Наши эксперты всегда на связи.</p>
+            <a class="section-nav-item" data-index="3">
+                <span class="section-nav-item-number">04</span>
+                <span>Проекты</span>
             </a>
-            
+            <a class="section-nav-item" data-index="4">
+                <span class="section-nav-item-number">05</span>
+                <span>Сертификаты</span>
+            </a>
+            <a class="section-nav-item" data-index="5">
+                <span class="section-nav-item-number">06</span>
+                <span>Контакты</span>
+            </a>
         </div>
     </div>
-</section>
 
-        <section class="promo-carousel">
-            <div class="container">
-                <h2 class="promo-carousel__title">Акции и спецпредложения</h2>
-                <div class="promo-carousel__wrapper">
-                    <button class="promo-carousel__btn promo-carousel__btn--prev" aria-label="Назад">‹</button>
-                    <div class="promo-carousel__track-wrapper">
-                        <ul class="promo-carousel__track">
+    <div class="page-container">
+        <div class="horizontal-container">
+            <div class="panels-container">
+                
+                <!-- Panel 1: О компании -->
+                <section class="panel panel-split" data-index="0">
+                    <div class="editorial-content">
+                        <div class="panel-content">
+                            <div class="chapter">Синтез новых возможностей</div>
+                            <h1 class="title">Прайм Топ — производственная компания в области полимерных лакокрасочных материалов</h1>
+                            <div class="text">
+                                <p>Специализируемся на защитных и функциональных материалах для металлургии, строительства, нефтяной, судостроительной, электротехнической, пищевой и других отраслей.</p>
+                            </div>
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <div class="stat-number-small">16</div>
+                                    <div class="stat-label-small">лет работы на рынке</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number-small">42 000</div>
+                                    <div class="stat-label-small">тонн в год</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number-small">400+</div>
+                                    <div class="stat-label-small">штат сотрудников</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="editorial-image">
+                        <div class="image-wrapper">
+                            <img src="https://www.iphones.ru/wp-content/uploads/2019/12/Timcookjapancolor-1.jpg" alt="Производство" class="parallax" data-speed="0.3">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Panel 2: Направления -->
+                <section class="panel panel-full" data-index="1">
+                    <div class="image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?w=1200" alt="Направления" class="panel-full-background parallax" data-speed="0.2">
+                    </div>
+                    <div class="panel-full-overlay"></div>
+                    <div class="panel-full-content">
+                        <div class="chapter">Направления деятельности</div>
+                        <h2 class="title">Узкоспециализированные профессиональные материалы</h2>
+                        <div class="text">
+                            <p>Текущий портфель нашей продукции целенаправленно ограничен продуктами для производственных линий, сборочных цехов, промышленных площадок с высокими требованиями к безопасности, технологичности и стабильности качества.</p>
+                        </div>
+                        <div class="directions-grid">
+                            <div class="direction-card">
+                                <h3>Покрытия для металлической упаковки</h3>
+                                <p>Пищевая и химическая промышленность, бытовая химия, парфюмерия, фармацевтика</p>
+                            </div>
+                            <div class="direction-card">
+                                <h3>Морские и промышленные покрытия</h3>
+                                <p>Судостроение, строительство, нефтегазовая отрасль, инфраструктура</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Panel 3: Оборудование и Производство -->
+                <section class="panel panel-split" data-index="2">
+                    <div class="editorial-image">
+                        <div class="image-wrapper">
+                            <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1200" alt="Оборудование" class="parallax" data-speed="0.3">
+                        </div>
+                    </div>
+                    <div class="editorial-content">
+                        <div class="panel-content">
+                            <div class="chapter">Производство и Оборудование</div>
+                            <h2 class="title">Современные технологии без аналогов в России</h2>
+                            <div class="text">
+                                <p>Высокотехнологичное оборудование и постоянное совершенствование. Расширяем производственные и лабораторные мощности для обеспечения лидирующего качества.</p>
+                            </div>
+                            <div class="equipment-list">
+                                <div class="equipment-item">• Печь Mathis для отверждения эмалей</div>
+                                <div class="equipment-item">• Реометр для оценки реологического профиля</div>
+                                <div class="equipment-item">• Автоклав для стерилизации лаков</div>
+                                <div class="equipment-item">• Трибометр для коэффициента трения</div>
+                                <div class="equipment-item">• Амперметр для сплошности покрытия</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Panel 4: Проекты с каруселью -->
+                <section class="panel panel-full" data-index="3">
+                    <div class="image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1200" alt="Проекты" class="panel-full-background parallax" data-speed="0.2">
+                    </div>
+                    <div class="panel-full-overlay"></div>
+                    <div class="panel-full-content">
+                        <div class="beyond-text">ПРОЕКТЫ</div>
+                        <div class="text">
+                            <p>Наши клиенты — крупнейшие российские компании</p>
+                        </div>
+                        
+                        <div class="projects-carousel">
+                            <button class="carousel-btn carousel-prev">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
                             
-                        </ul>
+                            <div class="carousel-track-container">
+                                <div class="carousel-track">
+                                    <div class="carousel-slide">
+                                        <div class="project-date">11.04.2024</div>
+                                        <div class="project-image">
+                                            <img src="public/images/ekb_arena.jpg" alt="Проект 1">
+                                        </div>
+                                        <div class="project-title">Екатеринбург арена</div>
+                                    </div>
+                                    <div class="carousel-slide">
+                                        <div class="project-date">11.04.2024</div>
+                                        <div class="project-image">
+                                            <img src="arena1.jpg" alt="Проект 2">
+                                        </div>
+                                        <div class="project-title">Открытие арена</div>
+                                    </div>
+                                    <div class="carousel-slide">
+                                        <div class="project-date">11.04.2024</div>
+                                        <div class="project-image">
+                                            <img src="glav_kino.jpg" alt="Проект 3">
+                                        </div>
+                                        <div class="project-title">Главкино</div>
+                                    </div>
+                                    <div class="carousel-slide">
+                                        <div class="project-date">11.04.2024</div>
+                                        <div class="project-image">
+                                            <img src="luh.jpg" alt="Проект 4">
+                                        </div>
+                                        <div class="project-title">Лужники</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="carousel-btn carousel-next">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div class="carousel-dots"></div>
                     </div>
-                    <button class="promo-carousel__btn promo-carousel__btn--next" aria-label="Вперед">›</button>
-                </div>
-            </div>
-        </section>
+                </section>
 
-        <section class="popular-categories" id="categories">
-            <div class="container">
-                <h2 class="section-title">Популярные категории</h2>
-                <div class="categories__grid">
-                    <a href="/products?category=oils" class="category-card">
-                        <img src="images/каталог/masla.webp" alt="Масла и автохимия" />
-                        <div class="category-card__overlay"></div>
-                        <h3>Масла и автохимия</h3>
-                    </a>
-                    <a href="/products?category=tires" class="category-card">
-                        <img src="images/каталог/шины.webp" alt="Шины и диски" />
-                        <div class="category-card__overlay"></div>
-                        <h3>Шины и диски</h3>
-                    </a>
-                    <a href="/products?category=electronics" class="category-card">
-                        <img src="images/каталог/автоэлектроника.webp" alt="Автоэлектроника" />
-                        <div class="category-card__overlay"></div>
-                        <h3>Автоэлектроника</h3>
-                    </a>
-                    <a href="/catalog" class="category-card category-card--all">
-                        <div class="category-card__overlay"></div>
-                        <h3>Смотреть все →</h3>
-                    </a>
-                </div>
-            </div>
-        </section>
-        
-        <section class="about-contacts" id="about">
-            <div class="container about-contacts__container">
-                <div class="about-info">
-                    <h2 class="section-title">О компании Lime Details</h2>
-                    <p>
-                        Lime Details — надежный магазин автозапчастей с широким ассортиментом и выгодными ценами.
-                        Мы работаем для вас уже более 10 лет, предлагая качественные товары от проверенных производителей.
-                        Наша команда профессионалов всегда готова помочь с выбором и ответить на любые вопросы.
-                    </p>
-                </div>
-                <div class="contacts-info" id="contacts">
-                    <h3 class="contacts-info__title">Связаться с нами</h3>
-                    <p><strong>Адрес:</strong> <a href="https://yandex.ru/maps/-/CLEOeV9h" target="_blank">Липецк, Пр. Победы, 12</a></p>
-                    <p><strong>Email:</strong> <a href="mailto:info@limedetails.by">info@limedetails.by</a></p>
-                    <p><strong>Телефон:</strong> <a href="tel:+79999999999">+7 (999) 999-99-99</a></p>
-                    <div class="contacts__socials">
-                        <a href="#" aria-label="Facebook"><img src="images/ico_контакты/Facebook.webp" alt="Facebook" /></a>
-                        <a href="#" aria-label="Instagram"><img src="images/ico_контакты/instagram.webp" alt="Instagram" /></a>
-                        <a href="#" aria-label="VK"><img src="images/ico_контакты/VK.webp" alt="VK" /></a>
-                        <a href="#" aria-label="Telegram"><img src="images/ico_контакты/Telegram.webp" alt="Telegram" /></a>
+                <!-- Panel 5: Сертификаты -->
+                <section class="panel panel-full" data-index="4">
+                    <div class="image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200" alt="Сертификаты" class="panel-full-background parallax" data-speed="0.2">
                     </div>
-                </div>
-            </div>
-        </section>
-    </main>
+                    <div class="panel-full-overlay"></div>
+                    <div class="panel-full-content">
+                        <div class="beyond-text">СЕРТИФИКАТЫ</div>
+                        <div class="text">
+                            <p>Производство соответствует международным стандартам качества</p>
+                        </div>
+                        
+                        <div class="certificates-carousel">
+                            <div class="certificates-track-container">
+                                <div class="certificates-track">
+                                    <div class="certificate-slide">
+                                        <div class="certificate-image">
+                                            <img src="ISO-9001.png" alt="ISO 9001">
+                                        </div>
+                                        <div class="certificate-title">ISO 9001</div>
+                                        <div class="certificate-desc">Система менеджмента качества</div>
+                                    </div>
+                                    <div class="certificate-slide">
+                                        <div class="certificate-image">
+                                            <img src="ISO-14001.png" alt="ISO 14001">
+                                        </div>
+                                        <div class="certificate-title">ISO 14001</div>
+                                        <div class="certificate-desc">Экологический менеджмент</div>
+                                    </div>
+                                    <div class="certificate-slide">
+                                        <div class="certificate-image">
+                                            <img src="ISO-45001.png" alt="ISO 45001">
+                                        </div>
+                                        <div class="certificate-title">ISO 45001</div>
+                                        <div class="certificate-desc">Охрана труда и безопасность</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="certificates-controls">
+                                <button class="certificates-btn certificates-prev">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </button>
+                                <div class="certificates-dots"></div>
+                                <button class="certificates-btn certificates-next">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="text" style="margin-top: 60px;">
+                            <p>Собственный центр R&D в области создания новых типов смол, добавок и катализаторов. Более 50% сырья собственного производства.</p>
+                        </div>
+                    </div>
+                </section>
 
-    <footer class="footer">
-        <div class="container footer__content">
-            <p>© 2025 Lime Details. Все права защищены.</p>
-            <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
+                <!-- Panel 6: Контакты -->
+                <section class="panel panel-full" data-index="5">
+                    <div class="panel-full-overlay" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);"></div>
+                    <div class="panel-full-content">
+                        <div class="space-text">КОНТАКТЫ</div>
+                        <div class="contacts-grid">
+                            <div class="contact-block">
+                                <h3>Головной офис</h3>
+                                <p>398516, Липецкая область, Липецкий район, с. Косыревка</p>
+                            </div>
+                            <div class="contact-block">
+                                <h3>Телефоны</h3>
+                                <p>+7 (4742) 75-50-01 (Липецк)</p>
+                                <p>+7 (495) 646-28-24 (Москва)</p>
+                            </div>
+                            <div class="contact-block">
+                                <h3>Email</h3>
+                                <div class="email-wrapper">
+                                    <a href="mailto:info@prime-top.ru" class="email">info@prime-top.ru</a>
+                                    <button class="copy-email">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                        </svg>
+                                    </button>
+                                    <span class="copy-tooltip">Скопировано!</span>
+                                </div>
+                            </div>
+                            <div class="contact-block">
+                                <h3>Сайт</h3>
+                                <p><a href="https://prime-top.ru" target="_blank" class="site-link">www.prime-top.ru</a></p>
+                            </div>
+                        </div>
+                        <div class="text" style="margin-top: 60px; text-align: center;">
+                            <p>Конкурс веб-разработчиков при поддержке ЛГТУ</p>
+                            <p>Разработка: 7-23 ноября 2025 | Защита: 28 ноября 2025</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
         </div>
-    </footer>
+    </div>
+
+    <div class="navigation">
+        <div class="nav-text">ПРОКРУТИТЕ</div>
+        <div class="nav-progress">
+            <div class="nav-progress-fill"></div>
+        </div>
+        <div class="nav-text">01 / 06</div>
+    </div>
