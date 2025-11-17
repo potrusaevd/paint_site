@@ -10,69 +10,57 @@ const jwt = require('jsonwebtoken');
 const { sql, poolPromise } = require('./db');
 const { sendVerificationEmail } = require('./mailer');
 const ejsLayouts = require('express-ejs-layouts');
-// ИЗМЕНЕНИЕ: Импортируем необходимые функции из express-validator
-const { body, validationResult } = require('express-validator');
 
 const app = express();
 console.log("A: Express создан");
-const port = 3000;
+const port = 3001;
+
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
-            // Политика по умолчанию: разрешать всё с нашего домена
             defaultSrc: ["'self'"],
 
-            // Для скриптов: разрешаем с нашего домена И встраиваемые <script> теги
-            scriptSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js", "https://cdn.skypack.dev/tweakpane@4.0.4", "https://cdn.skypack.dev/gsap@3.13.0/Draggable", "https://cdn.skypack.dev/gsap@3.13.0","https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"],
 
-            // Явно разрешаем встроенные обработчики событий (onclick и т.д.)
             scriptSrcAttr: ["'unsafe-inline'"],
 
-            // Для стилей: разрешаем с нашего домена, inline-стили И со домена Google Fonts
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
 
-            // Шрифты от Google загружаются с другого домена, его тоже нужно разрешить
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
 
-            // <<< РЕШЕНИЕ НОВОЙ ПРОБЛЕМЫ
-            // Для изображений: разрешаем с нашего домена, встроенные (data:), 
-            // а также с доменов, откуда грузятся картинки в примерах.
             imgSrc: ["'self'", "data:", "https://www.iphones.ru", "https://images.unsplash.com"],
 
-            // Для AJAX/fetch запросов
             connectSrc: ["'self'"]
         }
     }
 }));
 
-// ===========================================
-// --- Настройки Express и Middleware ---
-// ===========================================
+// Настройки Express и Middleware
 
-app.use(ejsLayouts);
-app.set('layout', 'partials/_layout');
+
+app.use(ejsLayouts); 
+app.set('layout', 'partials/_layout'); 
 
 // 1. Настройка шаблонизатора EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// 2. Настройка раздачи статических файлов
+
+
+// 2. Настройка раздачи статических файлов 
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Отдельно указываем путь к загруженным аватарам
+// Отдельно указываем путь к загруженным аватарам 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 3. Другие Middleware
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 
-// ИЗМЕНЕНИЕ: Убран устаревший пакет xss-clean, вызывавший ошибку.
-// app.use(xss());
-
-// Генерируем секретный ключ при каждом запуске. Для продакшена выносится в .env
+// Генерируем секретный ключ при каждом запуске
 const SECRET_KEY = crypto.randomBytes(64).toString('hex');
 
-// --- Multer для загрузки файлов ---
+//Multer для загрузки файлов
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) { fs.mkdirSync(uploadsDir); }
 const storage = multer.diskStorage({
@@ -82,21 +70,9 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // Ограничение 5 МБ
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|gif/;
-        const mimetype = allowedTypes.test(file.mimetype);
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        if (mimetype && extname) {
-            return cb(null, true);
-        }
-        cb(new Error('Ошибка: Разрешены только изображения (jpeg, jpg, png, gif)!'));
-    }
-});
+const upload = multer({ storage: storage });
 
-// --- MIDDLEWARE для проверки JWT токена ---
+//MIDDLEWARE для проверки JWT токена
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -112,60 +88,61 @@ const authenticateToken = (req, res, next) => {
 // --- НОВЫЙ РАЗДЕЛ: Маршруты для рендеринга страниц ---
 // ===========================================
 app.get("/", (req, res) => {
-    res.render("index", {
+    res.render("index", { 
         title: "Прайм Топ - Производитель красок",
-        pageStyles: ['/css/main.css'],
-        pageScripts: ['/js/index.js']
+        pageStyles: ['/css/main.css'], 
+        pageScripts: ['/js/index.js'],
+        bodyClass: 'home-page' 
     });
 });
 
 app.get("/catalog", (req, res) => {
-    res.render("catalog", {
+    res.render("catalog", { 
         title: "Каталог товаров - Lime Details",
-        pageStyles: ['/css/catalog.css'],
+        pageStyles: ['/css/catalog.css'], 
         pageScripts: ['/js/catalog.js']
     });
 });
 
 app.get("/products", (req, res) => {
-    res.render("products", {
-        title: "Товары - Lime Details",
-        pageStyles: ['/css/products.css'],
-        pageScripts: ['/js/products.js']
+    res.render("products", { 
+        title: "Каталог - Прайм Топ",
+        pageStyles: ['/css/products.css', '/css/ui-elements.css'], 
+        pageScripts: ['https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js','https://cdn.skypack.dev/tweakpane@4.0.4','https://cdn.skypack.dev/gsap@3.13.0/Draggable','https://cdn.skypack.dev/gsap@3.13.0','https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js','/js/products.js','/js/ui-elements.js']
     });
 });
 
 app.get('/auth', (req, res) => {
-    res.render('auth', {
+    res.render('auth', { 
         title: 'Вход - Прайм Топ',
-        layout: false
+        layout: false 
     });
 });
 
 app.get("/profile", (req, res) => {
-    res.render("profile", {
+    res.render("profile", { 
         title: "Профиль пользователя - Lime Details",
-        pageStyles: ['/css/profile.css'],
+        pageStyles: ['/css/profile.css'], 
         pageScripts: ['/js/profile.js']
     });
 });
 
 app.get("/delivery", (req, res) => {
-    res.render("delivery", {
+    res.render("delivery", { 
         title: "Оплата и доставка — Lime Details",
         pageStyles: ['/css/info-page.css']
     });
 });
 
 app.get("/warranty", (req, res) => {
-    res.render("warranty", {
+    res.render("warranty", { 
         title: "Гарантия — Lime Details",
         pageStyles: ['/css/info-page.css']
     });
 });
 
 app.get("/support", (req, res) => {
-    res.render("support", {
+    res.render("support", { 
         title: "Поддержка | Lime Details",
         pageStyles: ['/css/support.css'],
         pageScripts: ['/js/support.js']
@@ -173,7 +150,7 @@ app.get("/support", (req, res) => {
 });
 
 app.get("/checkout", (req, res) => {
-    res.render("checkout", {
+    res.render("checkout", { 
         title: "Оформление заказа - Lime Details",
         pageStyles: ['/css/checkout.css'],
         pageScripts: ['/js/checkout.js']
@@ -184,7 +161,7 @@ app.get("/checkout", (req, res) => {
 
 // --- ОТКРЫТЫЕ API  ---
 app.get('/api/search', async (req, res) => {
-    const { query } = req.query;
+    const { query } = req.query; 
 
     if (!query || query.trim().length < 2) {
         return res.json([]);
@@ -197,17 +174,17 @@ app.get('/api/search', async (req, res) => {
         const result = await pool.request()
             .input('SearchQuery', sql.NVarChar, searchQuery)
             .query(`
-                SELECT TOP 20
-                    ProductID,
-                    ProductName,
+                SELECT TOP 20 
+                    ProductID, 
+                    ProductName, 
                     Brand,
-                    Price,
-                    DiscountPrice,
-                    ImageURL
+                    Price, 
+                    DiscountPrice, 
+                    ImageURL 
                 FROM Products
                 WHERE ProductName LIKE @SearchQuery OR Brand LIKE @SearchQuery
             `);
-
+        
         res.json(result.recordset);
     } catch (error) {
         console.error("Ошибка при выполнении поиска:", error);
@@ -215,23 +192,9 @@ app.get('/api/search', async (req, res) => {
     }
 });
 
-// ИЗМЕНЕНИЕ: Добавлен массив middleware для валидации и санитизации данных
-app.post('/api/register', [
-    body('username', 'Имя пользователя не должно быть пустым').trim().notEmpty().escape(),
-    body('email', 'Некорректный email').isEmail().normalizeEmail(),
-    body('companyName', 'Название компании не должно быть пустым').trim().notEmpty().escape(),
-    body('password', 'Пароль должен содержать минимум 6 символов').isLength({ min: 6 })
-], async (req, res) => {
-    // ИЗМЕНЕНИЕ: Блок проверки результатов валидации
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        // Если есть ошибки, возвращаем статус 400 и список ошибок
-        return res.status(400).json({ message: 'Ошибка ввода данных', errors: errors.array() });
-    }
-
+app.post('/api/register', async (req, res) => {
     const { username, email, password, companyName } = req.body;
 
-    // Дополнительная проверка на всякий случай, хотя express-validator уже это делает
     if (!username || !email || !password || !companyName) {
         return res.status(400).json({ message: 'Все поля (Имя, Email, Пароль, Название компании) обязательны.' });
     }
@@ -248,7 +211,7 @@ app.post('/api/register', [
 
             const existingUser = await request.input('Email', sql.NVarChar, email).query('SELECT UserID FROM Users WHERE Email = @Email');
             if (existingUser.recordset.length > 0) {
-                await transaction.rollback();
+                await transaction.rollback(); 
                 return res.status(409).json({ message: 'Пользователь с таким email уже существует.' });
             }
 
@@ -260,7 +223,7 @@ app.post('/api/register', [
 
             const passwordHash = await bcrypt.hash(password, 10);
             const verificationToken = crypto.randomBytes(32).toString('hex');
-            const tokenExpiry = new Date(Date.now() + 3600000);
+            const tokenExpiry = new Date(Date.now() + 3600000); 
 
             request = new sql.Request(transaction);
             await request
@@ -269,7 +232,7 @@ app.post('/api/register', [
                 .input('PasswordHash', sql.NVarChar, passwordHash)
                 .input('VerificationToken', sql.NVarChar, verificationToken)
                 .input('TokenExpiry', sql.DateTime, tokenExpiry)
-                .input('CompanyID', sql.Int, newCompanyId)
+                .input('CompanyID', sql.Int, newCompanyId) 
                 .query('INSERT INTO Users (Username, Email, PasswordHash, VerificationToken, TokenExpiry, CompanyID) VALUES (@Username, @Email, @PasswordHash, @VerificationToken, @TokenExpiry, @CompanyID)');
 
             await transaction.commit();
@@ -279,7 +242,7 @@ app.post('/api/register', [
 
         } catch (err) {
             await transaction.rollback();
-            throw err;
+            throw err; 
         }
     } catch (err) {
         console.error('Критическая ошибка при регистрации в транзакции:', err);
@@ -299,18 +262,18 @@ app.post('/api/login', async (req, res) => {
         if (!isPasswordMatch) return res.status(401).json({ message: 'Неверные учетные данные.' });
 
         const accessToken = jwt.sign(
-    { userId: user.UserID, email: user.Email, companyId: user.CompanyID },
-        SECRET_KEY,
+    { userId: user.UserID, email: user.Email, companyId: user.CompanyID }, 
+        SECRET_KEY, 
         { expiresIn: '6h' }
     );
-
+            
     res.status(200).json({
         accessToken,
         userId: user.UserID,
         username: user.Username,
         email: user.Email,
         avatarUrl: user.AvatarURL,
-        companyId: user.CompanyID
+        companyId: user.CompanyID // ИЗМЕНЕНИЕ: Возвращаем companyId на фронтенд
     });
     } catch (err) {
         console.error('Ошибка входа:', err);
@@ -339,7 +302,7 @@ app.get('/api/products', async (req, res) => {
     try {
         const pool = await poolPromise;
         const request = pool.request();
-        let query = 'SELECT ProductID, ProductName, Description, Price, Brand, Category, SubCategory, StockQuantity, ImageURL, Rating, ReviewCount FROM Products';
+        let query = 'SELECT ProductID, ProductName, Description, Price, Brand, Category, SubCategory, StockQuantity, ImageURL, RalColor, CoatingType, ProductSeries FROM Products';
         let conditions = [];
         if (category && category !== 'all') {
             conditions.push(`Category = @Category`);
@@ -388,11 +351,11 @@ app.get('/api/products/promo', async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request().query(`
-            SELECT TOP 10
-                ProductID,
-                ProductName,
-                Price,
-                DiscountPrice,
+            SELECT TOP 10 
+                ProductID, 
+                ProductName, 
+                Price, 
+                DiscountPrice, 
                 ImageURL,
                 Rating
             FROM Products
@@ -424,17 +387,7 @@ app.post('/api/avatar/upload', authenticateToken, upload.single('avatar'), async
     }
 });
 
-// ИЗМЕНЕНИЕ: Добавлена валидация и санитизация имени пользователя
-app.put('/api/user/update', [
-    authenticateToken,
-    body('username', 'Имя пользователя не может быть пустым').trim().notEmpty().escape()
-], async (req, res) => {
-    // ИЗМЕНЕНИЕ: Блок проверки результатов валидации
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+app.put('/api/user/update', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     const { username } = req.body;
     if (!username) return res.status(400).json({ message: 'Имя пользователя не предоставлено.' });
@@ -454,20 +407,19 @@ app.put('/api/user/update', [
 // Создать новый заказ из корзины
 app.post('/api/orders/create', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
-    const companyId = req.user.companyId;
-    let transaction;
     try {
         const pool = await poolPromise;
-        transaction = new sql.Transaction(pool);
+        const transaction = new sql.Transaction(pool);
+        
         await transaction.begin();
-
+        
         let request = new sql.Request(transaction);
 
         // 1. Получаем товары из корзины
         const cartItemsResult = await request
             .input('UserID_Cart', sql.Int, userId)
             .query('SELECT ci.ProductID, ci.Quantity, p.ProductName, p.Price, p.DiscountPrice, p.ImageURL FROM CartItems ci JOIN Products p ON ci.ProductID = p.ProductID WHERE ci.UserID = @UserID_Cart');
-
+        
         const cartItems = cartItemsResult.recordset;
         if (cartItems.length === 0) {
             await transaction.rollback();
@@ -484,14 +436,14 @@ app.post('/api/orders/create', authenticateToken, async (req, res) => {
         request = new sql.Request(transaction);
         const orderResult = await request
             .input('UserID_Order', sql.Int, userId)
-            .input('CompanyID_Order', sql.Int, companyId)
+            .input('CompanyID_Order', sql.Int, companyId) // ИЗМЕНЕНИЕ: Передаем CompanyID
             .input('Total', sql.Decimal(10, 2), total)
             .query('INSERT INTO Orders (UserID, CompanyID, Status, Total) OUTPUT INSERTED.OrderID VALUES (@UserID_Order, @CompanyID_Order, \'processing\', @Total)');
         const newOrderId = orderResult.recordset[0].OrderID;
 
         // 4. Переносим товары из корзины в OrderItems
         for (const item of cartItems) {
-            request = new sql.Request(transaction);
+            request = new sql.Request(transaction); 
             await request
                 .input('OrderID', sql.Int, newOrderId)
                 .input('ProductName', sql.NVarChar, item.ProductName)
@@ -512,9 +464,6 @@ app.post('/api/orders/create', authenticateToken, async (req, res) => {
         res.status(201).json({ message: 'Заказ успешно создан!', orderId: newOrderId });
 
     } catch (err) {
-        if (transaction && transaction.active) {
-            await transaction.rollback();
-        }
         console.error("КРИТИЧЕСКАЯ ОШИБКА СОЗДАНИЯ ЗАКАЗА:", err);
         res.status(500).json({ message: 'Внутренняя ошибка сервера при создании заказа.' });
     }
@@ -524,12 +473,12 @@ app.get('/api/checkout-info', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     try {
         const pool = await poolPromise;
-
+        
         // Запрос 1: Получаем данные пользователя
         const userResult = await pool.request()
             .input('UserID', sql.Int, userId)
             .query('SELECT Username, Email FROM Users WHERE UserID = @UserID');
-
+        
         // Запрос 2: Получаем адреса пользователя
         const addressesResult = await pool.request()
             .input('UserID', sql.Int, userId)
@@ -561,16 +510,16 @@ app.get('/api/cart', authenticateToken, async (req, res) => {
         const result = await pool.request()
             .input('UserID', sql.Int, req.user.userId)
             .query(`
-                SELECT
-                    ci.ProductID,
-                    ci.Quantity,
-                    p.ProductName,
-                    p.Price,
-                    p.DiscountPrice,
+                SELECT 
+                    ci.ProductID, 
+                    ci.Quantity, 
+                    p.ProductName, 
+                    p.Price, 
+                    p.DiscountPrice, 
                     p.ImageURL,
-                    p.ProductSeries,
-                    p.RalColor,
-                    p.VolumeLiters as Volume
+                    p.ProductSeries, -- ДОБАВЛЕНО
+                    p.RalColor,      -- ДОБАВЛЕНО
+                    p.VolumeLiters as Volume -- ДОБАВЛЕНО и переименовано
                 FROM CartItems ci
                 JOIN Products p ON ci.ProductID = p.ProductID
                 WHERE ci.UserID = @UserID
@@ -579,7 +528,7 @@ app.get('/api/cart', authenticateToken, async (req, res) => {
     } catch (err) { res.status(500).json({ message: 'Ошибка получения корзины' }); }
 });
 
-// Добавить товар в корзину
+// Добавить товар в корзину 
 app.post('/api/cart/add', authenticateToken, async (req, res) => {
     const { productId, quantity = 1 } = req.body;
     try {
@@ -592,7 +541,7 @@ app.post('/api/cart/add', authenticateToken, async (req, res) => {
                 MERGE INTO CartItems AS target
                 USING (SELECT @UserID AS UserID, @ProductID AS ProductID) AS source
                 ON (target.UserID = source.UserID AND target.ProductID = source.ProductID)
-                WHEN MATCHED THEN
+                WHEN MATCHED THEN 
                     UPDATE SET Quantity = target.Quantity + @Quantity
                 WHEN NOT MATCHED THEN
                     INSERT (UserID, ProductID, Quantity) VALUES (source.UserID, source.ProductID, @Quantity);
@@ -604,19 +553,8 @@ app.post('/api/cart/add', authenticateToken, async (req, res) => {
 // Обновить количество товара
 app.put('/api/cart/update', authenticateToken, async (req, res) => {
     const { productId, quantity } = req.body;
-    if (quantity <= 0) {
-         // Вместо небезопасного redirect, который не работает для API,
-         // просто удаляем товар здесь же
-        try {
-            const pool = await poolPromise;
-            await pool.request()
-                .input('UserID', sql.Int, req.user.userId)
-                .input('ProductID', sql.Int, productId)
-                .query('DELETE FROM CartItems WHERE UserID = @UserID AND ProductID = @ProductID');
-            return res.status(200).json({ message: 'Товар удален из корзины' });
-        } catch (err) {
-            return res.status(500).json({ message: 'Ошибка удаления товара при обновлении количества' });
-        }
+    if (quantity <= 0) { 
+        return res.redirect(307, '/api/cart/remove');
     }
     try {
         const pool = await poolPromise;
@@ -665,17 +603,17 @@ app.post('/api/user/change-password', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/orders', authenticateToken, async (req, res) => {
-    const companyId = req.user.companyId;
+    const companyId = req.user.companyId; // ИЗМЕНЕНИЕ: Используем companyId
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('CompanyID', sql.Int, companyId)
+            .input('CompanyID', sql.Int, companyId) // ИЗМЕНЕНИЕ: Передаем CompanyID в запрос
             .query(`
                 SELECT o.OrderID as id, o.OrderDate as date, o.Status as status, o.Total as total,
                     (SELECT oi.ProductName as name, oi.Quantity as quantity, oi.Price as price, oi.ImageURL as img
                      FROM OrderItems oi WHERE oi.OrderID = o.OrderID FOR JSON PATH) as items
                 FROM Orders o
-                WHERE o.IsHidden = 0 AND o.CompanyID = @CompanyID
+                WHERE o.IsHidden = 0 AND o.CompanyID = @CompanyID -- ИЗМЕНЕНИЕ: Фильтруем по CompanyID
                 ORDER BY CASE o.Status WHEN 'processing' THEN 1 WHEN 'shipped' THEN 2 WHEN 'delivered' THEN 3 WHEN 'cancelled' THEN 4 ELSE 5 END, o.OrderDate DESC
             `);
         res.json(result.recordset);
@@ -687,56 +625,42 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
 
 app.post('/api/orders/:id/repeat', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
-    const companyId = req.user.companyId;
-    const originalOrderId = req.params.id;
-    let transaction;
     try {
         const pool = await poolPromise;
-        transaction = new sql.Transaction(pool);
+        const originalOrderId = req.params.id;
+        const transaction = new sql.Transaction(pool);
         await transaction.begin();
-
+        
         const originalOrderRequest = new sql.Request(transaction);
-        const originalOrder = await originalOrderRequest
-            .input('OrderID', sql.Int, originalOrderId)
-            .input('CompanyID', sql.Int, companyId)
-            .query('SELECT * FROM Orders WHERE OrderID = @OrderID AND CompanyID = @CompanyID');
-
+        const originalOrder = await originalOrderRequest.input('OrderID', sql.Int, originalOrderId).query('SELECT * FROM Orders WHERE OrderID = @OrderID AND UserID = @userId', { userId });
         if (originalOrder.recordset.length === 0) {
              await transaction.rollback();
-             return res.status(404).send('Исходный заказ не найден или не принадлежит вашей компании');
+             return res.status(404).send('Исходный заказ не найден или не принадлежит вам');
         }
-
+        
         const newOrderRequest = new sql.Request(transaction);
-        const newOrderResult = await newOrderRequest
-            .input('UserID', sql.Int, userId)
-            .input('CompanyID', sql.Int, companyId)
-            .input('Total', sql.Decimal(10, 2), originalOrder.recordset[0].Total)
-            .query('INSERT INTO Orders (UserID, CompanyID, Status, Total) OUTPUT INSERTED.OrderID VALUES (@UserID, @CompanyID, \'processing\', @Total)');
+        const newOrderResult = await newOrderRequest.input('UserID', sql.Int, userId).input('Total', sql.Decimal(10, 2), originalOrder.recordset[0].Total).query('INSERT INTO Orders (UserID, Status, Total) OUTPUT INSERTED.OrderID VALUES (@UserID, \'processing\', @Total)');
         const newOrderId = newOrderResult.recordset[0].OrderID;
-
         const itemsRequest = new sql.Request(transaction);
         await itemsRequest.input('NewOrderID', sql.Int, newOrderId).input('OldOrderID', sql.Int, originalOrderId).query('INSERT INTO OrderItems (OrderID, ProductName, Quantity, Price, ImageURL) SELECT @NewOrderID, ProductName, Quantity, Price, ImageURL FROM OrderItems WHERE OrderID = @OldOrderID');
-
+        
         await transaction.commit();
         res.status(201).json({ message: 'Заказ успешно повторен!', newOrderId: newOrderId });
     } catch (err) {
-        if (transaction && transaction.active) {
-            await transaction.rollback();
-        }
         console.error("Ошибка при повторе заказа:", err);
         res.status(500).send(err.message);
     }
 });
 
 app.put('/api/orders/:id/cancel', authenticateToken, async (req, res) => {
-    const companyId = req.user.companyId;
+    const userId = req.user.userId;
     try {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('OrderID', sql.Int, req.params.id)
-            .input('CompanyID', sql.Int, companyId)
-            .query('UPDATE Orders SET Status = \'cancelled\' WHERE OrderID = @OrderID AND CompanyID = @CompanyID');
-        if (result.rowsAffected[0] === 0) return res.status(404).send('Заказ не найден или не принадлежит вашей компании');
+            .input('UserID', sql.Int, userId)
+            .query('UPDATE Orders SET Status = \'cancelled\' WHERE OrderID = @OrderID AND UserID = @UserID');
+        if (result.rowsAffected[0] === 0) return res.status(404).send('Заказ не найден или не принадлежит вам');
         res.status(200).send('Заказ отменен');
     } catch (err) {
         res.status(500).send(err.message);
@@ -747,6 +671,7 @@ app.put('/api/orders/:id/cancel', authenticateToken, async (req, res) => {
 // --- API для Избранного  ---
 // ===========================================
 
+// Получить все избранные товары пользователя
 app.get('/api/favorites', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     try {
@@ -767,6 +692,7 @@ app.get('/api/favorites', authenticateToken, async (req, res) => {
     }
 });
 
+// Добавить/Удалить товар из избранного (toggle)
 app.post('/api/favorites/toggle', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     let { productId } = req.body;
@@ -778,7 +704,7 @@ app.post('/api/favorites/toggle', authenticateToken, async (req, res) => {
 
     try {
         const pool = await poolPromise;
-
+        
         const existingFavorite = await pool.request()
             .input('UserID', sql.Int, userId)
             .input('ProductID', sql.Int, productId)
@@ -810,7 +736,7 @@ app.delete('/api/favorites/all', authenticateToken, async (req, res) => {
         await pool.request()
             .input('UserID', sql.Int, userId)
             .query('DELETE FROM UserFavorites WHERE UserID = @UserID');
-
+        
         res.status(200).json({ message: 'Избранное успешно очищено.' });
     } catch (error) {
         console.error('Ошибка при очистке избранного:', error);
@@ -825,7 +751,7 @@ app.get('/api/favorites/ids', authenticateToken, async (req, res) => {
         const result = await pool.request()
             .input('UserID', sql.Int, userId)
             .query('SELECT ProductID FROM UserFavorites WHERE UserID = @UserID');
-
+        
         const favoriteIds = result.recordset.map(item => item.ProductID);
         res.json(favoriteIds);
 
@@ -836,14 +762,14 @@ app.get('/api/favorites/ids', authenticateToken, async (req, res) => {
 });
 
 app.put('/api/orders/:id/hide', authenticateToken, async (req, res) => {
-    const companyId = req.user.companyId;
+    const userId = req.user.userId;
     try {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('OrderID', sql.Int, req.params.id)
-            .input('CompanyID', sql.Int, companyId)
-            .query('UPDATE Orders SET IsHidden = 1 WHERE OrderID = @OrderID AND CompanyID = @CompanyID');
-        if (result.rowsAffected[0] === 0) return res.status(404).send('Заказ не найден или не принадлежит вашей компании');
+            .input('UserID', sql.Int, userId)
+            .query('UPDATE Orders SET IsHidden = 1 WHERE OrderID = @OrderID AND UserID = @UserID');
+        if (result.rowsAffected[0] === 0) return res.status(404).send('Заказ не найден или не принадлежит вам');
         res.status(200).send('Заказ скрыт');
     } catch (err) {
         res.status(500).send(err.message);
@@ -851,34 +777,19 @@ app.put('/api/orders/:id/hide', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/addresses', authenticateToken, async (req, res) => {
-    const companyId = req.user.companyId;
+    const companyId = req.user.companyId; // ИЗМЕНЕНИЕ
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('CompanyID', sql.Int, companyId)
-            .query('SELECT * FROM Addresses WHERE CompanyID = @CompanyID');
+            .input('CompanyID', sql.Int, companyId) // ИЗМЕНЕНИЕ
+            .query('SELECT * FROM Addresses WHERE CompanyID = @CompanyID'); // ИЗМЕНЕНИЕ
         res.json(result.recordset);
     } catch (err) {
         res.status(500).send(err.message);
     }
 });
 
-// ИЗМЕНЕНИЕ: Добавлена валидация и санитизация полей адреса
-const addressValidator = [
-    body('AddressType').trim().notEmpty().escape(),
-    body('City').trim().notEmpty().escape(),
-    body('Street').trim().notEmpty().escape(),
-    body('House').trim().notEmpty().escape(),
-    body('Apartment').trim().escape(),
-    body('PostalCode').trim().escape()
-];
-
-app.post('/api/addresses', authenticateToken, addressValidator, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ message: 'Ошибка ввода данных', errors: errors.array() });
-    }
-
+app.post('/api/addresses', authenticateToken, async (req, res) => {
     const companyId = req.user.companyId;
     const { AddressType, City, Street, House, Apartment, PostalCode } = req.body;
     if (!AddressType || !City || !Street || !House) {
@@ -897,17 +808,12 @@ app.post('/api/addresses', authenticateToken, addressValidator, async (req, res)
             .query('INSERT INTO Addresses (CompanyID, AddressType, City, Street, House, Apartment, PostalCode, IsDefault) OUTPUT INSERTED.* VALUES (@CompanyID, @AddressType, @City, @Street, @House, @Apartment, @PostalCode, 0)');
         res.status(201).json(result.recordset[0]);
     } catch (err) {
-        console.error('SQL Error in POST /api/addresses:', err.message);
+        console.error('SQL Error in POST /api/addresses:', err.message); 
         res.status(500).json({ message: 'Ошибка на сервере при добавлении адреса.' });
     }
 });
 
-app.put('/api/addresses/:addressId', authenticateToken, addressValidator, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ message: 'Ошибка ввода данных', errors: errors.array() });
-    }
-
+app.put('/api/addresses/:addressId', authenticateToken, async (req, res) => {
     const { addressId } = req.params;
     const companyId = req.user.companyId;
     const { AddressType, City, Street, House, Apartment, PostalCode } = req.body;
@@ -965,7 +871,7 @@ app.get('/api/company-info', authenticateToken, async (req, res) => {
         const result = await pool.request()
             .input('CompanyID', sql.Int, companyId)
             .query('SELECT * FROM Companies WHERE CompanyID = @CompanyID');
-
+        
         if (result.recordset.length === 0) {
             return res.status(404).json({ message: 'Компания не найдена.' });
         }
@@ -983,23 +889,26 @@ app.get('/api/stock-levels', authenticateToken, async (req, res) => {
     try {
         const pool = await poolPromise;
 
+        // Запрос 1: Получаем зарезервированные остатки для этой компании
+        // (Здесь мы предполагаем, что вы создали и наполнили таблицу StockLevels, как обсуждали)
         const reservedStockResult = await pool.request()
             .input('CompanyID', sql.Int, companyId)
             .query(`
-                SELECT p.ProductName, p.RalColor, p.CoatingType, s.Quantity
+                SELECT p.ProductName, p.RalColor, p.CoatingType, s.Quantity 
                 FROM StockLevels s
                 JOIN Products p ON s.ProductID = p.ProductID
                 WHERE s.CompanyID = @CompanyID AND s.StockType = 'Reserved'
             `);
 
+        // Запрос 2: Получаем свободные остатки
         const freeStockResult = await pool.request()
             .query(`
-                SELECT p.ProductName, p.RalColor, p.CoatingType, s.Quantity
+                SELECT p.ProductName, p.RalColor, p.CoatingType, s.Quantity 
                 FROM StockLevels s
                 JOIN Products p ON s.ProductID = p.ProductID
                 WHERE s.StockType = 'Free'
             `);
-
+        
         res.json({
             reserved: reservedStockResult.recordset,
             free: freeStockResult.recordset
