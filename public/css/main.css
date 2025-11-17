@@ -16,15 +16,15 @@
     box-sizing: border-box;
 }
 
-body {
+body.home-page {
     font-family: 'Inter', sans-serif;
-    overflow: hidden;
+    overflow: hidden; 
     cursor: grab;
     background-color: var(--color-primary);
     color: var(--color-text);
 }
 
-body:active {
+body.home-page:active {
     cursor: grabbing;
 }
 
