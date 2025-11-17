@@ -5,6 +5,7 @@ const crypto =require('crypto');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const helmet = require('helmet');
 const jwt = require('jsonwebtoken');
 const { sql, poolPromise } = require('./db');
 const { sendVerificationEmail } = require('./mailer');
@@ -15,7 +16,35 @@ const { body, validationResult } = require('express-validator');
 const app = express();
 console.log("A: Express создан");
 const port = 3000;
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            // Политика по умолчанию: разрешать всё с нашего домена
+            defaultSrc: ["'self'"],
 
+            // Для скриптов: разрешаем с нашего домена И встраиваемые <script> теги
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+
+            // <<< РЕШЕНИЕ ПРОБЛЕМЫ №2
+            // Явно разрешаем встроенные обработчики событий (onclick и т.д.)
+            // Эта директива переопределяет безопасные настройки helmet по умолчанию
+            scriptSrcAttr: ["'unsafe-inline'"],
+
+            // <<< РЕШЕНИЕ ПРОБЛЕМЫ №1
+            // Для стилей: разрешаем с нашего домена, inline-стили И со домена Google Fonts
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+
+            // Шрифты от Google загружаются с другого домена, его тоже нужно разрешить
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+
+            // Для изображений: разрешаем с нашего домена и встроенные (data:)
+            imgSrc: ["'self'", "data:"],
+
+            // Для AJAX/fetch запросов (на всякий случай, если клиентский JS их делает)
+            connectSrc: ["'self'"]
+        }
+    }
+}));
 // ===========================================
 // --- Настройки Express и Middleware ---
 // ===========================================
