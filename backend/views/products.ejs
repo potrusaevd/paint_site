@@ -1,55 +1,191 @@
 
-    <main class="products-page-main">
-        <div class="container">
-            <nav class="breadcrumbs">
-                <a href="/">Главная</a>
-                <span class="breadcrumb-separator">→</span>
-                <a href="/catalog">Каталог</a>
-                <span class="breadcrumb-separator">→</span>
-                <span class="breadcrumb-current" id="pageTitle">Загрузка...</span>
-            </nav>
-
-            <div class="products-layout">
-                <aside class="products-filters">
-                    <h3>Фильтры</h3>
-                    <div class="filter-group">
-                        <h4>Бренд</h4>
-                        <div id="brandsFilterContainer" class="filter-options">
-                            <div class="filter-loader"></div>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <h4>Цена</h4>
-                        <div class="price-filter">
-                            <input type="number" placeholder="от" id="priceFrom">
-                            <input type="number" placeholder="до" id="priceTo">
-                        </div>
-                    </div>
-                    <button id="applyFiltersBtn" class="btn btn-primary">Применить</button>
-                    <button id="resetFiltersBtn" class="btn btn-secondary">Сбросить</button>
-                </aside>
-
-                <section class="products-grid-container">
-                    <div class="products-toolbar">
-                        <span id="productCount">Загрузка товаров...</span>
-                        <select id="sortSelect">
-                            <option value="Rating_DESC">По популярности</option>
-                            <option value="Price_ASC">Сначала дешевые</option>
-                            <option value="Price_DESC">Сначала дорогие</option>
-                            <option value="ProductName_ASC">По названию (А-Я)</option>
-                        </select>
-                    </div>
-                    <div class="products-grid" id="productsGrid">
-                        
-                    </div>
-                </section>
+    <!-- Main Content -->
+    <div class="page-wrapper">
+        <!-- Sidebar Filters -->
+        <aside class="products-filters">
+            <div class="filters-header">
+                <h3>Фильтры</h3>
+                <button class="reset-filters" onclick="resetFilters()">Сбросить все</button>
             </div>
-        </div>
-    </main>
 
-    <footer class="footer">
-        <div class="container footer__content">
-            <p>&copy; 2025 Lime Details. Все права защищены.</p>
-            <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
-        </div>
-    </footer>
+            <div class="filter-group">
+                <div class="filter-title" onclick="toggleFilter(this)">
+                    <span>Наличие на складе</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="filter-content">
+                    <label class="checkbox-label">
+                        <label class="checkbox">
+                            <input type="checkbox" name="availability" value="free" />
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
+                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
+                            </svg>
+                        </label>
+                        <span>Свободные остатки</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <label class="checkbox">
+                            <input type="checkbox" name="availability" value="free" />
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
+                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
+                            </svg>
+                        </label>
+                        <span>Мои зарезервированные остатки</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <div class="filter-title" onclick="toggleFilter(this)">
+                    <span>Вид покрытия</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="filter-content">
+                    <label class="checkbox-label">
+                        <label class="checkbox">
+                            <input type="checkbox" name="availability" value="free" />
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
+                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
+                            </svg>
+                        </label>
+                        <span>Эмаль полиэфирная</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <label class="checkbox">
+                            <input type="checkbox" name="availability" value="free" />
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
+                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
+                            </svg>
+                        </label>
+                        <span>Эмаль полиуретановая текстурированная</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <label class="checkbox">
+                            <input type="checkbox" name="availability" value="free" />
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
+                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
+                            </svg>
+                        </label>
+                        <span>Лицевая полиэфирная эмаль</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <label class="checkbox">
+                            <input type="checkbox" name="availability" value="free" />
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
+                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
+                            </svg>
+                        </label>
+                        <span>Грунтовка</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <div class="filter-title" onclick="toggleFilter(this)">
+                    <span>Цвет (RAL)</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="filter-content">
+                    <input type="text" class="filter-input" placeholder="Введите RAL, например 8017" id="ralInput">
+                    <div class="popular-ral">
+                        <span class="ral-chip" onclick="selectRAL('8017')">8017</span>
+                        <span class="ral-chip" onclick="selectRAL('9003')">9003</span>
+                        <span class="ral-chip" onclick="selectRAL('7024')">7024</span>
+                        <span class="ral-chip" onclick="selectRAL('6005')">6005</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <div class="filter-title" onclick="toggleFilter(this)">
+                    <span>Технические параметры</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="filter-content">
+                    <div class="range-filter">
+                        <label>Условная вязкость</label>
+                        <div class="range-inputs">
+                            <input type="number" placeholder="От" min="0" max="200" value="80">
+                            <span>—</span>
+                            <input type="number" placeholder="До" min="0" max="200" value="95">
+                        </div>
+                    </div>
+
+                    <div class="range-filter">
+                        <label>Блеск при 60°</label>
+                        <div class="range-inputs">
+                            <input type="number" placeholder="От" min="0" max="100">
+                            <span>—</span>
+                            <input type="number" placeholder="До" min="0" max="100">
+                        </div>
+                    </div>
+
+                    <div class="range-filter">
+                        <label>ΔE (отклонение цвета)</label>
+                        <div class="range-inputs">
+                            <input type="number" placeholder="От" min="0" max="5" step="0.1">
+                            <span>—</span>
+                            <input type="number" placeholder="До" min="0" max="5" step="0.1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <div class="filter-title" onclick="toggleFilter(this)">
+                    <span>Остаток на складе (кг)</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="filter-content">
+                    <div class="range-inputs">
+                        <input type="number" placeholder="От" min="0">
+                        <span>—</span>
+                        <input type="number" placeholder="До" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-gooey apply-filters-btn">
+                <span>Применить</span>
+                <svg preserveAspectRatio="none" viewBox="0 0 132 45">
+                    <g clip-path="url(#clip)" filter="url(#goo-big)">
+                        <circle class="top-left" cx="49.5" cy="-0.5" r="26.5" />
+                        <circle class="middle-bottom" cx="70.5" cy="40.5" r="26.5" />
+                        <circle class="top-right" cx="104" cy="6.5" r="27" />
+                        <circle class="right-bottom" cx="123.5" cy="36.5" r="26.5" />
+                        <circle class="left-bottom" cx="16.5" cy="28" r="30" />
+                    </g>
+                    <defs>
+                        <clipPath id="clip">
+                            <rect width="132" height="45" rx="10" />
+                        </clipPath>
+                    </defs>
+                </svg>
+            </button>
+        </aside>
+
+
+        <section class="products-section">
+
+
+            <!-- Контейнер для карточек товаров. ОН ДОЛЖЕН БЫТЬ ПУСТЫМ! -->
+            <div class="products-grid">
+                <!-- JavaScript заполнит эту область -->
+            </div>
+
+            <!-- Контейнер для пагинации. ОН ДОЛЖЕН БЫТЬ ПУСТЫМ! -->
+            <nav class="pagination" aria-label="Pagination navigation">
+                <!-- JavaScript заполнит эту область -->
+            </nav>
+        </section>
+    </div>
