@@ -1,4 +1,19 @@
-// auth.js - ОБЪЕДИНЕННАЯ И АДАПТИРОВАННАЯ ВЕРСИЯ
+// auth.js - ОБЪЕДИНЕННАЯ, АДАПТИРОВАННАЯ И БЕЗОПАСНАЯ ВЕРСИЯ
+
+/**
+ * Функция для экранирования HTML-тегов в строке для безопасного отображения.
+ * Предотвращает XSS-атаки, преобразуя символы вроде < > в их HTML-сущности.
+ * @param {string} str - Входная строка, которая может содержать вредоносный код.
+ * @returns {string} - Безопасная для отображения строка.
+ */
+function escapeHTML(str) {
+    // Проверяем, что на вход подана строка
+    const str_val = String(str || '');
+    const p = document.createElement('p');
+    p.textContent = str_val;
+    return p.innerHTML;
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================
@@ -88,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.classList.add('error');
         input.classList.remove('success');
         if(errorMessage) {
+          // ИСПОЛЬЗОВАНИЕ .textContent ЗДЕСЬ БЕЗОПАСНО
           errorMessage.textContent = message;
           errorMessage.classList.add('show');
         }
@@ -196,12 +212,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.cookie = `userAvatar=${encodeURIComponent(data.avatarUrl)}; path=/; max-age=86400`;
             }
             
+            // Это сообщение статично и безопасно, экранирование не требуется.
             window.showCustomAlert('Успешный вход! Перенаправляем...', 'success');
             
             setTimeout(() => { window.location.href = '/profile'; }, 1500);
 
         } catch (error) {
-            window.showCustomAlert(error.message, 'error');
+            // ИСПРАВЛЕНО: Сообщение от сервера экранируется перед отображением
+            window.showCustomAlert(escapeHTML(error.message), 'error');
             submitBtn.disabled = false;
             submitBtn.textContent = 'Войти';
         }
@@ -223,6 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!validateEmail(emailInput.value)) { showError(emailInput, 'Некорректный email'); isValid = false; }
         if (!validatePassword(passwordInput.value)) { showError(passwordInput, 'Пароль должен быть длиннее 8 символов'); isValid = false; }
         if (passwordInput.value !== passwordConfirmInput.value) { showError(passwordConfirmInput, 'Пароли не совпадают'); isValid = false; }
+        // Сообщение о принятии условий статично и безопасно
         if (!termsInput.checked) { window.showCustomAlert('Нужно принять условия использования.', 'warning'); isValid = false; }
         if (!isValid) return;
         
@@ -244,12 +263,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Ошибка регистрации');
 
-            window.showCustomAlert(data.message, 'success');
+            // ИСПРАВЛЕНО: Сообщение от сервера экранируется перед отображением
+            window.showCustomAlert(escapeHTML(data.message), 'success');
             form.reset();
             switchToLogin(event);
 
         } catch (error) {
-            window.showCustomAlert(error.message, 'error');
+            // ИСПРАВЛЕНО: Сообщение от сервера экранируется перед отображением
+            window.showCustomAlert(escapeHTML(error.message), 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Создать аккаунт';

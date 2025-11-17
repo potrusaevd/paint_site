@@ -14,31 +14,25 @@ document.addEventListener('DOMContentLoaded', function () {
         document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     }
 
-function handleLogout(event) {
-    event.preventDefault();
+    function handleLogout(event) {
+        event.preventDefault();
 
-    // Можно использовать кастомное подтверждение, если оно есть на странице
-    const confirmLogout = (typeof showCustomConfirm === 'function') 
-        ? showCustomConfirm('Вы уверены, что хотите выйти?') 
-        : Promise.resolve(confirm('Вы уверены, что хотите выйти?'));
-    
-    confirmLogout.then(confirmed => {
-        if (confirmed) {
-            // Удаляем токен из localStorage
-            localStorage.removeItem('accessToken');
-
-            // Удаляем все известные нам cookie
-            deleteCookie('userLoggedIn');
-            deleteCookie('userName');
-            deleteCookie('userEmail');
-            deleteCookie('userAvatar');
-            deleteCookie('userId');
-            
-            // Перенаправляем на страницу входа
-            window.location.href = '/auth';
-        }
-    });
-}
+        const confirmLogout = (typeof showCustomConfirm === 'function') 
+            ? showCustomConfirm('Вы уверены, что хотите выйти?') 
+            : Promise.resolve(confirm('Вы уверены, что хотите выйти?'));
+        
+        confirmLogout.then(confirmed => {
+            if (confirmed) {
+                localStorage.removeItem('accessToken');
+                deleteCookie('userLoggedIn');
+                deleteCookie('userName');
+                deleteCookie('userEmail');
+                deleteCookie('userAvatar');
+                deleteCookie('userId');
+                window.location.href = '/auth';
+            }
+        });
+    }
     
     function initHeaderWidget() {
         const loginElement = document.querySelector('.account-login');
@@ -52,20 +46,37 @@ function handleLogout(event) {
             const userEmail = getCookie('userEmail') || 'email@example.com';
             const userAvatar = getCookie('userAvatar');
 
-            // ИЩЕМ ЭЛЕМЕНТЫ СТРОГО ВНУТРИ ВИДЖЕТА В ШАПКЕ
             const avatarContainer = profileElement.querySelector('.user-avatar');
             const nameEl = profileElement.querySelector('.user-name');
-            const emailEl = profileElement.querySelector('.user-email'); // Находит .user-email внутри .user-profile
+            const emailEl = profileElement.querySelector('.user-email');
             
+            // --- ИСПРАВЛЕНИЕ УЯЗВИМОСТИ: Программное создание элементов ---
             if (avatarContainer) {
-                if (userAvatar) {
-                    avatarContainer.innerHTML = `<img src="${API_URL}/${userAvatar.replace(/\\/g, '/')}" alt="Аватар">`;
+                // Очищаем контейнер безопасным способом перед добавлением нового содержимого
+                avatarContainer.innerHTML = ''; 
+
+                if (userAvatar && userAvatar !== 'null' && userAvatar !== 'undefined') {
+                    // Создаем элемент <img> программно
+                    const img = document.createElement('img');
+                    // Устанавливаем src. Браузер автоматически обработает URL, предотвращая 'javascript:' инъекции.
+                    img.src = `${API_URL}/${userAvatar.replace(/\\/g, '/')}`;
+                    img.alt = 'Аватар';
+                    // Добавляем безопасный элемент в DOM
+                    avatarContainer.appendChild(img);
                 } else {
-                    avatarContainer.innerHTML = `<span class="user-initial">${userName.charAt(0).toUpperCase()}</span>`;
+                    // Создаем <span> для инициала
+                    const span = document.createElement('span');
+                    span.className = 'user-initial';
+                    // Используем .textContent для безопасной вставки текста
+                    span.textContent = userName.charAt(0).toUpperCase();
+                    // Добавляем безопасный элемент в DOM
+                    avatarContainer.appendChild(span);
                 }
             }
+            
+            // Использование .textContent здесь изначально было безопасным
             if (nameEl) nameEl.textContent = userName;
-            if (emailEl) emailEl.textContent = userEmail; // Заполняет почту ТОЛЬКО в шапке
+            if (emailEl) emailEl.textContent = userEmail;
 
             const logoutBtn = profileElement.querySelector('.logout');
             const dropdown = profileElement.querySelector('.user-dropdown');

@@ -3,17 +3,46 @@
 
 window.showCustomAlert = function(message, type = 'success') {
     const container = document.getElementById('customAlertContainer');
-    if (!container) { alert(message); return; }
+    // Если контейнера нет, используем стандартный alert, который безопасен (не парсит HTML).
+    if (!container) { 
+        alert(message); 
+        return; 
+    }
+    
+    // --- ИСПРАВЛЕНИЕ УЯЗВИМОСТИ: Создаем элементы программно ---
+
+    // 1. Создаем основной div-контейнер для алерта
     const alertDiv = document.createElement('div');
     alertDiv.className = `custom-alert ${type}`;
-    alertDiv.innerHTML = `<span>${message}</span><button class="custom-alert-close-btn">×</button>`;
+
+    // 2. Создаем span для текста сообщения
+    const messageSpan = document.createElement('span');
+    // Используем .textContent для безопасной вставки сообщения
+    messageSpan.textContent = message; 
+
+    // 3. Создаем кнопку закрытия
+    const closeButton = document.createElement('button');
+    closeButton.className = 'custom-alert-close-btn';
+    // Используем .textContent для безопасного символа "×"
+    closeButton.textContent = '×'; 
+    closeButton.addEventListener('click', () => alertDiv.remove());
+
+    // 4. Собираем алерт из созданных элементов
+    alertDiv.appendChild(messageSpan);
+    alertDiv.appendChild(closeButton);
+
+    // 5. Добавляем готовый и безопасный алерт на страницу
     container.appendChild(alertDiv);
-    alertDiv.querySelector('.custom-alert-close-btn').addEventListener('click', () => alertDiv.remove());
+    
     setTimeout(() => {
-        if (alertDiv.parentNode) alertDiv.remove();
+        // Проверяем, существует ли еще элемент, перед удалением
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
     }, 5000);
 };
 
+// Эта функция изначально была безопасной, никаких изменений не требуется.
 window.showCustomConfirm = function(text, title = 'Подтвердите действие') {
     const modalOverlay = document.getElementById('confirmModalOverlay');
     const titleEl = document.getElementById('confirmModalTitle');
@@ -22,9 +51,11 @@ window.showCustomConfirm = function(text, title = 'Подтвердите дей
     const noBtn = document.getElementById('confirmModalNo');
 
     if (!modalOverlay || !titleEl || !textEl || !yesBtn || !noBtn) {
+        // Стандартный confirm также безопасен.
         return Promise.resolve(confirm(text));
     }
 
+    // Использование .textContent здесь абсолютно безопасно.
     titleEl.textContent = title;
     textEl.textContent = text;
     modalOverlay.style.display = 'flex';

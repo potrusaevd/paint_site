@@ -1,3 +1,34 @@
+// ==========================================================
+// --- ФУНКЦИИ ЭКРАНИРОВАНИЯ ДЛЯ БЕЗОПАСНОСТИ ---
+// ==========================================================
+
+/**
+ * Функция для экранирования HTML-тегов в строке для безопасного отображения в текстовом контексте.
+ * @param {string | number} str - Входная строка или число.
+ * @returns {string} - Безопасная для отображения строка.
+ */
+function escapeHTML(str) {
+    const str_val = String(str || '');
+    const p = document.createElement('p');
+    p.textContent = str_val;
+    return p.innerHTML;
+}
+
+/**
+ * Функция для экранирования строки для безопасного использования в значениях HTML-атрибутов.
+ * @param {string | number} str - Входная строка или число.
+ * @returns {string} - Безопасная для атрибута строка.
+ */
+function escapeAttribute(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'http://localhost:3000/api';
     
@@ -9,8 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const productCountEl = document.getElementById('productCount');
     const applyFiltersBtn = document.getElementById('applyFiltersBtn');
     const resetFiltersBtn = document.getElementById('resetFiltersBtn');
-    
-    // Находим главный контейнер макета
     const productsLayout = document.querySelector('.products-layout');
 
     let rawProductList = [];
@@ -31,15 +60,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
+        // ИСПРАВЛЕНО: Экранируем все данные от сервера перед вставкой в HTML
         productsGrid.innerHTML = products.map(p => {
-            const imageSrc = p.ImageURL ? `/${p.ImageURL.replace(/\\/g, '/')}` : '/images/placeholder.png';
+            const imagePath = p.ImageURL ? p.ImageURL.replace(/\\/g, '/') : 'images/placeholder.png';
+            const safeImageSrc = escapeAttribute(`/${imagePath}`);
+            const safeProductNameAttr = escapeAttribute(p.ProductName);
+            const safeProductNameHTML = escapeHTML(p.ProductName);
+            const safeProductId = escapeAttribute(p.ProductID);
+
             return `
-            <div class="unified-product-card" data-product-id="${p.ProductID}">
+            <div class="unified-product-card" data-product-id="${safeProductId}">
                 <div class="product-img">
-                    <a href="#"><img src="${imageSrc}" alt="${p.ProductName}" onerror="this.onerror=null;this.src='/images/placeholder.png';"></a>
+                    <a href="#"><img src="${safeImageSrc}" alt="${safeProductNameAttr}" onerror="this.onerror=null;this.src='/images/placeholder.png';"></a>
                 </div>
                 <div class="product-list">
-                    <h3><a href="#">${p.ProductName}</a></h3>
+                    <h3><a href="#">${safeProductNameHTML}</a></h3>
                     <div class="price-container">
                         ${p.DiscountPrice ? `<span class="old-price">₽ ${p.Price.toFixed(2)}</span>` : ''}
                         <span class="price">₽ ${(p.DiscountPrice || p.Price).toFixed(2)}</span>
@@ -50,8 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="add-to-links">
                             <div class="favorite-toggle">
-                                <input type="checkbox" id="fav-catalog-${p.ProductID}" class="favorite-checkbox" data-product-id="${p.ProductID}">
-                                <label for="fav-catalog-${p.ProductID}" class="wishlist-label" title="В избранное">♥</label>
+                                <input type="checkbox" id="fav-catalog-${safeProductId}" class="favorite-checkbox" data-product-id="${safeProductId}">
+                                <label for="fav-catalog-${safeProductId}" class="wishlist-label" title="В избранное">♥</label>
                             </div>
                             <a href="#" class="compare" title="Сравнить">⇄</a>
                         </div>
@@ -70,9 +105,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderFilters(products) {
         if (!brandsFilterContainer) return;
         const brands = [...new Set(products.map(p => p.Brand).filter(b => b))];
-        brandsFilterContainer.innerHTML = brands.map(brand => `
-            <label>${brand} <input type="checkbox" value="${brand}"><span class="checkmark"></span></label>
-        `).join('');
+        
+        // ИСПРАВЛЕНО: Экранируем данные бренда перед вставкой
+        brandsFilterContainer.innerHTML = brands.map(brand => {
+            const safeBrandHTML = escapeHTML(brand);
+            const safeBrandAttr = escapeAttribute(brand);
+            return `
+            <label>${safeBrandHTML} <input type="checkbox" value="${safeBrandAttr}"><span class="checkmark"></span></label>
+            `;
+        }).join('');
     }
 
     // --- Универсальная функция фильтрации и сортировки ---
@@ -117,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- РЕЖИМ ПОИСКА ---
     async function runSearchMode(query) {
+        // Использование .textContent здесь безопасно, но для единообразия можно экранировать
         if (pageTitle) pageTitle.textContent = `Результаты поиска: "${query}"`;
         
         if (productsLayout) productsLayout.classList.add('search-mode');
@@ -127,11 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Ошибка поиска');
             rawProductList = await response.json();
             
-            // В режиме поиска сортировка применяется сразу после получения данных
             applyFiltersAndSort();
         } catch (error) {
             console.error("Ошибка при поиске:", error);
-            if (productsGrid) productsGrid.innerHTML = "<p>Не удалось выполнить поиск.</p>";
+            if (productsGrid) productsGrid.innerHTML = `<p>${escapeHTML('Не удалось выполнить поиск: ' + error.message)}</p>`;
         }
     }
 
@@ -165,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
             applyFiltersAndSort();
         } catch (error) {
             console.error("Ошибка загрузки товаров:", error);
-            if (productsGrid) productsGrid.innerHTML = "<p>Не удалось загрузить товары.</p>";
+            if (productsGrid) productsGrid.innerHTML = `<p>${escapeHTML('Не удалось загрузить товары: ' + error.message)}</p>`;
         }
     }
     

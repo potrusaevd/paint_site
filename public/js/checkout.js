@@ -1,3 +1,16 @@
+/**
+ * Функция для экранирования HTML-тегов в строке для безопасного отображения.
+ * Предотвращает XSS-атаки, преобразуя символы вроде < > в их HTML-сущности.
+ * @param {string | number} str - Входная строка или число.
+ * @returns {string} - Безопасная для отображения строка.
+ */
+function escapeHTML(str) {
+    const str_val = String(str || '');
+    const p = document.createElement('p');
+    p.textContent = str_val;
+    return p.innerHTML;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Проверяем авторизацию
     if (!localStorage.getItem('accessToken')) {
@@ -29,12 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const cartItems = await cartResponse.json();
 
             if (cartItems.length === 0) {
-                // Используем кастомный алерт
                 if (typeof window.showCustomAlert === 'function') {
                     window.showCustomAlert('Ваша корзина пуста. Перенаправляем в каталог.', 'warning');
-                    setTimeout(() => {
-                        window.location.href = '/catalog';
-                    }, 2000);
+                    setTimeout(() => { window.location.href = '/catalog'; }, 2000);
                 } else {
                     alert('Ваша корзина пуста. Перенаправляем в каталог.');
                     window.location.href = '/catalog';
@@ -48,9 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
-            summaryItemsContainer.innerHTML = `<p>Ошибка загрузки данных.</p>`;
+            // Используем .textContent для безопасного вывода
+            summaryItemsContainer.textContent = 'Ошибка загрузки данных.';
             
-            // Используем кастомный алерт для ошибок
             if (typeof window.showCustomAlert === 'function') {
                 window.showCustomAlert('Ошибка загрузки данных для оформления заказа', 'error');
             } else {
@@ -62,27 +72,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Функция для заполнения полей формы ---
     function populateForm(user, addresses) {
         if (user) {
+            // Использование .value для input безопасно
             customerNameInput.value = user.Username || '';
             customerEmailInput.value = user.Email || '';
         }
 
         if (addresses && addresses.length > 0) {
-            savedAddressesContainer.innerHTML = addresses.map((addr, index) => `
+            // ИСПРАВЛЕНО: Экранируем все динамические данные перед вставкой в HTML
+            savedAddressesContainer.innerHTML = addresses.map((addr) => {
+                const safeAddressType = escapeHTML(addr.AddressType);
+                const safeCity = escapeHTML(addr.City);
+                const safeStreet = escapeHTML(addr.Street);
+                const safeHouse = escapeHTML(addr.House);
+                const safeApartment = addr.Apartment ? `, ${escapeHTML(addr.Apartment)}` : '';
+                
+                return `
                 <label class="saved-address-label ${addr.IsDefault ? 'selected' : ''}">
                     <input type="radio" name="saved_address" value="${addr.AddressID}" ${addr.IsDefault ? 'checked' : ''}>
-                    <span class="address-type">${addr.AddressType}</span>
-                    <span class="address-details">${addr.City}, ${addr.Street}, ${addr.House}${addr.Apartment ? ', ' + addr.Apartment : ''}</span>
+                    <span class="address-type">${safeAddressType}</span>
+                    <span class="address-details">${safeCity}, ${safeStreet}, ${safeHouse}${safeApartment}</span>
                 </label>
-            `).join('');
+            `;
+            }).join('');
 
-            // Сразу заполняем поля адреса по умолчанию
             const defaultAddress = addresses.find(addr => addr.IsDefault) || addresses[0];
             if (defaultAddress) {
+                // Использование .value безопасно
                 addressCityInput.value = defaultAddress.City;
                 addressStreetInput.value = `${defaultAddress.Street}, ${defaultAddress.House}${defaultAddress.Apartment ? ', ' + defaultAddress.Apartment : ''}`;
             }
 
-            // Добавляем обработчик для выбора другого адреса
             savedAddressesContainer.addEventListener('change', (e) => {
                 if (e.target.name === 'saved_address') {
                     const selectedId = parseInt(e.target.value, 10);
@@ -106,15 +125,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Функция отрисовки состава заказа ---
     function renderSummary(items) {
         let total = 0;
+        // ИСПРАВЛЕНО: Экранируем название товара перед вставкой
         summaryItemsContainer.innerHTML = items.map(item => {
             const price = item.DiscountPrice || item.Price;
             total += price * item.Quantity;
             const imageSrc = item.ImageURL ? `/${item.ImageURL.replace(/\\/g, '/')}` : '/images/placeholder.png';
+            const safeProductName = escapeHTML(item.ProductName); // Экранируем!
+
             return `
             <div class="summary-item">
-                <img src="${imageSrc}" alt="${item.ProductName}" class="summary-item-img">
+                <img src="${imageSrc}" alt="${safeProductName}" class="summary-item-img">
                 <div class="summary-item-info">
-                    <h4>${item.ProductName}</h4>
+                    <h4>${safeProductName}</h4>
                     <p>Кол-во: ${item.Quantity}</p>
                 </div>
                 <span class="summary-item-price">${(price * item.Quantity).toFixed(2)} ₽</span>
@@ -128,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     checkoutForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Используем кастомное подтверждение
         let confirmed = true;
         if (typeof window.showCustomConfirm === 'function') {
             confirmed = await window.showCustomConfirm('Вы уверены, что хотите оформить заказ?', 'Подтверждение заказа');
@@ -149,24 +170,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);
+            
+            // ИСПРАВЛЕНО: Экранируем номер заказа, полученный от сервера
+            const safeOrderId = escapeHTML(result.orderId);
 
-            // Используем кастомный алерт для успеха
             if (typeof window.showCustomAlert === 'function') {
-                window.showCustomAlert(`Спасибо! Ваш заказ №${result.orderId} успешно оформлен.`, 'success');
-                setTimeout(() => {
-                    window.location.href = '/profile#orders';
-                }, 2500);
+                window.showCustomAlert(`Спасибо! Ваш заказ №${safeOrderId} успешно оформлен.`, 'success');
+                setTimeout(() => { window.location.href = '/profile#orders'; }, 2500);
             } else {
-                alert(`Спасибо! Ваш заказ №${result.orderId} успешно оформлен.`);
+                alert(`Спасибо! Ваш заказ №${safeOrderId} успешно оформлен.`);
                 window.location.href = '/profile#orders';
             }
 
         } catch (error) {
-            // Используем кастомный алерт для ошибок
+            // ИСПРАВЛЕНО: Экранируем сообщение об ошибке
+            const safeErrorMessage = escapeHTML(error.message);
+
             if (typeof window.showCustomAlert === 'function') {
-                window.showCustomAlert(`Ошибка оформления заказа: ${error.message}`, 'error');
+                window.showCustomAlert(`Ошибка оформления заказа: ${safeErrorMessage}`, 'error');
             } else {
-                alert(`Ошибка оформления заказа: ${error.message}`);
+                alert(`Ошибка оформления заказа: ${safeErrorMessage}`);
             }
             
             placeOrderBtn.disabled = false;
@@ -174,6 +197,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Запускаем загрузку всех данных при открытии страницы
     loadCheckoutData();
 });

@@ -1,3 +1,34 @@
+// ==========================================================
+// --- ФУНКЦИИ ЭКРАНИРОВАНИЯ ДЛЯ БЕЗОПАСНОСТИ ---
+// ==========================================================
+
+/**
+ * Функция для экранирования HTML-тегов в строке для безопасного отображения в текстовом контексте.
+ * @param {string | number} str - Входная строка или число.
+ * @returns {string} - Безопасная для отображения строка.
+ */
+function escapeHTML(str) {
+    const str_val = String(str || '');
+    const p = document.createElement('p');
+    p.textContent = str_val;
+    return p.innerHTML;
+}
+
+/**
+ * Функция для экранирования строки для безопасного использования в значениях HTML-атрибутов.
+ * @param {string | number} str - Входная строка или число.
+ * @returns {string} - Безопасная для атрибута строка.
+ */
+function escapeAttribute(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+
 // profile.js - ПОЛНАЯ ВЕРСИЯ С JWT И ВСЕМИ ФУНКЦИЯМИ
 
 const API_URL = 'http://localhost:3000/api';
@@ -11,18 +42,14 @@ function getCookie(name) {
     return null;
 }
 
-// Новая "умная" функция для запросов к API
 async function fetchWithAuth(url, options = {}) {
     const token = localStorage.getItem('accessToken');
-
-    // Подготавливаем заголовки
     const headers = { ...options.headers };
 
-    // Устанавливаем Content-Type, только если его не определили как undefined (для FormData)
     if (headers['Content-Type'] !== undefined) {
         headers['Content-Type'] = 'application/json';
     } else {
-        delete headers['Content-Type']; // Удаляем, чтобы браузер сам установил для FormData
+        delete headers['Content-Type'];
     }
 
     if (token) {
@@ -30,7 +57,6 @@ async function fetchWithAuth(url, options = {}) {
     }
 
     const newOptions = { ...options, headers };
-
     const response = await fetch(url, newOptions);
 
     if (response.status === 401 || response.status === 403) {
@@ -45,12 +71,10 @@ async function fetchWithAuth(url, options = {}) {
 
 function showLoading(container, isLoading, text) {
     if (isLoading) {
-        container.innerHTML = `<p style="text-align:center; padding: 2rem;">${text}</p>`;
+        container.innerHTML = `<p style="text-align:center; padding: 2rem;">${escapeHTML(text)}</p>`;
     }
 }
 
-
-// 1. Новая функция для загрузки и отрисовки избранного
 
 async function initializeFavoritesFeature() {
     const container = document.querySelector('.favorites-grid');
@@ -58,7 +82,6 @@ async function initializeFavoritesFeature() {
 
     if (!container || !clearButton) return;
 
-    // ----- Функция для отрисовки -----
     const renderFavorites = (favorites) => {
         if (!favorites || favorites.length === 0) {
             container.innerHTML = '<p style="text-align: center; color: #aaa;">В избранном пока пусто. Добавьте товары из каталога, нажав на сердечко ♥.</p>';
@@ -66,13 +89,18 @@ async function initializeFavoritesFeature() {
             return;
         }
         clearButton.style.display = 'inline-block';
+        // ИСПРАВЛЕНО: Экранируем все данные от сервера
         container.innerHTML = favorites.map(fav => {
-            const imageSrc = fav.ImageURL ? `/${fav.ImageURL.replace(/\\/g, '/')}` : '/images/placeholder.png';
+            const imagePath = fav.ImageURL ? fav.ImageURL.replace(/\\/g, '/') : 'images/placeholder.png';
+            const safeImageSrc = escapeAttribute(`/${imagePath}`);
+            const safeProductNameAttr = escapeAttribute(fav.ProductName);
+            const safeProductNameHTML = escapeHTML(fav.ProductName);
+
             return `
             <div class="favorite-item" data-product-id="${fav.ProductID}">
-                <img src="${imageSrc}" alt="${fav.ProductName}">
+                <img src="${safeImageSrc}" alt="${safeProductNameAttr}">
                 <div class="favorite-info">
-                    <h4>${fav.ProductName}</h4>
+                    <h4>${safeProductNameHTML}</h4>
                     <p class="favorite-price">₽ ${(fav.DiscountPrice || fav.Price).toFixed(2)}</p>
                     <div class="favorite-actions">
                         <a href="#" class="btn btn-primary" onclick="addToCart(${fav.ProductID}, event)">В корзину</a>
@@ -84,7 +112,6 @@ async function initializeFavoritesFeature() {
         }).join('');
     };
     
-    // ----- Загрузка данных -----
     const loadFavorites = async () => {
         try {
             showLoading(container, true, 'Загрузка избранного...');
@@ -93,13 +120,11 @@ async function initializeFavoritesFeature() {
             const favorites = await response.json();
             renderFavorites(favorites);
         } catch (error) {
-            container.innerHTML = `<p>${error.message}</p>`;
+            container.innerHTML = `<p>${escapeHTML(error.message)}</p>`;
         }
     };
     
     await loadFavorites();
-
-    // ----- Обработчики событий -----
     
     clearButton.addEventListener('click', async () => {
         const confirmed = await showCustomConfirm('Вы уверены, что хотите удалить все товары из избранного?');
@@ -109,65 +134,42 @@ async function initializeFavoritesFeature() {
             const response = await fetchWithAuth(`${API_URL}/favorites/all`, { method: 'DELETE' });
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);
-            showCustomAlert(result.message, 'success');
+            showCustomAlert(escapeHTML(result.message), 'success');
             renderFavorites([]);
         } catch (error) {
-            showCustomAlert('Ошибка: ' + error.message, 'error');
+            showCustomAlert(escapeHTML('Ошибка: ' + error.message), 'error');
         }
     });
 
     container.addEventListener('click', async (e) => {
         const removeButton = e.target.closest('button.favorite-remove');
         if (!removeButton) return;
-
-        // productId теперь берется напрямую из атрибута кнопки, которая была нажата
         const productId = removeButton.dataset.productId;
-        if (!productId) {
-            console.error("Не удалось найти productId на кнопке 'Удалить'");
-            return;
-        }
+        if (!productId) return;
 
         try {
-            // Создаем объект с данными для отправки
             const requestBody = { productId: productId };
-
             const response = await fetchWithAuth(`${API_URL}/favorites/toggle`, {
                 method: 'POST',
-                headers: {
-                    // Прямо указываем, что отправляем JSON
-                    'Content-Type': 'application/json' 
-                },
-                // Явно передаем строку JSON в тело запроса
                 body: JSON.stringify(requestBody) 
             });
             
             if (!response.ok) {
                 let errorMessage = `Ошибка ${response.status}.`;
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorMessage;
-                } catch (jsonError) {
-                    console.warn("Ответ сервера при ошибке не является JSON.");
-                }
+                try { const errorData = await response.json(); errorMessage = errorData.message || errorMessage; } catch (jsonError) {}
                 throw new Error(errorMessage);
             }
 
-            // Если все успешно, удаляем элемент из DOM
             removeButton.closest('.favorite-item').remove();
             showCustomAlert('Товар удален из избранного.', 'info');
-            
-            if (container.children.length === 0) {
-                renderFavorites([]);
-            }
+            if (container.children.length === 0) renderFavorites([]);
 
         } catch (error) {
-            showCustomAlert('Ошибка удаления: ' + error.message, 'error');
+            showCustomAlert(escapeHTML('Ошибка удаления: ' + error.message), 'error');
         }
     });
 }
 
-
-// --- Секция 2: Инициализация страницы ---
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!localStorage.getItem('accessToken')) {
@@ -188,29 +190,24 @@ function initializeProfilePage() {
     initializeFavoritesFeature();
 }
 
-// --- Секция 3: Функции для разделов профиля ---
-
-// ЗАМЕНИТЕ функцию loadUserProfileData в файле profile.js
 
 function loadUserProfileData() {
+    // Использование .textContent и .value безопасно, но данные для аватара нужно обработать.
     const userName = getCookie('userName') || 'Пользователь';
     const userEmail = getCookie('userEmail') || 'email@example.com';
-    const userAvatarPath = getCookie('userAvatar'); // Получаем путь
+    const userAvatarPath = getCookie('userAvatar');
 
     document.getElementById('usernameDisplay').textContent = userName;
     document.getElementById('profileUserEmail').textContent = userEmail;
     
     const avatarImg = document.getElementById('avatarImg');
     
-    // --- ГЛАВНОЕ ИЗМЕНЕНИЕ ---
-    // Проверяем, что путь к аватару существует и не является "null" или "undefined"
+    // ИСПРАВЛЕНО: Безопасная установка src для аватара
     if (userAvatarPath && userAvatarPath !== 'null' && userAvatarPath !== 'undefined') {
-        // Формируем полный URL, добавляя адрес сервера
-        // API_URL здесь уже должен быть определен в начале файла
         const fullAvatarUrl = `http://localhost:3000/${userAvatarPath.replace(/\\/g, '/')}`;
-        avatarImg.src = fullAvatarUrl;
+        // Экранируем URL перед присвоением, чтобы предотвратить XSS через 'javascript:' протокол.
+        avatarImg.src = escapeAttribute(fullAvatarUrl);
     } else {
-        // Если аватара нет, показываем стандартную картинку
         avatarImg.src = 'images/аватары/default-avatar.png';
     }
 
@@ -224,57 +221,41 @@ function initializeSideNavigation() {
     const navItems = document.querySelectorAll('.profile-nav .nav-item');
     const tabContents = document.querySelectorAll('.profile-content .tab-content');
 
-    // 1. Центральная функция для активации нужной вкладки
     function activateTab(tabId) {
-        // Если ID не предоставлен, по умолчанию выбираем 'personal'
         const targetTabId = tabId || 'personal';
         const defaultTab = document.querySelector('.nav-item[data-tab="personal"]');
-
         let tabFound = false;
+
         navItems.forEach(nav => {
             const isTarget = nav.getAttribute('data-tab') === targetTabId;
             nav.classList.toggle('active', isTarget);
             if (isTarget) tabFound = true;
         });
-
-        // Если вкладка по хешу не найдена, активируем дефолтную
-        if (!tabFound && defaultTab) {
-            defaultTab.classList.add('active');
-        }
+        if (!tabFound && defaultTab) defaultTab.classList.add('active');
 
         tabContents.forEach(content => {
             const isTarget = content.id === targetTabId;
             content.classList.toggle('active', isTarget);
         });
-        
-        // Если вкладка не найдена, показываем контент дефолтной
         if (!tabFound) {
             const defaultContent = document.getElementById('personal');
             if(defaultContent) defaultContent.classList.add('active');
         }
     }
 
-    // 2. Функция, которая читает хеш из URL и вызывает активацию
     function handleHash() {
-        const hash = window.location.hash.substring(1); // Получаем ID без символа '#'
+        const hash = window.location.hash.substring(1);
         activateTab(hash);
     }
 
-    // 3. Обработчики кликов теперь просто меняют хеш
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
-            const targetTabId = item.getAttribute('data-tab');
-            // Устанавливаем хеш, это вызовет событие 'hashchange'
-            window.location.hash = targetTabId;
+            window.location.hash = item.getAttribute('data-tab');
         });
     });
 
-    // 4. Слушаем событие изменения хеша
     window.addEventListener('hashchange', handleHash);
-
-    // 5. ВЫЗЫВАЕМ ФУНКЦИЮ ПРИ ПЕРВОЙ ЗАГРУЗКЕ СТРАНИЦЫ
-    // --- ЭТО КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ---
     handleHash();
 }
 
@@ -287,10 +268,7 @@ function initializeEditMode() {
     
     const toggleEditMode = (isEditing) => {
         inputs.forEach(input => {
-            if (input.id !== 'email') {
-                input.readOnly = !isEditing;
-                input.disabled = !isEditing;
-            }
+            if (input.id !== 'email') input.readOnly = !isEditing;
         });
         editBtn.style.display = isEditing ? 'none' : 'block';
         formActions.style.display = isEditing ? 'flex' : 'none';
@@ -318,7 +296,7 @@ function initializeEditMode() {
             loadUserProfileData();
             setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
-            showCustomAlert(`Ошибка: ${error.message}`, 'error');
+            showCustomAlert(escapeHTML(`Ошибка: ${error.message}`), 'error');
         }
     });
 }
@@ -339,17 +317,16 @@ async function initializeAvatarUpload() {
             const response = await fetchWithAuth(`${API_URL}/avatar/upload`, {
                 method: 'POST',
                 body: formData,
-                headers: { 'Content-Type': undefined } // Для FormData Content-Type не указывается
+                headers: { 'Content-Type': undefined }
             });
             const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || 'Не удалось загрузить файл.');
-            }
+            if (!response.ok) throw new Error(data.message || 'Не удалось загрузить файл.');
+            
             document.cookie = `userAvatar=${encodeURIComponent(data.filePath)}; path=/; max-age=86400`;
             showCustomAlert('Аватар успешно обновлен!', 'success');
             setTimeout(() => window.location.reload(), 1500);
         } catch (error) {
-            showCustomAlert(`Ошибка: ${error.message}`, 'error');
+            showCustomAlert(escapeHTML(`Ошибка: ${error.message}`), 'error');
         }
     });
 }
@@ -364,10 +341,8 @@ async function initializeOrdersFeature() {
         ALL_ORDERS = await response.json();
         renderOrders(ALL_ORDERS);
     } catch (error) {
-        console.error(error.message);
         if (error.message.includes('Сессия истекла')) return;
-        showLoading(container, false, '');
-        container.innerHTML = '<p>Не удалось загрузить заказы.</p>';
+        container.innerHTML = `<p>${escapeHTML('Не удалось загрузить заказы: ' + error.message)}</p>`;
     }
     const filter = document.getElementById('orderStatusFilter');
     filter.addEventListener('change', () => {
@@ -384,29 +359,31 @@ function renderOrders(ordersToRender) {
         container.innerHTML = `<p style="text-align: center; color: #aaa;">У вас пока нет заказов.</p>`;
         return;
     }
+    // ИСПРАВЛЕНО: Экранируем все данные от сервера
     container.innerHTML = ordersToRender.map(order => {
         const itemsArray = (typeof order.items === 'string') ? JSON.parse(order.items || '[]') : (order.items || []);
-        const statusInfo = {
-            delivered: { text: 'Доставлен', class: 'status-delivered' },
-            processing: { text: 'В обработке', class: 'status-processing' },
-            shipped: { text: 'Отправлен', class: 'status-shipped' },
-            cancelled: { text: 'Отменен', class: 'status-cancelled' }
-        };
+        const statusInfo = { delivered: { text: 'Доставлен', class: 'status-delivered' }, processing: { text: 'В обработке', class: 'status-processing' }, shipped: { text: 'Отправлен', class: 'status-shipped' }, cancelled: { text: 'Отменен', class: 'status-cancelled' } };
         const currentStatus = statusInfo[order.status] || { text: 'Неизвестно', class: '' };
+        
         return `
             <div class="order-card">
                 <div class="order-header">
-                    <div class="order-number">Заказ №${order.id}</div>
+                    <div class="order-number">Заказ №${escapeHTML(order.id)}</div>
                     <div class="order-date">${new Date(order.date).toLocaleDateString('ru-RU')}</div>
                     <div class="order-status ${currentStatus.class}">${currentStatus.text}</div>
                 </div>
                 <div class="order-items">
-                    ${itemsArray.map(item => `
+                    ${itemsArray.map(item => {
+                        const safeImgSrc = escapeAttribute(item.img ? item.img.replace(/\\/g, '/') : 'images/placeholder.png');
+                        const safeItemNameAttr = escapeAttribute(item.name);
+                        const safeItemNameHTML = escapeHTML(item.name);
+                        return `
                         <div class="order-item">
-                            <img src="${item.img ? item.img.replace(/\\/g, '/') : 'images/placeholder.png'}" alt="${item.name}" onerror="this.onerror=null;this.src='images/placeholder.png';">
-                            <div class="item-info"><h4>${item.name}</h4><p>Количество: ${item.quantity}</p></div>
+                            <img src="${safeImgSrc}" alt="${safeItemNameAttr}" onerror="this.onerror=null;this.src='images/placeholder.png';">
+                            <div class="item-info"><h4>${safeItemNameHTML}</h4><p>Количество: ${item.quantity}</p></div>
                             <div class="item-price">${(item.price * item.quantity).toFixed(2)} ₽</div>
-                        </div>`).join('')}
+                        </div>`;
+                    }).join('')}
                 </div>
                 <div class="order-total">
                     <span>Итого: ${parseFloat(order.total).toFixed(2)} ₽</span>
@@ -431,7 +408,7 @@ async function handleOrderActions(e) {
                 const response = await fetchWithAuth(`${API_URL}/orders/${orderId}/repeat`, { method: 'POST' });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message);
-                showCustomAlert(`Заказ успешно повторен! Новый номер: ${result.newOrderId}`, 'success');
+                showCustomAlert(`Заказ успешно повторен! Новый номер: ${escapeHTML(result.newOrderId)}`, 'success');
                 initializeOrdersFeature();
             }
         } else if (target.classList.contains('btn-cancel-order')) {
@@ -452,7 +429,7 @@ async function handleOrderActions(e) {
             }
         }
     } catch (error) {
-        showCustomAlert(error.message, 'error');
+        showCustomAlert(escapeHTML(error.message), 'error');
     }
 }
 
@@ -485,9 +462,7 @@ function initializeAddressesFeature() {
 
     addAddressBtn.addEventListener('click', () => openModal());
     closeBtn.addEventListener('click', () => modalOverlay.style.display = 'none');
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) modalOverlay.style.display = 'none';
-    });
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) modalOverlay.style.display = 'none'; });
     addressForm.addEventListener('submit', handleAddressFormSubmit);
     addressesContainer.addEventListener('click', async (e) => {
         const button = e.target.closest('button.btn');
@@ -504,10 +479,10 @@ function initializeAddressesFeature() {
                     const response = await fetchWithAuth(`${API_URL}/addresses/${addressId}`, { method: 'DELETE' });
                     const result = await response.json();
                     if (!response.ok) throw new Error(result.message);
-                    showCustomAlert(result.message, 'success');
+                    showCustomAlert(escapeHTML(result.message), 'success');
                     loadAddresses();
                 } catch (error) {
-                    showCustomAlert(error.message, 'error');
+                    showCustomAlert(escapeHTML(error.message), 'error');
                 }
             }
         }
@@ -524,10 +499,8 @@ async function loadAddresses() {
         ALL_ADDRESSES = await response.json();
         renderAddresses(ALL_ADDRESSES);
     } catch (error) {
-        console.error(error.message);
         if (error.message.includes('Сессия истекла')) return;
-        showLoading(container, false, '');
-        container.innerHTML = '<p>Не удалось загрузить адреса.</p>';
+        container.innerHTML = `<p>${escapeHTML('Не удалось загрузить адреса: ' + error.message)}</p>`;
     }
 }
 
@@ -537,34 +510,36 @@ function renderAddresses(addresses) {
         container.innerHTML = '<p>У вас пока нет сохраненных адресов.</p>';
         return;
     }
-    container.innerHTML = addresses.map(addr => `
+    // ИСПРАВЛЕНО: Экранируем все поля адреса
+    container.innerHTML = addresses.map(addr => {
+        const safeAddressType = escapeHTML(addr.AddressType);
+        const safeCity = escapeHTML(addr.City);
+        const safeStreet = escapeHTML(addr.Street);
+        const safeHouse = escapeHTML(addr.House);
+        const safeApartment = addr.Apartment ? `, кв. ${escapeHTML(addr.Apartment)}` : '';
+        const safePostalCode = escapeHTML(addr.PostalCode || 'не указан');
+
+        return `
         <div class="address-card">
             <div class="address-header">
-                <h4>${addr.AddressType}</h4>
+                <h4>${safeAddressType}</h4>
                 ${addr.IsDefault ? '<span class="address-default">Основной</span>' : ''}
             </div>
-            <p>${addr.City}, ${addr.Street}, д. ${addr.House}${addr.Apartment ? `, кв. ${addr.Apartment}` : ''}</p>
-            <p>Индекс: ${addr.PostalCode || 'не указан'}</p>
+            <p>${safeCity}, ${safeStreet}, д. ${safeHouse}${safeApartment}</p>
+            <p>Индекс: ${safePostalCode}</p>
             <div class="address-actions">
                 <button class="btn btn-outline btn-edit-address" data-address-id="${addr.AddressID}">Редактировать</button>
                 ${!addr.IsDefault ? `<button class="btn btn-danger btn-delete-address" data-address-id="${addr.AddressID}">Удалить</button>` : ''}
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 async function handleAddressFormSubmit(e) {
     e.preventDefault();
     const form = e.target;
     const editingId = form.dataset.editingId;
-    const addressData = {
-        AddressType: document.getElementById('addressType').value,
-        City: document.getElementById('city').value,
-        Street: document.getElementById('street').value,
-        House: document.getElementById('house').value,
-        Apartment: document.getElementById('apartment').value,
-        PostalCode: document.getElementById('postalCode').value
-    };
+    const addressData = { AddressType: document.getElementById('addressType').value, City: document.getElementById('city').value, Street: document.getElementById('street').value, House: document.getElementById('house').value, Apartment: document.getElementById('apartment').value, PostalCode: document.getElementById('postalCode').value };
     if (!addressData.AddressType || !addressData.City || !addressData.Street || !addressData.House) {
         showCustomAlert('Пожалуйста, заполните все обязательные поля.', 'error');
         return;
@@ -575,11 +550,11 @@ async function handleAddressFormSubmit(e) {
         const response = await fetchWithAuth(url, { method, body: JSON.stringify(addressData) });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
-        showCustomAlert(result.message || 'Адрес успешно сохранен!', 'success');
+        showCustomAlert(escapeHTML(result.message || 'Адрес успешно сохранен!'), 'success');
         document.getElementById('addressModalOverlay').style.display = 'none';
         loadAddresses();
     } catch (error) {
-        showCustomAlert(`Ошибка: ${error.message}`, 'error');
+        showCustomAlert(escapeHTML(`Ошибка: ${error.message}`), 'error');
     }
 }
 
@@ -590,12 +565,9 @@ async function initializeSecurityFeature() {
         const currentPassword = document.getElementById('currentPassword').value;
         const newPassword = document.getElementById('newPassword').value;
         const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-        if (newPassword.length < 6) {
-            return showCustomAlert('Новый пароль должен быть не менее 6 символов.', 'error');
-        }
-        if (newPassword !== confirmNewPassword) {
-            return showCustomAlert('Новые пароли не совпадают.', 'error');
-        }
+        if (newPassword.length < 6) return showCustomAlert('Новый пароль должен быть не менее 6 символов.', 'error');
+        if (newPassword !== confirmNewPassword) return showCustomAlert('Новые пароли не совпадают.', 'error');
+        
         try {
             const response = await fetchWithAuth(`${API_URL}/user/change-password`, {
                 method: 'POST',
@@ -603,15 +575,10 @@ async function initializeSecurityFeature() {
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);
-            showCustomAlert(result.message, 'success');
+            showCustomAlert(escapeHTML(result.message), 'success');
             e.target.reset();
         } catch (error) {
-            showCustomAlert(`Ошибка: ${error.message}`, 'error');
+            showCustomAlert(escapeHTML(`Ошибка: ${error.message}`), 'error');
         }
     });
 }
-
-
-
-
-
