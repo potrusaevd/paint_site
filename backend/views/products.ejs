@@ -18,19 +18,15 @@
                 <div class="filter-content">
                     <label class="checkbox-label">
                         <label class="checkbox">
-                            <input type="checkbox" name="availability" value="free" />
-                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
-                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
-                            </svg>
+                            <input type="checkbox" name="availability" value="free" /> <!-- name="availability" value="free" -->
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)"><path class="tick" d="M4.5 10L10.5 16L24.5 1" /></svg>
                         </label>
                         <span>Свободные остатки</span>
                     </label>
                     <label class="checkbox-label">
                         <label class="checkbox">
-                            <input type="checkbox" name="availability" value="free" />
-                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
-                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
-                            </svg>
+                            <input type="checkbox" name="availability" value="reserved" /> <!-- name="availability" value="reserved" -->
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)"><path class="tick" d="M4.5 10L10.5 16L24.5 1" /></svg>
                         </label>
                         <span>Мои зарезервированные остатки</span>
                     </label>
@@ -47,25 +43,21 @@
                 <div class="filter-content">
                     <label class="checkbox-label">
                         <label class="checkbox">
-                            <input type="checkbox" name="availability" value="free" />
-                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
-                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
-                            </svg>
+                            <input type="checkbox" name="coating" value="Эмаль полиэфирная" />
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)"><path class="tick" d="M4.5 10L10.5 16L24.5 1" /></svg>
                         </label>
                         <span>Эмаль полиэфирная</span>
                     </label>
                     <label class="checkbox-label">
                         <label class="checkbox">
-                            <input type="checkbox" name="availability" value="free" />
-                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
-                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
-                            </svg>
+                            <input type="checkbox" name="coating" value="полиуретановая" /> 
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)"><path class="tick" d="M4.5 10L10.5 16L24.5 1" /></svg>
                         </label>
                         <span>Эмаль полиуретановая текстурированная</span>
                     </label>
                     <label class="checkbox-label">
                         <label class="checkbox">
-                            <input type="checkbox" name="availability" value="free" />
+                            <input type="checkbox" name="coating" value="Лицевая полиэфирная эмаль" />
                             <svg viewBox="0 0 24 24" filter="url(#goo-light)">
                                 <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
                             </svg>
@@ -74,7 +66,7 @@
                     </label>
                     <label class="checkbox-label">
                         <label class="checkbox">
-                            <input type="checkbox" name="availability" value="free" />
+                            <input type="checkbox" name="coating" value="Грунтовка" />
                             <svg viewBox="0 0 24 24" filter="url(#goo-light)">
                                 <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
                             </svg>
@@ -113,27 +105,27 @@
                     <div class="range-filter">
                         <label>Условная вязкость</label>
                         <div class="range-inputs">
-                            <input type="number" placeholder="От" min="0" max="200" value="80">
+                            <input type="number" placeholder="От" id="viscosityMin" min="0" max="200" >
                             <span>—</span>
-                            <input type="number" placeholder="До" min="0" max="200" value="95">
+                            <input type="number" placeholder="До" id="viscosityMax" min="0" max="200" >
                         </div>
                     </div>
 
                     <div class="range-filter">
                         <label>Блеск при 60°</label>
                         <div class="range-inputs">
-                            <input type="number" placeholder="От" min="0" max="100">
+                            <input type="number" placeholder="От" id="glossMin" min="0" max="100">
                             <span>—</span>
-                            <input type="number" placeholder="До" min="0" max="100">
+                            <input type="number" placeholder="До" id="glossMax" min="0" max="100">
                         </div>
                     </div>
 
                     <div class="range-filter">
                         <label>ΔE (отклонение цвета)</label>
                         <div class="range-inputs">
-                            <input type="number" placeholder="От" min="0" max="5" step="0.1">
+                            <input type="number" placeholder="От" id="deltaEMin" min="0" max="5" step="0.1">
                             <span>—</span>
-                            <input type="number" placeholder="До" min="0" max="5" step="0.1">
+                            <input type="number" placeholder="До" id="deltaEMax" min="0" max="5" step="0.1">
                         </div>
                     </div>
                 </div>
@@ -148,9 +140,9 @@
                 </div>
                 <div class="filter-content">
                     <div class="range-inputs">
-                        <input type="number" placeholder="От" min="0">
+                        <input type="number" placeholder="От" id="stockMin" min="0">
                         <span>—</span>
-                        <input type="number" placeholder="До" min="0">
+                        <input type="number" placeholder="До" id="stockMax" min="0">
                     </div>
                 </div>
             </div>
