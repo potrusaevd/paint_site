@@ -1,24 +1,24 @@
 /* ===================================
-   СТИЛИ ДЛЯ МОДАЛЬНОГО ОКНА КОРЗИНЫ (НОВЫЙ ДИЗАЙН)
+   СТИЛИ ДЛЯ МОДАЛЬНОГО ОКНА КОРЗИНЫ
+   (Адаптировано под ROOT.CSS)
    =================================== */
 
-/* Фон-оверлей с размытием */
+/* Фон-оверлей */
 .cart-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(15, 23, 42, 0.5); /* Полупрозрачный фон из новой темы */
-    backdrop-filter: blur(10px); /* Эффект размытия */
+    background-color: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(10px);
     z-index: 1100;
     display: flex;
     justify-content: flex-end;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
+    transition: opacity var(--transition-speed), visibility var(--transition-speed);
 }
-
 .cart-modal-overlay.show {
     opacity: 1;
     visibility: visible;
@@ -27,16 +27,15 @@
 /* Сама модалка */
 .cart-modal {
     width: 100%;
-    max-width: 480px; /* Немного шире для лучшей читаемости */
+    max-width: 480px;
     height: 100%;
-    background-color: var(--color-secondary); /* Цвет из новой темы */
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--bg-surface);
+    border-left: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     transform: translateX(100%);
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 .cart-modal-overlay.show .cart-modal {
     transform: translateX(0);
 }
@@ -47,47 +46,42 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;
 }
-
 .cart-modal-header h3 {
-    color: var(--color-text);
+    font-family: var(--font-heading);
+    color: var(--text-primary);
     font-weight: 600;
     margin: 0;
     font-size: 1.2rem;
 }
-
 .cart-modal-close {
     background: none;
     border: none;
-    color: var(--color-text-muted);
+    color: var(--text-secondary);
     font-size: 2rem;
     cursor: pointer;
-    transition: color 0.3s, transform 0.3s;
+    transition: color var(--transition-speed), transform var(--transition-speed);
 }
-
 .cart-modal-close:hover {
-    color: var(--color-text);
+    color: var(--text-primary);
     transform: rotate(90deg);
 }
 
-/* Тело модалки со списком товаров */
+/* Тело модалки */
 .cart-modal-body {
     flex-grow: 1;
     overflow-y: auto;
     padding: 1rem 2rem;
 }
-
-/* Кастомный скроллбар */
 .cart-modal-body::-webkit-scrollbar { width: 6px; }
 .cart-modal-body::-webkit-scrollbar-track { background: transparent; }
-.cart-modal-body::-webkit-scrollbar-thumb { background-color: var(--color-accent); border-radius: 3px; }
+.cart-modal-body::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 3px; }
 
-/* Сообщение о пустой корзине */
 .cart-empty-message {
     text-align: center;
-    color: var(--color-text-muted);
+    color: var(--text-secondary);
     height: 100%;
     display: flex;
     align-items: center;
@@ -95,147 +89,62 @@
     font-size: 1rem;
 }
 
-/* Новый дизайн элемента товара в корзине */
+/* Элемент товара в корзине */
 .cart-item {
     display: grid;
     grid-template-columns: 60px 1fr 30px;
     gap: 1rem;
     padding: 1.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
 }
-
 .cart-item-img-wrapper {
     width: 60px;
     height: 60px;
-    background-color: var(--color-primary);
-    border-radius: 8px;
+    background-color: var(--bg-main);
+    border-radius: var(--border-radius-sm);
     overflow: hidden;
 }
-.cart-item-img-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+.cart-item-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+.cart-item-info .product-name { font-weight: 600; margin-bottom: 0.5rem; }
+.cart-item-info .product-details { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+.cart-item-info .product-details span { margin-right: 1rem; }
+.cart-item-info .price { color: var(--text-primary); font-weight: 600; }
 
-.cart-item-info .product-name {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.cart-item-info .product-details {
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-    margin-bottom: 0.75rem;
-}
-.cart-item-info .product-details span {
-    margin-right: 1rem;
-}
-
-.cart-item-info .price {
-    color: var(--color-text);
-    font-weight: 600;
-}
-
-.quantity-control {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-}
-
+.quantity-control { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
 .quantity-btn {
     width: 28px;
     height: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-color);
     background: transparent;
-    color: var(--color-text);
+    color: var(--text-primary);
     cursor: pointer;
     border-radius: 50%;
     transition: background-color 0.2s, border-color 0.2s;
 }
-.quantity-btn:hover {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-}
-
-.quantity-input {
-    width: 40px;
-    text-align: center;
-    background: transparent;
-    border: none;
-    color: var(--color-text);
-    font-size: 1rem;
-    font-weight: 500;
-}
-.quantity-input:focus {
-    outline: none;
-}
-/* Убираем стрелки у number input */
-.quantity-input::-webkit-outer-spin-button,
-.quantity-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.quantity-btn:hover { background-color: var(--primary); border-color: var(--primary); }
+.quantity-input { width: 40px; text-align: center; background: transparent; border: none; color: var(--text-primary); font-size: 1rem; font-weight: 500; }
+.quantity-input:focus { outline: none; }
+.quantity-input::-webkit-outer-spin-button, .quantity-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .quantity-input[type=number] { -moz-appearance: textfield; }
 
-.cart-item-remove {
-    background: none;
-    border: none;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    font-size: 1.5rem;
-    transition: color 0.3s;
-    align-self: center;
-}
-.cart-item-remove:hover {
-    color: #e74c3c; /* Красный для удаления */
-}
-
+.cart-item-remove { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.5rem; transition: color var(--transition-speed); align-self: center; }
+.cart-item-remove:hover { color: var(--error); }
 
 /* Подвал модалки */
 .cart-modal-footer {
     padding: 1.5rem 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background-color: var(--color-primary);
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-main);
     flex-shrink: 0;
 }
 
-.cart-total {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
-    color: var(--color-text-muted);
-}
-#cartTotalSum {
-    font-weight: 700;
-    font-size: 1.3rem;
-    color: var(--color-text);
-}
+.cart-total { display: flex; justify-content: space-between; font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--text-secondary); }
+#cartTotalSum { font-weight: 700; font-size: 1.3rem; color: var(--text-primary); }
 
-.cart-modal-footer .btn-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
+.cart-modal-footer .btn-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.cart-modal-footer .btn { padding: 1rem; border-radius: var(--border-radius-sm); border: none; cursor: pointer; font-weight: 600; transition: all var(--transition-speed); }
 
-/* Обновленный вид кнопок */
-.cart-modal-footer .btn {
-    padding: 1rem;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-.btn-primary.btn-checkout {
-    background-color: var(--color-accent);
-    color: white;
-}
-.btn-primary.btn-checkout:hover {
-    background-color: #4f46e5;
-}
-.btn-secondary {
-    background-color: var(--color-secondary);
-    color: var(--color-text);
-}
-.btn-secondary:hover {
-    background-color: #334155;
-}
+.btn-primary.btn-checkout { background-color: var(--primary); color: var(--text-inverted); }
+.btn-primary.btn-checkout:hover { background-color: var(--secondary); }
+.btn-secondary { background-color: var(--bg-surface); color: var(--text-primary); }
+.btn-secondary:hover { background-color: var(--bg-surface); opacity: 0.8; }
