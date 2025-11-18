@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Center menu navigation
     if (catalogBtn) {
         catalogBtn.addEventListener('click', () => {
-            window.location.href = '/catalog'; 
+            window.location.href = '/products'; 
         });
     }
 
