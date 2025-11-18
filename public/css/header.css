@@ -12,8 +12,180 @@
     padding: 12px 20px;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 1099;
+    z-index: 999;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);/* ===================================
+   ЦЕНТРАЛЬНОЕ МЕНЮ
+   =================================== */
+
+.center-menu {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.7); /* Оставляем полупрозрачность */
+    backdrop-filter: blur(20px);
+    padding: 12px 20px;
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
+    z-index: 999;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 1;
+}
+
+.center-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all var(--transition-speed);
+    white-space: nowrap;
+}
+
+.center-menu-btn:hover {
+    background: rgba(102, 126, 234, 0.2); /* Оставим кастомный hover, т.к. он с прозрачностью */
+    color: var(--primary);
+}
+
+.center-menu-btn svg {
+    flex-shrink: 0;
+}
+
+.search-btn {
+    padding: 8px;
+}
+.search-btn span {
+    display: none;
+}
+
+/* ===================================
+   БЛОК КОРЗИНЫ
+   =================================== */
+
+.cart {
+    position: fixed;
+    top: 24px;
+    right: 5%; /* Используем проценты для лучшей адаптивности */
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(20px);
+    padding: 12px;
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
+    z-index: 9999;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cart-menu-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+.cart-menu-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    color: var(--primary);
+}
+.cart-menu-btn svg {
+    flex-shrink: 0;
+}
+
+.cart-counter {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background-color: var(--error); /* Используем системный цвет ошибки для акцента */
+    color: var(--text-inverted);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-main); 
+}
+
+/* ===================================
+   РЕЖИМ ПОИСКА
+   =================================== */
+
+.center-menu.search-mode {
+    padding: 12px;
+    gap: 12px;
+    width: 90%;
+    max-width: 500px;
+    animation: expandSearch 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes expandSearch {
+    from { width: auto; opacity: 0.8; }
+    to { width: 90%; max-width: 500px; opacity: 1; }
+}
+
+.search-input-inline {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 16px;
+    outline: none;
+    padding: 8px;
+    animation: fadeInInput 0.3s ease 0.2s both;
+}
+
+@keyframes fadeInInput {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.search-input-inline::placeholder {
+    color: var(--text-secondary);
+}
+
+.search-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+    transition: opacity var(--transition-speed), transform var(--transition-speed);
+    animation: rotateIn 0.4s ease 0.2s both;
+}
+
+@keyframes rotateIn {
+    from { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+    to { opacity: 0.7; transform: rotate(0) scale(1); }
+}
+
+.search-close-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     opacity: 1;
 }
@@ -87,7 +259,7 @@
     padding: 12px;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 1099;
+    z-index: 999;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     opacity: 1;
