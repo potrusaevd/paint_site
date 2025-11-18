@@ -30,7 +30,7 @@ app.use(helmet({
 
             imgSrc: ["'self'", "data:", "https://www.iphones.ru", "https://images.unsplash.com"],
 
-            connectSrc: ["'self'"]
+            connectSrc: ["'self'", "http://localhost:3001"]
         }
     }
 }));
@@ -404,6 +404,190 @@ app.put('/api/user/update', authenticateToken, async (req, res) => {
     }
 });
 
+
+app.get('/api/filter-batches', authenticateToken, async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const request = pool.request();
+        const { companyId } = req.user;
+
+        // Безопасный парсинг параметров
+        const { availability, ral } = req.query;
+        const parseJson = (str) => { try { return JSON.parse(str); } catch { return null; } };
+        const coatingsArray = parseJson(req.query.coatings);
+        const paramsObj = parseJson(req.query.params);
+        const stockObj = parseJson(req.query.stock);
+
+        let query = `
+            SELECT 
+                p.ProductID, p.ProductName, p.CoatingType, p.RalColor, p.ImageURL, p.Price,
+                s.Quantity AS StockQuantity,
+                s.ProductSeries,
+                pp.Viscosity, pp.Gloss60, pp.DeltaE
+            FROM 
+                dbo.StockLevels AS s
+            JOIN 
+                dbo.Products AS p ON s.ProductID = p.ProductID
+            LEFT JOIN 
+                dbo.ProductProperties AS pp ON s.ProductSeries = pp.ProductSeries
+            WHERE 1 = 1
+        `;
+
+        // --- ДИНАМИЧЕСКОЕ ДОБАВЛЕНИЕ ФИЛЬТРОВ ---
+
+        // 1. Фильтр по наличию на складе
+        if (availability === 'free') {
+            query += ` AND s.StockType = 'Free'`;
+        } else if (availability === 'reserved') {
+            query += ` AND s.StockType = 'Reserved' AND s.CompanyID = @CompanyID`;
+            request.input('CompanyID', sql.Int, companyId);
+        } else {
+            query += ` AND (s.StockType = 'Free' OR (s.StockType = 'Reserved' AND s.CompanyID = @CompanyID))`;
+            request.input('CompanyID', sql.Int, companyId);
+        }
+
+        // 2. Фильтр по виду покрытия (точное совпадение)
+        if (coatingsArray && Array.isArray(coatingsArray) && coatingsArray.length > 0) {
+            const coatingPlaceholders = coatingsArray.map((_, idx) => `@coating${idx}`).join(', ');
+            query += ` AND p.CoatingType IN (${coatingPlaceholders})`;
+            coatingsArray.forEach((coating, idx) => {
+                request.input(`coating${idx}`, sql.NVarChar, coating);
+            });
+        }
+
+        // 3. Фильтр по RAL
+        if (ral) {
+            query += ` AND p.RalColor = @ral`;
+            request.input('ral', sql.NVarChar, ral);
+        }
+
+        // 4. Фильтры по техническим параметрам
+        if (paramsObj) {
+            // Добавляем это условие, только если используется хотя бы один из тех. фильтров
+            query += ` AND pp.PropertyID IS NOT NULL`;
+
+            if (paramsObj.viscosity) {
+                if (paramsObj.viscosity.min != null && !isNaN(paramsObj.viscosity.min)) { 
+                    query += ` AND pp.Viscosity >= @viscosityMin`; 
+                    request.input('viscosityMin', sql.Decimal(10, 5), paramsObj.viscosity.min); 
+                }
+                if (paramsObj.viscosity.max != null && !isNaN(paramsObj.viscosity.max)) { 
+                    query += ` AND pp.Viscosity <= @viscosityMax`; 
+                    request.input('viscosityMax', sql.Decimal(10, 5), paramsObj.viscosity.max); 
+                }
+            }
+            if (paramsObj.gloss) {
+                if (paramsObj.gloss.min != null && !isNaN(paramsObj.gloss.min)) { 
+                    query += ` AND pp.Gloss60 >= @glossMin`; 
+                    request.input('glossMin', sql.Decimal(10, 5), paramsObj.gloss.min); 
+                }
+                if (paramsObj.gloss.max != null && !isNaN(paramsObj.gloss.max)) { 
+                    query += ` AND pp.Gloss60 <= @glossMax`; 
+                    request.input('glossMax', sql.Decimal(10, 5), paramsObj.gloss.max); 
+                }
+            }
+            if (paramsObj.deltaE) {
+                if (paramsObj.deltaE.min != null && !isNaN(paramsObj.deltaE.min)) { 
+                    query += ` AND pp.DeltaE >= @deltaEMin`; 
+                    request.input('deltaEMin', sql.Decimal(10, 5), paramsObj.deltaE.min); 
+                }
+                if (paramsObj.deltaE.max != null && !isNaN(paramsObj.deltaE.max)) { 
+                    query += ` AND pp.DeltaE <= @deltaEMax`; 
+                    request.input('deltaEMax', sql.Decimal(10, 5), paramsObj.deltaE.max); 
+                }
+            }
+        }
+        
+        // 5. Фильтр по остатку на складе
+        if (stockObj) {
+            if (stockObj.min != null && !isNaN(stockObj.min)) { 
+                query += ` AND s.Quantity >= @stockMin`; 
+                request.input('stockMin', sql.Decimal(10, 3), stockObj.min); 
+            }
+            if (stockObj.max != null && !isNaN(stockObj.max)) { 
+                query += ` AND s.Quantity <= @stockMax`; 
+                request.input('stockMax', sql.Decimal(10, 3), stockObj.max); 
+            }
+        }
+
+        // Сортировка
+        query += ` ORDER BY p.ProductName ASC`;
+        
+        const result = await request.query(query);
+        res.json(result.recordset);
+
+    } catch (error) {
+        console.error('Ошибка при фильтрации партий:', error);
+        res.status(500).json({ error: 'Ошибка сервера при фильтрации партий' });
+    }
+});
+
+
+// ПОЛУЧЕНИЕ ДЕТАЛЬНОЙ ИНФОРМАЦИИ О ПАРТИИ
+app.get('/api/batch-details/:series', authenticateToken, async (req, res) => {
+    // --- ОТЛАДКА: Шаг 1 ---
+    console.log('--- Получен запрос на /api/batch-details ---');
+    
+    const { series } = req.params;
+
+    // --- ОТЛАДКА: Шаг 2 ---
+    console.log(`Параметр "series" из URL: "${series}"`);
+
+    if (!series) {
+        console.error('Ошибка: Серия не была передана в URL.');
+        return res.status(400).json({ error: 'Не указана серия партии' });
+    }
+
+    try {
+        const pool = await poolPromise;
+        
+        // --- ОТЛАДКА: Шаг 3 ---
+        console.log('Подключение к БД успешно. Готовим SQL-запрос...');
+
+        const request = pool.request();
+        request.input('ProductSeries', sql.NVarChar, series);
+        
+        const queryString = `
+            SELECT 
+                p.ProductName, p.CoatingType, p.ImageURL,
+                s.Quantity AS StockQuantity,
+                pp.*
+            FROM 
+                dbo.StockLevels s
+            JOIN 
+                dbo.Products p ON s.ProductID = p.ProductID
+            LEFT JOIN 
+                dbo.ProductProperties pp ON s.ProductSeries = pp.ProductSeries
+            WHERE 
+                s.ProductSeries = @ProductSeries
+        `;
+        
+        // --- ОТЛАДКА: Шаг 4 ---
+        console.log('Выполняется SQL-запрос...');
+        // console.log(queryString); // Раскомментируйте, если хотите увидеть сам запрос
+
+        const result = await request.query(queryString);
+
+        // --- ОТЛАДКА: Шаг 5 ---
+        console.log(`Запрос выполнен. Найдено записей: ${result.recordset.length}`);
+
+        if (result.recordset.length === 0) {
+            console.warn(`Предупреждение: Партия с серией "${series}" не найдена в базе данных.`);
+            return res.status(404).json({ error: 'Информация по данной серии не найдена' });
+        }
+        
+        // --- ОТЛАДКА: Шаг 6 ---
+        console.log('Отправка данных клиенту:', result.recordset[0]);
+
+        res.json(result.recordset[0]);
+
+    } catch (error) {
+        // --- ОТЛАДКА: Шаг 7 (ОШИБКА) ---
+        console.error('КРИТИЧЕСКАЯ ОШИБКА при получении деталей партии:', error);
+        res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+    }
+});
+
 // Создать новый заказ из корзины
 app.post('/api/orders/create', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
@@ -517,15 +701,19 @@ app.get('/api/cart', authenticateToken, async (req, res) => {
                     p.Price, 
                     p.DiscountPrice, 
                     p.ImageURL,
-                    p.ProductSeries, -- ДОБАВЛЕНО
-                    p.RalColor,      -- ДОБАВЛЕНО
-                    p.VolumeLiters as Volume -- ДОБАВЛЕНО и переименовано
+                    p.RalColor,      -- Это поле есть в Products
+                    p.CoatingType    -- Это поле тоже есть в Products
+                    -- p.ProductSeries - УДАЛЕНО, т.к. его нет в таблице Products
+                    -- p.VolumeLiters - УДАЛЕНО, т.к. его тоже нет (можно будет добавить)
                 FROM CartItems ci
                 JOIN Products p ON ci.ProductID = p.ProductID
                 WHERE ci.UserID = @UserID
             `);
         res.json(result.recordset);
-    } catch (err) { res.status(500).json({ message: 'Ошибка получения корзины' }); }
+    } catch (err) { 
+        console.error('Ошибка получения корзины:', err); // Добавим лог ошибки на сервере
+        res.status(500).json({ message: 'Ошибка получения корзины' }); 
+    }
 });
 
 // Добавить товар в корзину 
