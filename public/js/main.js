@@ -1,35 +1,4 @@
 // ==========================================================
-// --- ФУНКЦИИ ЭКРАНИРОВАНИЯ ДЛЯ БЕЗОПАСНОСТИ ---
-// ==========================================================
-
-/**
- * Функция для экранирования HTML-тегов в строке для безопасного отображения в текстовом контексте.
- * @param {string | number} str - Входная строка или число.
- * @returns {string} - Безопасная для отображения строка.
- */
-function escapeHTML(str) {
-    const str_val = String(str || '');
-    const p = document.createElement('p');
-    p.textContent = str_val;
-    return p.innerHTML;
-}
-
-/**
- * Функция для экранирования строки для безопасного использования в значениях HTML-атрибутов.
- * @param {string | number} str - Входная строка или число.
- * @returns {string} - Безопасная для атрибута строка.
- */
-function escapeAttribute(str) {
-    return String(str || '')
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#x27;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
-
-
-// ==========================================================
 // --- ГЛОБАЛЬНЫЙ МЕНЕДЖЕР ИЗБРАННОГО ---
 // ==========================================================
 window.FavoriteManager = {
@@ -77,10 +46,7 @@ window.FavoriteManager = {
             });
         } catch (error) {
             console.error('Ошибка при переключении избранного:', error);
-            // ИСПРАВЛЕНО: Экранируем сообщение об ошибке
-            if (typeof showCustomAlert === 'function') {
-                showCustomAlert(escapeHTML('Ошибка: ' + error.message), 'error');
-            }
+            showCustomAlert('Ошибка: ' + error.message);
             checkbox.checked = !checkbox.checked;
         }
     }
@@ -110,23 +76,22 @@ window.addToCart = async (productId, event) => {
         if (typeof showCustomAlert === 'function') {
             showCustomAlert('Товар добавлен в корзину!', 'success');
         } else {
-            alert('Товар добавлен в корзину!');
+            showCustomAlert('Товар добавлен в корзину!');
         }
-    } catch(err) { 
-        console.error(err);
-        // ИСПРАВЛЕНО: Экранируем сообщение об ошибке
-        if (typeof showCustomAlert === 'function') {
-            showCustomAlert(escapeHTML('Ошибка: ' + err.message), 'error');
-        }
-    }
+    } catch(err) { console.error(err); }
 };
+
+
+
 
 // ==========================================================
 // --- ОСНОВНОЙ СКРИПТ, ВЫПОЛНЯЕМЫЙ ПОСЛЕ ЗАГРУЗКИ DOM ---
 // ==========================================================
 document.addEventListener('DOMContentLoaded', () => {
 
+        // Обработчик для кнопки "Оформить заказ"
     document.querySelector('.btn-checkout')?.addEventListener('click', () => {
+        // Проверяем, есть ли товары в корзине
         const totalSumText = document.getElementById('cartTotalSum')?.textContent || '0';
         const totalSum = parseFloat(totalSumText.replace('₽', ''));
         
@@ -137,33 +102,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById("closePrivacyBtn")?.addEventListener("click", () => {
-        document.getElementById("privacyModal").style.display = "none";
-    });
+
 
     // ==========================================================
     // --- ГЛОБАЛЬНАЯ СИСТЕМА УПРАВЛЕНИЯ КОРЗИНОЙ (объект и обработчики) ---
     // ==========================================================
     window.CartManager = {
+        // Получение данных с сервера и полная перерисовка корзины
         async refreshCart() {
             if (!localStorage.getItem('accessToken')) return;
             try {
                 const response = await fetch('/api/cart', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
                 });
-                if (!response.ok) throw new Error('Ошибка загрузки корзины');
+                if (!response.ok) return;
                 const items = await response.json();
                 this.updateIconCounter(items);
                 this.renderCartModal(items);
             } catch (error) { 
-                console.error("Ошибка обновления корзины:", error);
-                // ИСПРАВЛЕНО: Экранируем сообщение об ошибке
-                if (typeof showCustomAlert === 'function') {
-                    showCustomAlert(escapeHTML('Ошибка обновления корзины: ' + error.message), 'error');
-                }
+                console.error("Ошибка обновления корзины:", error); 
             }
         },
 
+        // Обновление счетчика на иконке на основе данных с сервера
         updateIconCounter(items) {
             const counter = document.getElementById('cartCounter');
             if(!counter) return;
@@ -176,71 +137,70 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         
+        // Полная отрисовка товаров в модальном окне
         renderCartModal(items) {
-            const modalBody = document.getElementById('cartModalBody');
-            const totalSumEl = document.getElementById('cartTotalSum');
-            if (!modalBody || !totalSumEl) return;
+        const modalBody = document.getElementById('cartModalBody');
+        const totalSumEl = document.getElementById('cartTotalSum');
+        if (!modalBody || !totalSumEl) return;
 
-            if (items.length === 0) {
-                modalBody.innerHTML = '<p class="cart-empty-message">Здесь пока пусто.</p>';
-                totalSumEl.textContent = '0 ₽';
-                return;
-            }
+        if (items.length === 0) {
+            modalBody.innerHTML = '<p class="cart-empty-message">Здесь пока пусто.</p>';
+            totalSumEl.textContent = '0 ₽';
+            return;
+        }
 
-            let totalSum = 0;
-            // ИСПРАВЛЕНО: Экранируем все данные от сервера перед вставкой в HTML
-            modalBody.innerHTML = items.map(item => {
-                const price = item.DiscountPrice || item.Price;
-                totalSum += price * item.Quantity;
-                const imagePath = item.ImageURL ? item.ImageURL.replace(/\\/g, '/') : 'images/placeholder.png';
-                
-                // Безопасное формирование строки с деталями
-                const details = [
-                    item.ProductSeries ? `Серия: ${escapeHTML(item.ProductSeries)}` : '',
-                    item.RalColor ? `RAL: ${escapeHTML(item.RalColor)}` : '',
-                    item.Volume ? `Объем: ${escapeHTML(item.Volume)} л` : ''
-                ].filter(Boolean).join(' | ');
+        let totalSum = 0;
+        modalBody.innerHTML = items.map(item => {
+            const price = item.DiscountPrice || item.Price;
+            totalSum += price * item.Quantity;
+            const imageSrc = item.ImageURL ? `/${item.ImageURL.replace(/\\/g, '/')}` : '/images/placeholder.png'; // плейсхолдер
+            
+            // Формируем строку с деталями товара
+            const details = [
+                item.ProductSeries ? `Серия: ${item.ProductSeries}` : '',
+                item.RalColor ? `RAL: ${item.RalColor}` : '',
+                item.Volume ? `Объем: ${item.Volume} л` : ''
+            ].filter(Boolean).join(' | '); // Собираем только существующие детали
 
-                // Экранирование для атрибутов и контента
-                const safeImageSrc = escapeAttribute(`/${imagePath}`);
-                const safeProductNameAttr = escapeAttribute(item.ProductName);
-                const safeProductNameHTML = escapeHTML(item.ProductName);
-
-                return `
-                <div class="cart-item" data-product-id="${item.ProductID}">
-                    <div class="cart-item-img-wrapper">
-                        <img src="${safeImageSrc}" alt="${safeProductNameAttr}">
-                    </div>
-                    <div class="cart-item-info">
-                        <div class="product-name">${safeProductNameHTML}</div>
-                        <div class="product-details">
-                            <span>${details}</span>
-                        </div>
-                        <div class="price">${price.toFixed(2)} ₽</div>
-                        <div class="quantity-control">
-                            <button class="quantity-btn decrease-qty">-</button>
-                            <input type="number" class="quantity-input" value="${item.Quantity}" min="1">
-                            <button class="quantity-btn increase-qty">+</button>
-                        </div>
-                    </div>
-                    <button class="cart-item-remove" title="Удалить товар">&times;</button>
+            return `
+            <div class="cart-item" data-product-id="${item.ProductID}">
+                <div class="cart-item-img-wrapper">
+                    <img src="${imageSrc}" alt="${item.ProductName}">
                 </div>
-                `;
-            }).join('');
-            totalSumEl.textContent = `${totalSum.toFixed(2)} ₽`;
-        },
+                <div class="cart-item-info">
+                    <div class="product-name">${item.ProductName}</div>
+                    <div class="product-details">
+                        <span>${details}</span>
+                    </div>
+                    <div class="price">${price.toFixed(2)} ₽</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn decrease-qty">-</button>
+                        <input type="number" class="quantity-input" value="${item.Quantity}" min="1">
+                        <button class="quantity-btn increase-qty">+</button>
+                    </div>
+                </div>
+                <button class="cart-item-remove" title="Удалить товар">&times;</button>
+            </div>
+            `;
+        }).join('');
+        totalSumEl.textContent = `${totalSum.toFixed(2)} ₽`;
+    },
 
-        toggleModal(show) {
-            const modal = document.getElementById('cartModal');
-            if(modal) {
-                if (show) {
-                    modal.classList.add('show');
-                } else {
-                    modal.classList.remove('show');
-                }
+    // Также замените функцию toggleModal для плавной анимации
+    toggleModal(show) {
+        const modal = document.getElementById('cartModal');
+        if(modal) {
+            if (show) {
+                modal.classList.add('show');
+            } else {
+                modal.classList.remove('show');
             }
-        },
+        }
+    },
 
+        // --- НОВЫЕ ФУНКЦИИ ---
+
+        // НОВАЯ ФУНКЦИЯ: Пересчет итоговой суммы на основе данных из DOM
         recalculateTotal() {
             const modalBody = document.getElementById('cartModalBody');
             const totalSumEl = document.getElementById('cartTotalSum');
@@ -263,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             totalSumEl.textContent = `${totalSum.toFixed(2)} ₽`;
         },
 
+        // НОВАЯ ФУНКЦИЯ: Обновление счетчика на иконке на основе данных из DOM
         updateIconCounterFromDOM() {
             const modalBody = document.getElementById('cartModalBody');
             if (!modalBody) return;
@@ -286,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Обработчики событий для корзины ---
-    const cartButton = document.querySelector('.cart_button');
+    const cartButton = document.querySelector('.cart_button'); // Ищем кнопку по новому классу
     if (cartButton) {
         cartButton.addEventListener('click', () => window.CartManager.toggleModal(true));
     }
@@ -296,6 +257,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.id === 'cartModal') window.CartManager.toggleModal(false);
     });
     
+    // (обработчик для кнопок "В корзину" теперь глобальный через onclick)
+
     document.getElementById('cartModalBody')?.addEventListener('click', async (e) => {
         const target = e.target;
         const itemEl = target.closest('.cart-item');
@@ -304,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const productId = itemEl.dataset.productId;
         if (!productId) return;
 
+        // --- Логика удаления товара ---
         if (target.classList.contains('cart-item-remove')) {
             try {
                 const response = await fetch('/api/cart/remove', {
@@ -316,29 +280,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (!response.ok) throw new Error('Ошибка удаления');
                 
+                // Удаляем элемент из DOM и обновляем итоговую сумму
                 itemEl.remove();
                 window.CartManager.recalculateTotal();
-                if (typeof showCustomAlert === 'function') {
-                    showCustomAlert('Товар удален из корзины.', 'info');
-                } else {
-                    alert('Товар удален из корзины.');
-                }
+                showCustomAlert ? showCustomAlert('Товар удален из корзины.', 'info') : showCustomAlert('Товар удален из корзины.');
 
             } catch (err) {
                 console.error(err);
-                if (typeof showCustomAlert === 'function') {
-                    showCustomAlert(escapeHTML('Ошибка: ' + err.message), 'error');
-                }
+                showCustomAlert(err.message);
             }
-            return;
+            return; // Завершаем выполнение
         }
         
+        // --- Логика изменения количества ---
         if (target.classList.contains('quantity-btn')) {
             const quantityInput = itemEl.querySelector('.quantity-input');
             let currentQuantity = parseInt(quantityInput.value, 10);
             
-            if (target.classList.contains('increase-qty')) currentQuantity++;
-            else if (target.classList.contains('decrease-qty')) currentQuantity--;
+            if (target.classList.contains('increase-qty')) {
+                currentQuantity++;
+            } else if (target.classList.contains('decrease-qty')) {
+                currentQuantity--;
+            }
 
             quantityInput.value = currentQuantity;
 
@@ -350,25 +313,33 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch('/api/cart/update', {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
                     body: JSON.stringify({ productId: productId, quantity: currentQuantity })
                 });
                 if (!response.ok) throw new Error('Ошибка обновления количества');
 
+                // ЛОКАЛЬНОЕ ОБНОВЛЕНИЕ: Пересчитываем только итоговую сумму
                 window.CartManager.recalculateTotal();
+                // Обновляем счетчик на иконке
                 window.CartManager.updateIconCounterFromDOM();
+
 
             } catch (err) {
                 console.error(err);
-                if (typeof showCustomAlert === 'function') {
-                    showCustomAlert(escapeHTML('Ошибка: ' + err.message), 'error');
-                }
+                showCustomAlert(err.message);
             }
         }
     });
 
+
+
+    // --- Первоначальная загрузка корзины ---
     window.CartManager.refreshCart();
 
+    // --- ЕДИНЫЙ ОБРАБОТЧИК ДЛЯ ВСЕХ ЧЕКБОКСОВ ИЗБРАННОГО ---
     document.body.addEventListener('change', async (e) => {
         if (!e.target.classList.contains('favorite-checkbox')) return;
         const checkbox = e.target;
@@ -377,5 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
         await window.FavoriteManager.toggleFavorite(productId, checkbox);
     });
 
+    // --- ПЕРВИЧНАЯ СИНХРОНИЗАЦИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ---
     window.FavoriteManager.syncFavoriteStatus();
 });
