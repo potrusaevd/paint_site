@@ -56,12 +56,25 @@ window.FavoriteManager = {
 // --- ГЛОБАЛЬНАЯ ФУНКЦИЯ ДОБАВЛЕНИЯ В КОРЗИНУ ---
 // ==========================================================
 window.addToCart = async (productId, event) => {
-    if (event) event.preventDefault();
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation(); // Останавливаем всплытие, чтобы не сработали другие клики
+    }
+
     if (!productId) return;
+    
     if (!localStorage.getItem('accessToken')) {
-        showCustomAlert('Пожалуйста, войдите в аккаунт, чтобы добавить товар в корзину.');
+        window.showCustomAlert('Пожалуйста, войдите в аккаунт, чтобы добавить товар в заявку.', 'info');
         return;
     }
+
+    // --- НОВАЯ ЛОГИКА: Визуальная обратная связь ---
+    const button = event.target.closest('.card-action-button');
+    if (button) {
+        button.disabled = true; // Блокируем кнопку на время запроса
+        button.querySelector('span:last-child').textContent = 'Добавление...';
+    }
+
     try {
         const response = await fetch('/api/cart/add', {
             method: 'POST',
@@ -71,14 +84,36 @@ window.addToCart = async (productId, event) => {
             },
             body: JSON.stringify({ productId: productId })
         });
-        if (!response.ok) throw new Error('Ошибка добавления товара');
-        if (window.CartManager) await window.CartManager.refreshCart();
-        if (typeof showCustomAlert === 'function') {
-            showCustomAlert('Товар добавлен в корзину!', 'success');
-        } else {
-            showCustomAlert('Товар добавлен в корзину!');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Ошибка добавления товара');
         }
-    } catch(err) { console.error(err); }
+
+        // Обновляем состояние корзины
+        if (window.CartManager) {
+            await window.CartManager.refreshCart();
+        }
+        
+        // Показываем успешное уведомление
+        window.showCustomAlert('Товар успешно добавлен в заявку!', 'success');
+
+        // Возвращаем кнопку в исходное состояние с небольшой задержкой
+        if (button) {
+            setTimeout(() => {
+                button.querySelector('span:last-child').textContent = 'В заявку →';
+                button.disabled = false;
+            }, 1000); // 1 секунда
+        }
+
+    } catch(err) { 
+        console.error(err); 
+        window.showCustomAlert(err.message, 'error');
+        // Возвращаем кнопку в исходное состояние в случае ошибки
+        if (button) {
+            button.querySelector('span:last-child').textContent = 'В заявку →';
+            button.disabled = false;
+        }
+    }
 };
 
 
