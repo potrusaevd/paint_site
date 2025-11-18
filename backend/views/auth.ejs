@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход - Прайм Топ</title>
+    <link rel="stylesheet" href="css/root.css">
+    <link rel="stylesheet" href="css/ui-elements.css">
     <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
@@ -87,8 +89,13 @@
 
                     <div class="form-footer">
                         <label class="checkbox-label">
-                            <input type="checkbox" name="remember">
-                            <span>Запомнить меня</span>
+                        <label class="checkbox">
+                            <input type="checkbox" name="availability" value="free" />
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
+                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
+                            </svg>
+                        </label>
+                        <span>Запомнить меня</span>
                         </label>
                         <a href="#" class="forgot-link">Забыли пароль?</a>
                     </div>
@@ -124,7 +131,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Пароль</label>
-                            <div class="password-input">
+                            <div class="reg-password">
                                 <input type="password" name="password" placeholder="Минимум 8 символов" required minlength="8">
                                 <button type="button" class="toggle-password" onclick="togglePassword(this)">
                                     <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -142,7 +149,7 @@
 
                         <div class="form-group">
                             <label>Подтверждение пароля</label>
-                            <div class="password-input">
+                            <div class="reg-password">
                                 <input type="password" name="passwordConfirm" placeholder="Повторите пароль" required>
                                 <button type="button" class="toggle-password" onclick="togglePassword(this)">
                                     <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -161,7 +168,12 @@
 
                     <div class="form-footer">
                         <label class="checkbox-label">
-                            <input type="checkbox" name="terms" required>
+                        <label class="checkbox">
+                            <input type="checkbox" name="availability" value="free" />
+                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
+                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
+                            </svg>
+                        </label>
                             <span>Я согласен с <a href="#" class="terms-link">условиями использования</a></span>
                         </label>
                     </div>
@@ -173,6 +185,8 @@
     </div>
 
     <script src="js/auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="js/ui-elements.js"></script>
     <script src="js/global-utils.js"></script>
 </body>
 </html>
