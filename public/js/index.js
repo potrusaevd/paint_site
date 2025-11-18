@@ -10,16 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sectionNavItems = document.querySelectorAll('.section-nav-item');
     const copyEmailBtn = document.querySelector('.copy-email');
     const copyTooltip = document.querySelector('.copy-tooltip');
-    
-    // Center menu
-    const centerMenu = document.querySelectorAll('.center-menu')[0];
-    const searchMode = document.querySelectorAll('.center-menu')[1];
-    const searchBtn = document.querySelector('.search-btn');
-    const searchCloseBtn = document.querySelector('.search-close-btn');
-    const searchInputInline = document.querySelector('.search-input-inline');
-    const catalogBtn = document.querySelector('.catalog-btn');
-    const aboutBtn = document.querySelector('.about-btn');
-    const cabinetBtn = document.querySelector('.cabinet-btn');
 
     const SMOOTH_FACTOR = 0.065;
     const PANEL_COUNT = panels.length;
@@ -45,100 +35,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const lerp = (start, end, factor) => start + (end - start) * factor;
     const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-    // Search functionality
-    const centerMenuContainer = document.querySelector('.center-menu');
-
-    if (searchBtn && centerMenuContainer) {
-        let searchInputEl = null;
-
-        const openSearch = () => {
-            if (centerMenuContainer.classList.contains('search-mode')) return; 
-
-            centerMenuContainer.classList.add('search-mode');
-            centerMenuContainer.querySelectorAll('.center-menu-btn:not(.search-btn)').forEach(btn => btn.style.display = 'none');
-            
-            searchInputEl = document.createElement('input');
-            searchInputEl.className = 'search-input-inline';
-            searchInputEl.placeholder = 'Поиск по каталогу...';
-            
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'search-close-btn';
-            closeBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-            
-            searchBtn.after(searchInputEl);
-            searchInputEl.after(closeBtn);
-            
-            searchInputEl.focus();
-
-            closeBtn.addEventListener('click', closeSearch);
-            searchInputEl.addEventListener('keydown', handleSearchInput);
-            
-            setTimeout(() => { 
-                document.addEventListener('click', handleClickOutside);
-            }, 0);
-        };
-
-        const closeSearch = () => {
-            if (!centerMenuContainer.classList.contains('search-mode')) return; 
-
-            centerMenuContainer.classList.remove('search-mode');
-            centerMenuContainer.querySelectorAll('.center-menu-btn:not(.search-btn)').forEach(btn => btn.style.display = 'flex');
-
-            centerMenuContainer.querySelector('.search-input-inline')?.remove();
-            centerMenuContainer.querySelector('.search-close-btn')?.remove();
-            searchInputEl = null;
-
-            document.removeEventListener('click', handleClickOutside);
-        };
-
-        const handleSearchInput = (e) => {
-            if (e.key === 'Enter' && searchInputEl.value.trim()) {
-                window.location.href = `/products?search=${encodeURIComponent(searchInputEl.value.trim())}`;
-            }
-        };
-
-        const handleClickOutside = (e) => {
-            if (centerMenuContainer && !centerMenuContainer.contains(e.target)) {
-                closeSearch();
-            }
-        };
-
-        searchBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            if (!centerMenuContainer.classList.contains('search-mode')) {
-                openSearch();
-            }
-        });
-
-        centerMenuContainer.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
+    window.goToPanel = function(index) { 
+    targetX = index * panelWidth;
+    startAnimation();
+}
+window.addEventListener('load', () => {
+    if (window.location.hash === '#contacts') {
+        // Проверяем, что функция для прокрутки существует
+        if (window.goToPanel) {
+            // Плавно прокручиваем к панели с индексом 5
+            window.goToPanel(5);
+        }
+        
     }
-
-    // Center menu navigation
-    if (catalogBtn) {
-        catalogBtn.addEventListener('click', () => {
-            window.location.href = '/products'; 
-        });
-    }
-
-    if (aboutBtn) {
-        aboutBtn.addEventListener('click', () => {
-            targetX = 5 * panelWidth;
-            startAnimation();
-        });
-    }
-
-    if (cabinetBtn) {
-        cabinetBtn.addEventListener('click', () => {
-            if (localStorage.getItem('accessToken')) {
-                window.location.href = '/profile';
-            } else {
-                window.location.href = '/auth';
-            }
-        });
-    }
-
+});
+   
     // Carousel functionality
     const carouselTrack = document.querySelector('.carousel-track');
     const carouselSlides = document.querySelectorAll('.carousel-slide');
@@ -556,4 +467,5 @@ document.addEventListener('DOMContentLoaded', () => {
         panels[0].classList.add('active');
         sectionNavItems[0].classList.add('active');
     }, 100);
+    
 });
