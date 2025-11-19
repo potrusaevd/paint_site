@@ -369,8 +369,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-
     // --- Первоначальная загрузка корзины ---
     window.CartManager.refreshCart();
 
@@ -385,4 +383,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- ПЕРВИЧНАЯ СИНХРОНИЗАЦИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ---
     window.FavoriteManager.syncFavoriteStatus();
+    
 });
