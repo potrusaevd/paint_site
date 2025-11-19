@@ -3,33 +3,19 @@ const nodemailer = require('nodemailer');
 let transporter;
 
 async function initializeMailer() {
-    let authData = {
-        user: 'awgq2d3jhxsvikdo@ethereal.email',
-        pass: 'YV6trmbBKUece1kHb1',
-    };
-
-    if (!authData.user || !authData.pass) {
-        console.log('Данные для Ethereal не найдены, создаем новый тестовый аккаунт...');
-        const testAccount = await nodemailer.createTestAccount();
-        authData = {
-            user: testAccount.user,
-            pass: testAccount.pass,
-        };
-        console.log('--- Ethereal.email Credentials (вставьте их в mailer.js) ---');
-        console.log('User:', authData.user);
-        console.log('Pass:', authData.pass);
-        console.log('-----------------------------------------------------------');
-    }
-
     transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: authData,
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: process.env.SMTP_PORT || 465,
+        secure: true, // Gmail требует SSL на 465
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
     });
 
-    console.log('Mailer инициализирован с пользователем:', authData.user);
+    console.log("Gmail SMTP initialized for:", process.env.SMTP_USER);
 }
+
 
 initializeMailer().catch(console.error);
 
@@ -58,5 +44,6 @@ async function sendVerificationEmail(to, token) {
     console.log("Сообщение отправлено: %s", info.messageId);
     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }
+
 
 module.exports = { sendVerificationEmail };
