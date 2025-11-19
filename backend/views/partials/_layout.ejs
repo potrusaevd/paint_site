@@ -56,27 +56,7 @@
     <script src="/js/global-utils.js" defer></script>
     <script src="/js/main.js" defer></script>
     <script src="/js/header.js"defer></script>
-    <script src="/js/clickSpark.js" defer></script>
-    <script>
-        setTimeout(() => {
-            try {
-                if (typeof ClickSpark !== 'undefined') {
-                    new ClickSpark(document.body, {
-                        sparkColor: "#4fa690",
-                        sparkSize: 10,
-                        sparkRadius: 20,
-                        sparkCount: 8,
-                        duration: 400,
-                        easing: "ease-out",
-                        extraScale: 1.0,
-                    });
-                    console.log('ClickSpark initialized with delay.');
-                }
-            } catch (error) {
-                console.error('Error initializing ClickSpark with delay:', error);
-            }
-        }, 2000);
-    </script>
+    
     
     
     <!-- Сюда вставятся УНИКАЛЬНЫЕ скрипты для конкретной страницы -->
