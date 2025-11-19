@@ -1,0 +1,15 @@
+# ENV files
+.env
+.env.*
+!important.env.example
+
+# Node deps
+node_modules/
+npm-debug.log*
+
+# Build files
+dist/
+build/
+
+# Local config
+*.local
