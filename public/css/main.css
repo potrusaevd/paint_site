@@ -328,7 +328,7 @@ body.menu-expanded .page-container {
 }
 
 .email {
-    font-size: 32px;
+    font-size: 28px;
     color: var(--text-primary);
     text-decoration: none;
     font-weight: 700;
@@ -563,11 +563,11 @@ body.menu-expanded .page-container {
 }
 
 .carousel-prev {
-    left: 0;
+    left: -50px;
 }
 
 .carousel-next {
-    right: 0;
+    right: -50px;
 }
 
 .carousel-btn:hover,
@@ -665,8 +665,8 @@ body.menu-expanded .page-container {
 
 .certificates-controls {
     position: fixed;
-    bottom: 90px;
-    right: 40px;
+    bottom: 70px;
+    right: 0px;
     display: flex;
     align-items: center;
     gap: 16px;
@@ -752,4 +752,8 @@ body.menu-expanded .page-container {
     .title { font-size: 2rem; }
     .beyond-text { font-size: 4rem; }
     .email { font-size: 20px; }
+    .left-menu {
+    opacity: 0;
+  }
+    
 }

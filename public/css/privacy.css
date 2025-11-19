@@ -1,0 +1,173 @@
+/* privacy.css - Adapted for :root variables */
+
+/* Модалка политики */
+.privacy-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(21, 27, 40, 0.7); /* Based on --black */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100;
+}
+
+.privacy-modal {
+    background: var(--dark-theme-gray300);
+    width: 80%;
+    max-width: 900px;
+    max-height: 80vh;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--dark-theme-box-shadow);
+}
+
+.privacy-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--dark-theme-primary);
+    color: var(--dark-theme-text);
+    padding: 1rem 1.5rem;
+}
+
+.privacy-modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-family: var(--medium);
+}
+
+.privacy-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--dark-theme-text);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.privacy-modal-close:hover {
+    opacity: 0.8;
+}
+
+.privacy-modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    color: var(--dark-theme-text);
+}
+
+/* Кастомный скроллбар для модального окна */
+.privacy-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.privacy-modal-body::-webkit-scrollbar-track {
+    background: var(--dark-theme-gray400);
+    border-radius: 4px;
+}
+
+.privacy-modal-body::-webkit-scrollbar-thumb {
+    background-color: var(--dark-theme-primary);
+    border-radius: 4px;
+    border: 2px solid var(--dark-theme-gray400);
+}
+
+.privacy-modal-body::-webkit-scrollbar-thumb:hover {
+    background-color: var(--dark-theme-primary-hover);
+}
+
+/* Для Firefox */
+.privacy-modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--dark-theme-primary) var(--dark-theme-gray400);
+}
+
+.privacy-date {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--dark-theme-gray500);
+    font-style: italic;
+}
+
+.privacy-block {
+    margin-bottom: 2rem;
+}
+
+.privacy-block h4 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--dark-theme-primary);
+    border-bottom: 2px solid var(--dark-theme-primary);
+    padding-bottom: 0.5rem;
+    font-family: var(--medium);
+}
+
+.privacy-block p,
+.privacy-block li {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 0.8rem;
+}
+
+.privacy-block ul {
+    margin: 0 0 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.privacy-block li {
+    margin-bottom: 0.5rem;
+}
+
+.privacy-block strong {
+    color: var(--dark-theme-primary);
+    font-family: var(--medium);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .privacy-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .privacy-modal-body {
+        padding: 1.5rem;
+    }
+    
+    .privacy-modal-header {
+        padding: 0.8rem 1rem;
+    }
+    
+    .privacy-modal-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .privacy-block h4 {
+        font-size: 1rem;
+    }
+    
+    .privacy-block p,
+    .privacy-block li {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .privacy-modal {
+        width: 98%;
+        max-height: 95vh;
+    }
+    
+    .privacy-modal-body {
+        padding: 1rem;
+    }
+    
+    .privacy-block {
+        margin-bottom: 1.5rem;
+    }
+}

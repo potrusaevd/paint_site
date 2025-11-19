@@ -446,7 +446,7 @@ body {
    =================================== */
 @media (max-width: 1024px) {
     .page-wrapper { grid-template-columns: 1fr; }
-    .products-filters { display: none; }
+    
 }
 
 @media (max-width: 768px) {
