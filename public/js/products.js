@@ -7,7 +7,7 @@ if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://localhost:3001/api';
+    const API_URL = 'http://localhost:process.env.PORT || 3000/api';
     
     // --- Глобальные переменные ---
     let allProducts = [];
@@ -561,3 +561,4 @@ window.closeDetailsModal = function() {
     initializeFilters();
     applyFiltersAndSort();
 });
+
