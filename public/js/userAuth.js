@@ -1,7 +1,7 @@
 // userAuth.js - ФИНАЛЬНАЯ ВЕРСЯ ДЛЯ ВСЕХ СТРАНИЦ
 
 document.addEventListener('DOMContentLoaded', function () {
-    const API_URL = 'http://localhost:3001';
+    const API_URL = 'http://localhost:process.env.PORT || 3000';
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -105,3 +105,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initHeaderWidget();
 });
+
