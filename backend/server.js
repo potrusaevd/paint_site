@@ -13,7 +13,7 @@ const ejsLayouts = require('express-ejs-layouts');
 
 const app = express();
 console.log("A: Express создан");
-const port = 3001;
+const port = process.env.PORT || 3000;
 
 app.use(helmet({
     contentSecurityPolicy: {
@@ -1125,3 +1125,4 @@ app.listen(port, () => {
     console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
+
