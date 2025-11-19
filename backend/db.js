@@ -1,20 +1,13 @@
 // backend/db.js - вариант для SQL Authentication
 const sql = require('mssql');
 const config = {
-    server: 'localhost\\SQLEXPRESS', 
-    
-
     user: 'sa',
-    password: 'doman12get', 
-
+    password: 'doman12get',
+    server: '91.190.73.253', // например 95.128.45.67
     database: 'Lime Ditails',
-
     options: {
-        encrypt: false,
         trustServerCertificate: true
-    },
-    
-    driver: 'tedious' 
+    }
 };
 
 const poolPromise = new sql.ConnectionPool(config)
@@ -27,4 +20,5 @@ const poolPromise = new sql.ConnectionPool(config)
 
 module.exports = {
     sql, poolPromise
+
 };
