@@ -233,19 +233,7 @@ window.addEventListener('load', () => {
         });
     };
 
-    menuBtn.addEventListener('click', () => {
-        menuExpanded = !menuExpanded;
-        leftMenu.classList.toggle('expanded');
-        document.body.classList.toggle('menu-expanded');
-        
-        if (menuExpanded) {
-            setTimeout(() => animateMenuItems(true), 150);
-        } else {
-            animateMenuItems(false);
-        }
-        
-        setTimeout(() => updateDimensions(false), 400);
-    });
+ 
 
     // Parallax
     const updateParallax = () => {
