@@ -58,17 +58,26 @@ window.showCustomConfirm = function(text, title = 'Подтвердите дей
     // Использование .textContent здесь абсолютно безопасно.
     titleEl.textContent = title;
     textEl.textContent = text;
-    modalOverlay.style.display = 'flex';
+    modalOverlay.classList.add('show');
 
     return new Promise((resolve) => {
         const onYesClick = () => { cleanup(); resolve(true); };
         const onNoClick = () => { cleanup(); resolve(false); };
         const cleanup = () => {
-            modalOverlay.style.display = 'none';
+            modalOverlay.classList.remove('show');
             yesBtn.removeEventListener('click', onYesClick);
             noBtn.removeEventListener('click', onNoClick);
+            modalOverlay.removeEventListener('click', onOverlayClick);
         };
+        const onOverlayClick = (e) => {
+            if (e.target === modalOverlay) {
+                cleanup();
+                resolve(false);
+            }
+        };
+
         yesBtn.addEventListener('click', onYesClick);
         noBtn.addEventListener('click', onNoClick);
+        modalOverlay.addEventListener('click', onOverlayClick);
     });
 };
