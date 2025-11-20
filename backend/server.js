@@ -55,9 +55,16 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 3. Другие Middleware
 app.use(cors({
-    origin: 'https://paint-site-vty0.onrender.com', // твой фронтенд на Render
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true // если нужны куки/авторизация
+  origin: 'https://paint-site-vty0.onrender.com', // фронтенд на Render
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  credentials: true // если используешь куки
+}));
+
+// Чтобы сервер обрабатывал preflight OPTIONS-запросы
+app.options('*', cors({
+  origin: 'https://paint-site-vty0.onrender.com',
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  credentials: true
 }));
 app.use(express.json());
 
@@ -1129,6 +1136,7 @@ app.listen(port, () => {
     console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
+
 
 
 
