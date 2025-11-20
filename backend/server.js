@@ -162,7 +162,6 @@ app.get("/checkout", (req, res) => {
 });
 
 
-
 // --- ОТКРЫТЫЕ API  ---
 app.get('/api/search', async (req, res) => {
     const { query } = req.query; 
@@ -592,26 +591,51 @@ app.get('/api/batch-details/:series', authenticateToken, async (req, res) => {
     }
 });
 
-// Создать новый заказ из корзины
-app.post('/api/orders/create', authenticateToken, async (req, res) => {
-    const userId = req.user.userId;
+
+// Получение информации о компании пользователя
+app.get('/api/company-info', authenticateToken, async (req, res) => {
+    const companyId = req.user.companyId;
+    if (!companyId) {
+        return res.status(400).json({ message: 'ID компании не найден в токене.' });
+    }
     try {
         const pool = await poolPromise;
-        const transaction = new sql.Transaction(pool);
+        const result = await pool.request()
+            .input('CompanyID', sql.Int, companyId)
+            .query('SELECT * FROM Companies WHERE CompanyID = @CompanyID');
         
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ message: 'Компания не найдена.' });
+        }
+        res.json(result.recordset[0]);
+    } catch (error) {
+        console.error('Ошибка получения информации о компании:', error);
+        res.status(500).json({ message: 'Ошибка сервера' });
+    }
+});
+
+// Создать новый заказ из корзины
+app.post('/api/orders/create', authenticateToken, async (req, res) => {
+    const { userId, companyId } = req.user;
+    // Получаем все данные из тела запроса
+    const orderData = req.body;
+
+    const pool = await poolPromise;
+    const transaction = new sql.Transaction(pool);
+
+    try {
         await transaction.begin();
-        
-        let request = new sql.Request(transaction);
 
         // 1. Получаем товары из корзины
-        const cartItemsResult = await request
+        let cartRequest = new sql.Request(transaction);
+        const cartItemsResult = await cartRequest
             .input('UserID_Cart', sql.Int, userId)
             .query('SELECT ci.ProductID, ci.Quantity, p.ProductName, p.Price, p.DiscountPrice, p.ImageURL FROM CartItems ci JOIN Products p ON ci.ProductID = p.ProductID WHERE ci.UserID = @UserID_Cart');
         
         const cartItems = cartItemsResult.recordset;
         if (cartItems.length === 0) {
             await transaction.rollback();
-            return res.status(400).json({ message: 'Ваша корзина пуста.' });
+            return res.status(400).json({ message: 'Ваша заявка пуста.' });
         }
 
         // 2. Рассчитываем итоговую сумму
@@ -620,19 +644,49 @@ app.post('/api/orders/create', authenticateToken, async (req, res) => {
             return sum + (price * item.Quantity);
         }, 0);
 
-        // 3. Создаем запись в таблице Orders
-        request = new sql.Request(transaction);
-        const orderResult = await request
-            .input('UserID_Order', sql.Int, userId)
-            .input('CompanyID_Order', sql.Int, companyId) // ИЗМЕНЕНИЕ: Передаем CompanyID
+        // 3. Создаем запись в таблице Orders со всеми новыми данными
+        let orderRequest = new sql.Request(transaction);
+        const orderResult = await orderRequest
+            .input('UserID', sql.Int, userId)
+            .input('CompanyID', sql.Int, companyId)
             .input('Total', sql.Decimal(10, 2), total)
-            .query('INSERT INTO Orders (UserID, CompanyID, Status, Total) OUTPUT INSERTED.OrderID VALUES (@UserID_Order, @CompanyID_Order, \'processing\', @Total)');
+            .input('Status', sql.NVarChar, 'В обработке') // Ставим начальный статус
+            .input('ContactPersonName', sql.NVarChar, orderData.customerName)
+            .input('ContactPhone', sql.NVarChar, orderData.customerPhone)
+            .input('ContactEmail', sql.NVarChar, orderData.customerEmail)
+            .input('CompanyName', sql.NVarChar, orderData.companyName)
+            .input('CompanyTaxID', sql.NVarChar, orderData.companyInn)
+            .input('ShippingAddressID', sql.Int, orderData.deliveryAddressId)
+            .input('DeliveryDate', sql.Date, orderData.deliveryDate || null)
+            .input('DeliveryTime', sql.NVarChar, orderData.deliveryTime)
+            .input('DeliveryComment', sql.NVarChar, orderData.deliveryComment)
+            .input('PaymentMethod', sql.NVarChar, orderData.paymentMethod)
+            .input('OrderComment', sql.NVarChar, orderData.orderComment)
+            .input('NeedDocuments', sql.Bit, orderData.needDocuments)
+            .input('IsUrgent', sql.Bit, orderData.urgentOrder)
+            .query(`
+                INSERT INTO Orders (
+                    UserID, CompanyID, Status, Total, 
+                    ContactPersonName, ContactPhone, ContactEmail, 
+                    CompanyName, CompanyTaxID, 
+                    ShippingAddressID, DeliveryDate, DeliveryTime, DeliveryComment,
+                    PaymentMethod, OrderComment, NeedDocuments, IsUrgent
+                ) 
+                OUTPUT INSERTED.OrderID 
+                VALUES (
+                    @UserID, @CompanyID, @Status, @Total,
+                    @ContactPersonName, @ContactPhone, @ContactEmail,
+                    @CompanyName, @CompanyTaxID,
+                    @ShippingAddressID, @DeliveryDate, @DeliveryTime, @DeliveryComment,
+                    @PaymentMethod, @OrderComment, @NeedDocuments, @IsUrgent
+                )
+            `);
         const newOrderId = orderResult.recordset[0].OrderID;
 
-        // 4. Переносим товары из корзины в OrderItems
+        // 4. Переносим товары из корзины в OrderItems (без изменений)
         for (const item of cartItems) {
-            request = new sql.Request(transaction); 
-            await request
+            let itemRequest = new sql.Request(transaction); 
+            await itemRequest
                 .input('OrderID', sql.Int, newOrderId)
                 .input('ProductName', sql.NVarChar, item.ProductName)
                 .input('Quantity', sql.Int, item.Quantity)
@@ -641,9 +695,9 @@ app.post('/api/orders/create', authenticateToken, async (req, res) => {
                 .query('INSERT INTO OrderItems (OrderID, ProductName, Quantity, Price, ImageURL) VALUES (@OrderID, @ProductName, @Quantity, @Price, @ImageURL)');
         }
 
-        // 5. Очищаем корзину
-        request = new sql.Request(transaction);
-        await request
+        // 5. Очищаем корзину (без изменений)
+        let clearCartRequest = new sql.Request(transaction);
+        await clearCartRequest
             .input('UserID_Clear', sql.Int, userId)
             .query('DELETE FROM CartItems WHERE UserID = @UserID_Clear');
 
@@ -652,6 +706,8 @@ app.post('/api/orders/create', authenticateToken, async (req, res) => {
         res.status(201).json({ message: 'Заказ успешно создан!', orderId: newOrderId });
 
     } catch (err) {
+        // Если что-то пошло не так, откатываем транзакцию
+        await transaction.rollback();
         console.error("КРИТИЧЕСКАЯ ОШИБКА СОЗДАНИЯ ЗАКАЗА:", err);
         res.status(500).json({ message: 'Внутренняя ошибка сервера при создании заказа.' });
     }
@@ -859,99 +915,7 @@ app.put('/api/orders/:id/cancel', authenticateToken, async (req, res) => {
     }
 });
 
-// ===========================================
-// --- API для Избранного  ---
-// ===========================================
 
-// Получить все избранные товары пользователя
-app.get('/api/favorites', authenticateToken, async (req, res) => {
-    const userId = req.user.userId;
-    try {
-        const pool = await poolPromise;
-        const result = await pool.request()
-            .input('UserID', sql.Int, userId)
-            .query(`
-                SELECT p.ProductID, p.ProductName, p.Price, p.DiscountPrice, p.ImageURL
-                FROM UserFavorites uf
-                JOIN Products p ON uf.ProductID = p.ProductID
-                WHERE uf.UserID = @UserID
-                ORDER BY uf.DateAdded DESC
-            `);
-        res.json(result.recordset);
-    } catch (error) {
-        console.error('Ошибка получения избранных товаров:', error);
-        res.status(500).json({ message: 'Ошибка сервера' });
-    }
-});
-
-// Добавить/Удалить товар из избранного (toggle)
-app.post('/api/favorites/toggle', authenticateToken, async (req, res) => {
-    const userId = req.user.userId;
-    let { productId } = req.body;
-
-    productId = parseInt(productId, 10);
-    if (!productId || isNaN(productId)) {
-        return res.status(400).json({ message: 'Передан некорректный ID товара.' });
-    }
-
-    try {
-        const pool = await poolPromise;
-        
-        const existingFavorite = await pool.request()
-            .input('UserID', sql.Int, userId)
-            .input('ProductID', sql.Int, productId)
-            .query('SELECT FavoriteID FROM UserFavorites WHERE UserID = @UserID AND ProductID = @ProductID');
-
-        if (existingFavorite.recordset.length > 0) {
-            await pool.request()
-                .input('UserID', sql.Int, userId)
-                .input('ProductID', sql.Int, productId)
-                .query('DELETE FROM UserFavorites WHERE UserID = @UserID AND ProductID = @ProductID');
-            res.status(200).json({ message: 'Товар удален из избранного.', action: 'removed' });
-        } else {
-            await pool.request()
-                .input('UserID', sql.Int, userId)
-                .input('ProductID', sql.Int, productId)
-                .query('INSERT INTO UserFavorites (UserID, ProductID) VALUES (@UserID, @ProductID)');
-            res.status(201).json({ message: 'Товар добавлен в избранное.', action: 'added' });
-        }
-    } catch (error) {
-        console.error('Ошибка при переключении избранного:', error);
-        res.status(500).json({ message: 'Внутренняя ошибка сервера при работе с избранным.' });
-    }
-});
-
-app.delete('/api/favorites/all', authenticateToken, async (req, res) => {
-    const userId = req.user.userId;
-    try {
-        const pool = await poolPromise;
-        await pool.request()
-            .input('UserID', sql.Int, userId)
-            .query('DELETE FROM UserFavorites WHERE UserID = @UserID');
-        
-        res.status(200).json({ message: 'Избранное успешно очищено.' });
-    } catch (error) {
-        console.error('Ошибка при очистке избранного:', error);
-        res.status(500).json({ message: 'Ошибка сервера' });
-    }
-});
-
-app.get('/api/favorites/ids', authenticateToken, async (req, res) => {
-    const userId = req.user.userId;
-    try {
-        const pool = await poolPromise;
-        const result = await pool.request()
-            .input('UserID', sql.Int, userId)
-            .query('SELECT ProductID FROM UserFavorites WHERE UserID = @UserID');
-        
-        const favoriteIds = result.recordset.map(item => item.ProductID);
-        res.json(favoriteIds);
-
-    } catch (error) {
-        console.error('Ошибка получения ID избранных товаров:', error);
-        res.status(500).json({ message: 'Ошибка сервера' });
-    }
-});
 
 app.put('/api/orders/:id/hide', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
@@ -969,15 +933,52 @@ app.put('/api/orders/:id/hide', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/addresses', authenticateToken, async (req, res) => {
-    const companyId = req.user.companyId; // ИЗМЕНЕНИЕ
+    const companyId = req.user.companyId; // Получаем ID компании из токена
+    if (!companyId) {
+        return res.status(400).json({ message: 'ID компании не определен для этого пользователя.' });
+    }
+
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('CompanyID', sql.Int, companyId) // ИЗМЕНЕНИЕ
-            .query('SELECT * FROM Addresses WHERE CompanyID = @CompanyID'); // ИЗМЕНЕНИЕ
+            .input('CompanyID', sql.Int, companyId)
+            .query('SELECT * FROM Addresses WHERE CompanyID = @CompanyID ORDER BY IsDefault DESC, AddressID ASC'); 
+            
         res.json(result.recordset);
+
     } catch (err) {
-        res.status(500).send(err.message);
+        console.error('Ошибка получения списка адресов:', err);
+        res.status(500).json({ message: 'Внутренняя ошибка сервера при получении адресов.' });
+    }
+});
+
+app.post('/api/addresses', authenticateToken, async (req, res) => {
+    const companyId = req.user.companyId;
+    const { AddressType, City, Street, House, Apartment, PostalCode } = req.body;
+    
+    // Проверка на обязательные поля
+    if (!AddressType || !City || !Street || !House) {
+        return res.status(400).json({ message: 'Не все обязательные поля были заполнены.' });
+    }
+    
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('CompanyID', sql.Int, companyId)
+            .input('AddressType', sql.NVarChar, AddressType)
+            .input('City', sql.NVarChar, City)
+            .input('Street', sql.NVarChar, Street)
+            .input('House', sql.NVarChar, House)
+            .input('Apartment', sql.NVarChar, Apartment || null)
+            .input('PostalCode', sql.NVarChar, PostalCode || null)
+            .query('INSERT INTO Addresses (CompanyID, AddressType, City, Street, House, Apartment, PostalCode, IsDefault) OUTPUT INSERTED.* VALUES (@CompanyID, @AddressType, @City, @Street, @House, @Apartment, @PostalCode, 0)');
+        
+        // Возвращает созданный адрес клиенту
+        res.status(201).json(result.recordset[0]);
+
+    } catch (err) {
+        console.error('SQL Error in POST /api/addresses:', err.message); 
+        res.status(500).json({ message: 'Ошибка на сервере при добавлении адреса.' });
     }
 });
 
@@ -1129,7 +1130,6 @@ app.listen(port, () => {
     console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
-
 
 
 
