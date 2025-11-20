@@ -228,7 +228,7 @@ body.menu-expanded .page-container {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 110%;
     height: 100%;
     overflow: hidden;
 }
@@ -752,8 +752,4 @@ body.menu-expanded .page-container {
     .title { font-size: 2rem; }
     .beyond-text { font-size: 4rem; }
     .email { font-size: 20px; }
-    .left-menu {
-    opacity: 0;
-  }
-    
 }
