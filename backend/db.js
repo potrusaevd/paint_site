@@ -3,7 +3,7 @@ const sql = require('mssql');
 const config = {
     user: 'sa',
     password: 'doman12get',
-    server: '91.190.73.253',
+    server: '46.72.143.250',
     port: 1433,
     database: 'Lime Ditails',
     options: {
@@ -24,4 +24,5 @@ module.exports = {
     sql, poolPromise
 
 };
+
 
