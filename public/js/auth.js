@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- БЛОК 2: ЛОГИКА РАБОТЫ С API ---
     // ==========================================================
     
-    const API_URL = 'https://my-backend.onrender.com/api';
+    const API_URL = 'https://paint-site-vty0.onrender.com/api';
     
     // Привязываем обработчики отправки форм
     loginFormContainer.querySelector('form').addEventListener('submit', handleLogin);
@@ -277,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
 
 
 
