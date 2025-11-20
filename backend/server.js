@@ -54,7 +54,11 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 3. Другие Middleware
-app.use(cors({ origin: '*' }));
+app.use(cors({
+    origin: 'https://paint-site-vty0.onrender.com', // твой фронтенд на Render
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true // если нужны куки/авторизация
+}));
 app.use(express.json());
 
 // Генерируем секретный ключ при каждом запуске
@@ -1125,6 +1129,7 @@ app.listen(port, () => {
     console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
+
 
 
 
