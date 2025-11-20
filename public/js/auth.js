@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- БЛОК 2: ЛОГИКА РАБОТЫ С API ---
     // ==========================================================
     
-    const API_URL = 'http://localhost:process.env.PORT || 3000/api';
+    const API_URL = 'http://91.190.73.253:1433 || 3000/api';
     
     // Привязываем обработчики отправки форм
     loginFormContainer.querySelector('form').addEventListener('submit', handleLogin);
@@ -277,4 +277,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
 
