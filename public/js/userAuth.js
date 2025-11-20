@@ -1,7 +1,7 @@
 // userAuth.js - ФИНАЛЬНАЯ ВЕРСЯ ДЛЯ ВСЕХ СТРАНИЦ
 
 document.addEventListener('DOMContentLoaded', function () {
-    const API_URL = 'http://localhost:process.env.PORT || 3000';
+    const API_URL = 'https://paint-site-vty0.onrender.com/api';
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -105,4 +105,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initHeaderWidget();
 });
+
 
