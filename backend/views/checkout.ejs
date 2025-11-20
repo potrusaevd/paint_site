@@ -1,73 +1,230 @@
-
-    <main class="checkout-main">
-        <div class="container">
-            <h1 class="checkout-title">Оформление заказа</h1>
-
-            <div class="checkout-layout">
-                <section class="checkout-form-section">
-                    <form id="checkoutForm" class="checkout-form">
-                        
-                        <div class="form-block">
-                            <h3>1. Контактная информация</h3>
-                            <div class="form-group">
-                                <label for="customerName">Ваше имя</label>
-                                <input type="text" id="customerName" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="customerEmail">Email</label>
-                                <input type="email" id="customerEmail" required>
-                            </div>
-                        </div>
-
-                        <div class="form-block">
-                            <h3>2. Адрес доставки</h3>
-                            <div id="savedAddresses" class="saved-addresses">
-                                
-                            </div>
-                            <div class="form-group">
-                                <label for="addressCity">Город</label>
-                                <input type="text" id="addressCity" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="addressStreet">Улица, дом, квартира</label>
-                                <input type="text" id="addressStreet" required>
-                            </div>
-                        </div>
-
-                        <div class="form-block">
-                            <h3>3. Способ оплаты</h3>
-                            <div class="payment-options">
-                                <label><input type="radio" name="payment" value="card_online" checked><span>Картой онлайн</span></label>
-                                <label><input type="radio" name="payment" value="card_on_delivery"><span>Картой при получении</span></label>
-                                <label><input type="radio" name="payment" value="cash_on_delivery"><span>Наличными при получении</span></label>
-                            </div>
-                        </div>
-
-                    </form>
-                </section>
-
-                <aside class="checkout-summary-section">
-                    <div class="summary-block">
-                        <h3>Ваш заказ</h3>
-                        <div id="summaryItems" class="summary-items">
-                            
-                            <div class="loader"></div>
-                        </div>
-                        <div class="summary-total">
-                            <span>Итого:</span>
-                            <span id="summaryTotal">0 ₽</span>
-                        </div>
-                        <button type="submit" form="checkoutForm" class="btn btn-primary btn-place-order">Подтвердить заказ</button>
-                    </div>
-                </aside>
+<main class="checkout-main">
+    <div class="checkout-container">
+        <!-- Левая часть: Форма -->
+        <section class="checkout-form-section">
+            <h1 class="checkout-title">Оформление заявки</h1>
+            <div class="checkout-steps">
+                <div class="step active">1. Информация</div>
+                <div class="step">2. Доставка и оплата</div>
+                <div class="step">3. Подтверждение</div>
             </div>
-        </div>
-    </main>
 
+            <form id="checkoutForm" class="checkout-form">
+                <!-- === ШАГ 1: ИНФОРМАЦИЯ === -->
+                <div id="infoStep">
+                    <!-- Контактное лицо -->
+                    <div class="form-block">
+                        <h3>Контактное лицо</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="customerName">ФИО представителя *</label>
+                                <input type="text" id="customerName" placeholder="Иванов Иван Иванович" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerPosition">Должность</label>
+                                <input type="text" id="customerPosition" placeholder="Менеджер по закупкам">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="customerPhone">Телефон *</label>
+                                <input type="tel" id="customerPhone" placeholder="+7 (999) 123-45-67" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerEmail">Email *</label>
+                                <input type="email" id="customerEmail" placeholder="ivanov@company.ru" required>
+                            </div>
+                        </div>
+                    </div>
 
-    <footer class="footer">
-        <div class="container footer__content">
-            <p>&copy; 2025 Lime Details. Все права защищены.</p>
-            <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
-        </div>
-    </footer>
+                    <!-- Данные компании -->
+                    <div class="form-block">
+                        <h3>Реквизиты компании</h3>
+                        <div class="form-group">
+                            <label for="companyName">Название организации *</label>
+                            <input type="text" id="companyName" placeholder='ООО "Компания"' required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="companyInn">ИНН *</label>
+                                <input type="text" id="companyInn" placeholder="1234567890" maxlength="12" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="companyKpp">КПП</label>
+                                <input type="text" id="companyKpp" placeholder="123456789" maxlength="9">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="companyLegalAddress">Юридический адрес</label>
+                            <input type="text" id="companyLegalAddress" placeholder="г. Минск, ул. Ленина, д. 1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- === ШАГ 2: ДОСТАВКА И ОПЛАТА === -->
+                <div id="paymentStep" style="display: none;">
+                    <!-- Адрес доставки -->
+                    <div class="form-block">
+                        <h3>Адрес доставки груза</h3>
+                        <div id="savedAddressesLoader" class="loader">Загрузка адресов...</div>
+                        <div id="savedAddresses" class="saved-addresses" style="display: none;"></div>
+                        <a href="#" class="add-link">+ Добавить новый адрес доставки</a>
+                        
+                        <!-- Дополнительные параметры доставки -->
+                        <div class="delivery-options">
+                            <div class="form-group">
+                                <label for="deliveryDate">Желаемая дата доставки</label>
+                                <input type="date" id="deliveryDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="deliveryTime">Желаемое время</label>
+                                <select id="deliveryTime">
+                                    <option value="">Не указано</option>
+                                    <option value="morning">Утро (9:00 - 12:00)</option>
+                                    <option value="afternoon">День (12:00 - 15:00)</option>
+                                    <option value="evening">Вечер (15:00 - 18:00)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deliveryComment">Комментарий к доставке</label>
+                            <textarea id="deliveryComment" placeholder="Например: необходима разгрузка, склад работает с 9 до 18"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Способ оплаты -->
+                    <div class="form-block">
+                        <h3>Условия оплаты</h3>
+                        <div class="saved-addresses payment-methods">
+                            <label class="saved-address-label payment-method selected">
+                                <input type="radio" name="payment_method" value="invoice" checked>
+                                <div>
+                                    <div class="address-type">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                            <line x1="2" y1="10" x2="22" y2="10"/>
+                                        </svg>
+                                        Оплата по счёту
+                                    </div>
+                                    <div class="address-details">Выставим счёт после подтверждения заявки менеджером. Стандартная отсрочка платежа.</div>
+                                </div>
+                            </label>
+
+                            <label class="saved-address-label payment-method">
+                                <input type="radio" name="payment_method" value="prepayment">
+                                <div>
+                                    <div class="address-type">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <polyline points="12 6 12 12 16 14"/>
+                                        </svg>
+                                        Предоплата 100%
+                                    </div>
+                                    <div class="address-details">Оплата до отгрузки товара. Доступна скидка 3% при полной предоплате.</div>
+                                </div>
+                            </label>
+
+                            <label class="saved-address-label payment-method">
+                                <input type="radio" name="payment_method" value="partial">
+                                <div>
+                                    <div class="address-type">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                        </svg>
+                                        Частичная предоплата
+                                    </div>
+                                    <div class="address-details">50% предоплата, 50% в течение 14 дней после получения товара.</div>
+                                </div>
+                            </label>
+
+                            <label class="saved-address-label payment-method">
+                                <input type="radio" name="payment_method" value="postpayment">
+                                <div>
+                                    <div class="address-type">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                            <polyline points="7 10 12 15 17 10"/>
+                                            <line x1="12" y1="15" x2="12" y2="3"/>
+                                        </svg>
+                                        Постоплата
+                                    </div>
+                                    <div class="address-details">Оплата в течение 30 дней после получения товара. Для постоянных клиентов.</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Дополнительные требования -->
+                    <div class="form-block">
+                        <h3>Дополнительная информация</h3>
+                        <div class="form-group">
+                            <label for="orderComment">Комментарий к заявке</label>
+                            <textarea id="orderComment" placeholder="Укажите особые требования, номер договора, реквизиты для выставления счёта и т.д."></textarea>
+                        </div>
+                        
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="needDocuments">
+                                <span>Необходимы сертификаты и документация на продукцию</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="urgentOrder">
+                                <span>Срочная заявка (обработка в приоритетном порядке)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кнопка отправки -->
+                <button type="submit" class="btn-place-order" id="checkoutNextBtn">
+                    Перейти к доставке и оплате
+                </button>
+            </form>
+        </section>
+
+        <!-- Правая часть: Сводка заявки -->
+        <section class="checkout-summary-section">
+            <h2 class="summary-title">Сводка заявки</h2>
+            <div id="summaryItems" class="summary-items">
+                <div class="loader">Загрузка...</div>
+            </div>
+            
+            <div class="price-details">
+                <div class="price-row">
+                    <span>Сумма по товарам</span>
+                    <strong id="summarySubtotal">0 ₽</strong>
+                </div>
+                <div class="price-row">
+                    <span>НДС (20%)</span>
+                    <strong id="summaryVat">0 ₽</strong>
+                </div>
+                <div class="price-row">
+                    <span>Доставка</span>
+                    <strong>Рассчитывается индивидуально</strong>
+                </div>
+                <div class="price-row price-total">
+                    <span>Итого к оплате</span>
+                    <strong id="summaryTotal">0 ₽</strong>
+                </div>
+            </div>
+            
+            <div class="discount-code">
+                <input type="text" id="promoCode" placeholder="Промокод или номер договора"> 
+                <button class="btn-apply" type="button">Применить</button>
+            </div>
+
+            <div class="b2b-notice">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <p>Окончательная стоимость и условия будут согласованы с менеджером в течение 1 рабочего дня.</p>
+            </div>
+        </section>
+    </div>
+</main>
