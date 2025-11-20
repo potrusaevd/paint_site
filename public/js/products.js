@@ -7,7 +7,7 @@ if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://localhost:process.env.PORT || 3000/api';
+    const API_URL = 'https://paint-site-vty0.onrender.com/api';
     
     // --- Глобальные переменные ---
     let allProducts = [];
@@ -561,4 +561,5 @@ window.closeDetailsModal = function() {
     initializeFilters();
     applyFiltersAndSort();
 });
+
 
