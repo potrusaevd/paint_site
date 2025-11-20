@@ -30,7 +30,7 @@ app.use(helmet({
 
             imgSrc: ["'self'", "data:", "https://www.iphones.ru", "https://images.unsplash.com"],
 
-            connectSrc: ["'self'", "http://localhost:process.env.PORT || 3000"]
+            connectSrc: ["'self'", "http://localhost:10000/api/login"]
         }
     }
 }));
@@ -1125,5 +1125,6 @@ app.listen(port, () => {
     console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
+
 
 
