@@ -102,6 +102,45 @@
     max-height: 100%;
 }
 
+/* Контролы для графика */
+.chart-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chart-mode-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+}
+
+.chart-mode-btn:hover {
+    background: var(--bg-main);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.chart-mode-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.chart-mode-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
 /* Сетка для двух колонок */
 .dashboard-grid {
     display: grid;
