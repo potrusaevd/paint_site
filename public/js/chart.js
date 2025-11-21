@@ -99,6 +99,23 @@
                 <div class="dashboard-section">
                     <div class="section-header">
                         <h4>Динамика потребления</h4>
+                        <div class="chart-controls" id="chartInterpolationControls">
+                            <button class="chart-mode-btn active" data-mode="monotone" title="Плавная кривая">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 17 L9 9 L15 13 L21 3"></path>
+                                </svg>
+                            </button>
+                            <button class="chart-mode-btn" data-mode="default" title="Линейная">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 17 L9 9 L15 13 L21 3" stroke-linecap="square"></path>
+                                </svg>
+                            </button>
+                            <button class="chart-mode-btn" data-mode="stepped" title="Ступенчатая">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 17 L3 9 L9 9 L9 13 L15 13 L15 3 L21 3"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="chart-container">
                         <canvas id="consumptionChart"></canvas>
@@ -159,7 +176,7 @@
     }
 
     /**
-     * Инициализация графика потребления (Bar Chart)
+     * Инициализация графика потребления (Line Chart с интерполяцией)
      */
     function initConsumptionChart(data) {
         const canvas = document.getElementById('consumptionChart');
@@ -175,30 +192,56 @@
         const labels = data.map(item => item.month || '');
         const values = data.map(item => item['Сумма заказов'] || 0);
 
+        // Создаем градиент для заливки
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+        gradient.addColorStop(0.5, 'rgba(59, 130, 246, 0.2)');
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
         consumptionChart = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Сумма заказов',
                     data: values,
-                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    backgroundColor: gradient,
                     borderColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 2,
-                    borderRadius: 8
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4, // Плавная кривая (cubic interpolation)
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointHoverBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
                     legend: {
                         display: false
                     },
                     tooltip: {
+                        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                        titleColor: '#f1f5f9',
+                        bodyColor: '#e2e8f0',
+                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: false,
                         callbacks: {
                             label: function(context) {
-                                return formatCurrency(context.parsed.y);
+                                return 'Сумма: ' + formatCurrency(context.parsed.y);
                             }
                         }
                     }
@@ -210,17 +253,32 @@
                             callback: function(value) {
                                 return formatCurrency(value);
                             },
-                            color: '#94a3b8'
+                            color: '#94a3b8',
+                            font: {
+                                size: 11
+                            },
+                            padding: 8
                         },
                         grid: {
-                            color: 'rgba(148, 163, 184, 0.1)'
+                            color: 'rgba(148, 163, 184, 0.08)',
+                            drawBorder: false
+                        },
+                        border: {
+                            display: false
                         }
                     },
                     x: {
                         ticks: {
-                            color: '#94a3b8'
+                            color: '#94a3b8',
+                            font: {
+                                size: 11
+                            },
+                            padding: 8
                         },
                         grid: {
+                            display: false
+                        },
+                        border: {
                             display: false
                         }
                     }
@@ -312,7 +370,7 @@
     function formatCurrency(number) {
         return new Intl.NumberFormat('ru-RU', {
             style: 'currency',
-            currency: 'RUB',
+            currency: 'RUB', 
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         }).format(number);
