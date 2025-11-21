@@ -3,7 +3,7 @@
 (function() {
     'use strict';
 
-    const API_URL = 'http://localhost:3001/api';
+    const API_URL = 'https://paint-site-vty0.onrender.com/api';
     let consumptionChart = null;
     let coatingChart = null;
 
