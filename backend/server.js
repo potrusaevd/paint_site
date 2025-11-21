@@ -100,13 +100,6 @@ app.get("/", (req, res) => {
     });
 });
 
-app.get("/catalog", (req, res) => {
-    res.render("catalog", { 
-        title: "Каталог товаров - Lime Details",
-        pageStyles: ['/css/catalog.css'], 
-        pageScripts: ['/js/catalog.js']
-    });
-});
 
 app.get("/products", (req, res) => {
     res.render("products", { 
@@ -126,11 +119,11 @@ app.get('/auth', (req, res) => {
 app.get("/profile", (req, res) => {
     res.render("profile", { 
         title: "Профиль пользователя - Lime Details",
-        pageStyles: ['/css/profile.css'], 
-        pageScripts: ['/js/profile.js']
+        pageStyles: ['/css/profile.css', '/css/dashboard.css'], // <-- Добавить CSS
+        pageScripts: ['/js/profile.js', '/js/chart.js', 'https://cdn.jsdelivr.net/npm/chart.js'],  // <-- Добавить JS
+        bodyClass: 'page-profile'
     });
 });
-
 
 app.get("/checkout", (req, res) => {
     res.render("checkout", { 
@@ -1110,6 +1103,7 @@ app.listen(port, () => {
     console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
+
 
 
 
