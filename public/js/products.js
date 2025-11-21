@@ -7,8 +7,58 @@ if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://localhost:3001/api';
-    
+    const API_URL = 'https://paint-site-vty0.onrender.com/api';
+    const filtersContainer = document.querySelector('.products-filters');
+    if (filtersContainer) {
+        // Создаем кнопку для мобильных
+        const toggleBtn = document.createElement('button');
+        toggleBtn.innerHTML = 'Фильтры и поиск <span style="font-size: 12px">▼</span>';
+        toggleBtn.className = 'mobile-filter-toggle btn';
+        toggleBtn.style.cssText = `
+            width: 100%;
+            margin-bottom: 15px;
+            background: var(--bg-surface);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 12px;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+        `;
+        
+        // Вставляем кнопку перед фильтрами
+        filtersContainer.parentNode.insertBefore(toggleBtn, filtersContainer);
+
+        // Функция проверки ширины экрана
+        const checkMobile = () => {
+            if (window.innerWidth <= 1024) {
+                toggleBtn.style.display = 'flex';
+                // По умолчанию скрываем содержимое фильтров на мобильном
+                if (!filtersContainer.classList.contains('open')) {
+                    filtersContainer.style.display = 'none';
+                }
+            } else {
+                toggleBtn.style.display = 'none';
+                filtersContainer.style.display = 'block';
+            }
+        };
+
+        // Обработчик клика
+        toggleBtn.addEventListener('click', () => {
+            const isOpen = filtersContainer.style.display === 'block';
+            filtersContainer.style.display = isOpen ? 'none' : 'block';
+            filtersContainer.classList.toggle('open');
+            toggleBtn.innerHTML = isOpen 
+                ? 'Фильтры и поиск <span style="font-size: 12px">▼</span>' 
+                : 'Скрыть фильтры <span style="font-size: 12px">▲</span>';
+        });
+
+        // Слушаем ресайз
+        window.addEventListener('resize', checkMobile);
+        checkMobile(); // Запуск при загрузке
+    }
     // --- Глобальные переменные ---
     let allProducts = [];
     let filteredProducts = [];
@@ -106,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return filters;
     }
-
     /**
      * Отправляет запрос на сервер с фильтрами
      * @param {Object} filters - Объект фильтров
