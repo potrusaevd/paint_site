@@ -2,7 +2,7 @@
 // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И КОНСТАНТЫ
 // ===================================
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'https://paint-site-vty0.onrender.com/api';
 let ALL_ORDERS = [];    // Кэш для заказов
 let ALL_ADDRESSES = []; // Кэш для адресов
 
@@ -495,3 +495,4 @@ function initializeSecurity() {
         });
     }
 }
+
