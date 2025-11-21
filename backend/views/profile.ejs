@@ -1,202 +1,281 @@
 
-<main class="profile-main">
-    <div class="container">
+    
+    <main class="profile-main">
         <div class="profile-container">
             
+            <!-- Боковое меню -->
             <aside class="profile-sidebar">
-                <div class="profile-avatar">
-                    <img src="images/аватары/default-avatar.png" alt="Аватар пользователя" id="avatarImg">
-                    <button class="avatar-upload-btn" id="avatarUpload">
-                        <img src="images/иконки/upload_ico.webp" alt="Загрузить фото">
+                <div class="company-logo">
+                    <img src="https://via.placeholder.com/120" alt="Логотип компании" id="companyLogo">
+                    <button class="logo-upload-btn" id="logoUpload" title="Загрузить логотип">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
                     </button>
-                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                    <input type="file" id="logoInput" accept="image/*" style="display: none;">
                 </div>
                 
-                <div class="profile-username">
-                    <h2 id="usernameDisplay">Иван Петров</h2>
-                    <p class="user-email" id="profileUserEmail">ivan.petrov@email.com</p>
+                <div class="company-info">
+                    <h2 id="companyName">ООО "Прайм Топ"</h2>
+                    <p class="contact-person">Контактное лицо: <span id="contactPerson">Иванов Иван</span></p>
+                    <p class="user-email" id="profileUserEmail">ivan@primetop.ru</p>
                 </div>
 
                 <nav class="profile-nav">
                     <ul>
-                        <li><a href="#" class="nav-item active" data-tab="personal">Личные данные</a></li>
-                        <li><a href="#" class="nav-item" data-tab="orders">Мои заказы</a></li>
-                        <li><a href="#" class="nav-item" data-tab="favorites">Избранное</a></li>
-                        <li><a href="#" class="nav-item" data-tab="addresses">Адреса доставки</a></li>
-                        <li><a href="#" class="nav-item" data-tab="notifications">Уведомления</a></li>
-                        <li><a href="#" class="nav-item" data-tab="security">Безопасность</a></li>
+                        <li>
+                            <a href="#dashboard" class="nav-item active" data-tab="dashboard">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="7" height="9"></rect>
+                                    <rect x="14" y="3" width="7" height="5"></rect>
+                                    <rect x="14" y="12" width="7" height="9"></rect>
+                                    <rect x="3" y="16" width="7" height="5"></rect>
+                                </svg>
+                                Панель управления
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#orders" class="nav-item" data-tab="orders">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                </svg>
+                                Мои заказы
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#stock" class="nav-item" data-tab="stock">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                </svg>
+                                Остатки на складе
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#company" class="nav-item" data-tab="company">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                                Реквизиты и адреса
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#security" class="nav-item" data-tab="security">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                                Безопасность
+                            </a>
+                        </li>
                     </ul>
                 </nav>
+
+                <button class="btn btn-logout" id="logoutBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Выход
+                </button>
             </aside>
 
+            <!-- Основной контент -->
             <section class="profile-content">
                 
-                <div class="tab-content active" id="personal">
+                <!-- Панель управления -->
+                <div class="tab-content active" id="dashboard">
                     <div class="content-header">
-                        <h3>Личные данные</h3>
-                        <button class="btn btn-secondary" id="editProfileBtn">Редактировать</button>
+                        <h3>Панель управления</h3>
+                        <div class="header-actions">
+                            <button class="btn btn-outline" onclick="window.location.href='/products'">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Сформировать заявку
+                            </button>
+                        </div>
                     </div>
-                    
-                    <form class="profile-form" id="personalDataForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="firstName">Имя</label>
-                                <input type="text" id="firstName" value="Иван" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label for="lastName">Фамилия</label>
-                                <input type="text" id="lastName" value="Петров" readonly>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" id="email" value="ivan.petrov@email.com" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label for="birthDate">Дата рождения</label>
-                                <input type="date" id="birthDate" value="1990-05-15" readonly>
-                            </div>
-                        </div>
 
-                        <div class="form-row">
-                             <div class="form-group">
-                                <label for="gender">Пол</label>
-                                <select id="gender" disabled>
-                                    <option value="male" selected>Мужской</option>
-                                    <option value="female">Женский</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="form-actions" id="formActions" style="display: none;">
-                            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-                            <button type="button" class="btn btn-secondary" id="cancelEditBtn">Отмена</button>
-                        </div>
-                    </form>
+                    <div id="react-dashboard-root">
+                        <div class="loading-placeholder">Загрузка аналитики...</div>
+                    </div>
                 </div>
-
+                <!-- Мои заказы -->
                 <div class="tab-content" id="orders">
                     <div class="content-header">
-                        <h3>Мои заказы</h3>
-                        <div class="orders-filter">
-                            <select id="orderStatusFilter">
+                        <h3>История заказов</h3>
+                        <div class="header-filters">
+                            <input type="text" placeholder="Поиск по номеру..." id="orderSearchInput" class="search-input">
+                            <select id="orderStatusFilter" class="filter-select">
                                 <option value="all">Все заказы</option>
-                                <option value="processing">В обработке</option>
-                                <option value="shipped">Отправлен</option>
+                                <option value="processing">В производстве</option>
+                                <option value="shipped">Отгружен</option>
                                 <option value="delivered">Доставлен</option>
                                 <option value="cancelled">Отменен</option>
                             </select>
                         </div>
                     </div>
                     <div class="orders-list" id="ordersListContainer">
-                        
+                        <div class="loading-placeholder">Загрузка заказов...</div>
                     </div>
                 </div>
 
-                <div class="tab-content" id="favorites">
+                <!-- Остатки на складе -->
+                <div class="tab-content" id="stock">
                     <div class="content-header">
-                        <h3>Избранные товары</h3>
-                        <button class="btn btn-secondary" id="clearFavoritesBtn">Очистить избранное</button>
+                        <h3>Остатки на складе</h3>
+                        <div class="header-tabs">
+                            <button class="tab-btn active" data-stock-tab="reserved">Мои зарезервированные</button>
+                            <button class="tab-btn" data-stock-tab="available">Свободные остатки</button>
+                        </div>
                     </div>
-                    <div class="favorites-grid">
-                        <div class="favorite-item">
-                            <img src="images/карусель/5w-30_ravenol.webp" alt="Товар">
-                            <div class="favorite-info">
-                                <h4>Масло Ravenol 5W-30</h4>
-                                <p class="favorite-price">8700 ₽</p>
-                                <div class="favorite-actions">
-                                    <button class="btn btn-primary">В корзину</button>
-                                    <button class="btn btn-outline favorite-remove">Удалить</button>
+                    
+                    <div class="stock-filters">
+                        <input type="text" placeholder="Поиск по наименованию..." id="stockSearchInput" class="search-input">
+                        <select id="coatingFilter" class="filter-select">
+                            <option value="">Все покрытия</option>
+                            <option value="polyester">Эмаль полиэфирная</option>
+                            <option value="primer">Грунтовка</option>
+                        </select>
+                    </div>
+
+                    <div class="stock-content">
+                        <div class="stock-tab-content active" id="stockReserved">
+                            <div class="stock-table-wrapper">
+                                <table class="stock-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Наименование</th>
+                                            <th>Серия партии</th>
+                                            <th>Цвет (RAL)</th>
+                                            <th>Покрытие</th>
+                                            <th>Количество (кг)</th>
+                                            <th>Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reservedStockBody">
+                                        <tr><td colspan="6" class="loading-placeholder">Загрузка...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="stock-tab-content" id="stockAvailable">
+                            <div class="stock-table-wrapper">
+                                <table class="stock-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Наименование</th>
+                                            <th>Серия партии</th>
+                                            <th>Цвет (RAL)</th>
+                                            <th>Покрытие</th>
+                                            <th>Количество (кг)</th>
+                                            <th>Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="availableStockBody">
+                                        <tr><td colspan="6" class="loading-placeholder">Загрузка...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Реквизиты и адреса -->
+                <div class="tab-content" id="company">
+                    <div class="content-header">
+                        <h3>Данные компании</h3>
+                    </div>
+
+                    <div class="company-sections">
+                        <!-- Реквизиты -->
+                        <div class="company-section">
+                            <div class="section-header">
+                                <h4>Реквизиты</h4>
+                                <button class="btn btn-outline btn-sm" id="contactManagerBtn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                    Связаться с менеджером
+                                </button>
+                            </div>
+                            
+                            <div class="requisites-grid">
+                                <div class="requisite-item">
+                                    <label>Название организации</label>
+                                    <p id="orgName">-</p>
+                                </div>
+                                <div class="requisite-item">
+                                    <label>ИНН</label>
+                                    <p id="orgInn">-</p>
+                                </div>
+                                <div class="requisite-item">
+                                    <label>КПП</label>
+                                    <p id="orgKpp">-</p>
+                                </div>
+                                <div class="requisite-item full-width">
+                                    <label>Юридический адрес</label>
+                                    <p id="orgAddress">-</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="tab-content" id="addresses">
-                    <div class="content-header">
-                        <h3>Адреса доставки</h3>
-                        <button class="btn btn-primary" id="addAddressBtn">Добавить адрес</button>
-                    </div>
-                    <div class="addresses-list" id="addressesListContainer">
-
-                    </div>
-                </div>
-
-                <div class="tab-content" id="notifications">
-                    <div class="content-header">
-                        <h3>Настройки уведомлений</h3>
-                    </div>
-                    <div class="notifications-settings">
-                        <div class="notification-item">
-                            <div class="notification-info">
-                                <h4>Email уведомления</h4>
-                                <p>Получать уведомления о статусе заказов и акциях</p>
+                        <!-- Адреса доставки -->
+                        <div class="company-section">
+                            <div class="section-header">
+                                <h4>Адреса доставки</h4>
+                                <button class="btn btn-primary btn-sm" id="addAddressBtn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    Добавить адрес
+                                </button>
                             </div>
-                            <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="notification-item">
-                            <div class="notification-info">
-                                <h4>Push-уведомления в браузере</h4>
-                                <p>Получать мгновенные оповещения (скоро)</p>
+                            <div class="addresses-list" id="addressesListContainer">
+                                <div class="loading-placeholder">Загрузка адресов...</div>
                             </div>
-                            <label class="toggle-switch"><input type="checkbox" ><span class="slider"></span></label>
                         </div>
                     </div>
                 </div>
 
+                <!-- Безопасность -->
                 <div class="tab-content" id="security">
                     <div class="content-header">
                         <h3>Безопасность</h3>
                     </div>
-                    <div class="scrollable-content">
-                    <form class="profile-form" id="passwordChangeForm">
+
+                    <div class="security-section">
                         <h4>Смена пароля</h4>
-                        <div class="form-group">
-                            <label for="currentPassword">Текущий пароль</label>
-                            <input type="password" id="currentPassword" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="newPassword">Новый пароль</label>
-                            <input type="password" id="newPassword" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmNewPassword">Подтвердите новый пароль</label>
-                            <input type="password" id="confirmNewPassword" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Сменить пароль</button>
-                    </form>
-                    <hr class="form-divider">
-                    <div class="security-options">
-                        <h4>Дополнительные настройки</h4>
-                        <div class="notification-item">
-                            <div class="notification-info">
-                                <h4>Номер телефона</h4>
-                                <p>Не привязан. <a href="#" class="link">Привязать номер</a></p>
+                        <form class="security-form" id="passwordChangeForm">
+                            <div class="form-group">
+                                <label for="currentPassword">Текущий пароль</label>
+                                <input type="password" id="currentPassword" required>
                             </div>
-                        </div>
-                        <div class="notification-item">
-                            <div class="notification-info">
-                                <h4>Двухфакторная аутентификация</h4>
-                                <p>Защитите свой аккаунт (скоро)</p>
+                            <div class="form-group">
+                                <label for="newPassword">Новый пароль</label>
+                                <input type="password" id="newPassword" required minlength="6">
+                                <small>Минимум 6 символов</small>
                             </div>
-                            <label class="toggle-switch"><input type="checkbox" disabled><span class="slider"></span></label>
-                        </div>
+                            <div class="form-group">
+                                <label for="confirmNewPassword">Подтвердите новый пароль</label>
+                                <input type="password" id="confirmNewPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Сменить пароль</button>
+                        </form>
                     </div>
-                    </div>
-                </div>
 
             </section>
         </div>
-    </div>
-</main>
+    </main>
 
 
-    <footer class="footer">
-        <div class="container footer__content">
-            <p>&copy; 2025 Lime Details. Все права защищены.</p>
-            <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'">Политика конфиденциальности</a>
-        </div>
-    </footer>
