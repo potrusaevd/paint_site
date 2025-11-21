@@ -446,10 +446,79 @@ body {
    =================================== */
 @media (max-width: 1024px) {
     .page-wrapper { grid-template-columns: 1fr; }
-    .products-filters { display: none; }
+    
 }
 
 @media (max-width: 768px) {
     .products-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 80px 16px; }
     .pagination { flex-wrap: wrap; }
+}
+/* ===================================
+   АДАПТИВНОСТЬ (ИСПРАВЛЕННАЯ)
+   =================================== */
+
+/* Планшеты и маленькие ноутбуки */
+@media (max-width: 1024px) {
+    .page-wrapper {
+        display: block; /* Отключаем сетку, элементы идут друг за другом */
+        margin-top: 80px; /* Чуть меньше отступ сверху */
+    }
+
+    /* Стиль фильтров для мобильных */
+    .products-filters {
+        position: relative; /* Отключаем липкое позиционирование */
+        top: 0;
+        width: 95%; /* На всю ширину */
+        max-width: none;
+        max-height: none; /* Убираем скролл внутри блока, пусть скроллится страница */
+        overflow-y: visible;
+        margin-bottom: 32px; /* Отступ от фильтров до товаров */
+        border-right: 1px solid var(--border-color);
+        border-left: 1px solid var(--border-color);
+        border-radius: var(--border-radius-sm);
+        z-index: 1; /* Чтобы не перекрывали модальные окна */
+    }
+
+    .products-section {
+        min-height: auto;
+    }
+}
+
+/* Мобильные телефоны */
+@media (max-width: 768px) {
+    .page-wrapper {
+        padding: 0 16px;
+        margin-top: 90px;
+    }
+
+    .products-filters {
+        padding: 16px;
+    }
+
+    .products-grid {
+        /* Изменяем minmax на 100%, чтобы на узких экранах карточка была во всю ширину */
+        grid-template-columns: 1fr; 
+        gap: 24px; /* Оптимальный отступ */
+        margin-bottom: 40px;
+    }
+
+    .product-card {
+        /* Убираем лишние эффекты наведения на тач-скринах */
+        transform: none !important; 
+    }
+    
+    .card-image {
+        height: 200px; /* Чуть больше картинка на мобильном */
+    }
+
+    .pagination {
+        margin-top: 32px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    /* Скрываем ненужные элементы пагинации на совсем маленьких экранах */
+    .pagination__item:nth-child(n+6):nth-last-child(n+2) {
+        display: none;
+    }
 }
