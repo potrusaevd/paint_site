@@ -207,6 +207,72 @@ window.addEventListener('load', () => {
         }, 250);
     });
 
+    const projectsCarouselContainer = document.querySelector('.projects-carousel .carousel-track-container');
+    const certificatesCarouselContainer = document.querySelector('.certificates-carousel .certificates-track-container');
+
+    // Создаем "наблюдателя" за изменением размеров
+    const resizeObserver = new ResizeObserver(entries => {
+        // Эта функция будет вызываться только когда размер изменится, без лишних срабатываний
+        for (let entry of entries) {
+            // Recalculate for projects carousel
+            if (entry.target === projectsCarouselContainer) {
+                slidesToShow = getSlidesToShow();
+                maxIndex = Math.max(0, totalSlides - slidesToShow);
+                currentSlideIndex = Math.min(currentSlideIndex, maxIndex);
+                createDots();
+                updateCarousel();
+            }
+
+            // Recalculate for certificates carousel
+            if (entry.target === certificatesCarouselContainer) {
+                certsSlidesToShow = getCertsSlidesToShow();
+                maxCertIndex = Math.max(0, totalCerts - certsSlidesToShow);
+                currentCertIndex = Math.min(currentCertIndex, maxCertIndex);
+                createCertDots();
+                updateCertificatesCarousel();
+            }
+        }
+    });
+
+    // "Подписываем" наблюдателя на контейнеры наших каруселей
+    if (projectsCarouselContainer) {
+        resizeObserver.observe(projectsCarouselContainer);
+    }
+    if (certificatesCarouselContainer) {
+        resizeObserver.observe(certificatesCarouselContainer);
+    }
+
+
+    // УЛУЧШЕННЫЕ ФУНКЦИИ РАСЧЕТА (добавь их тоже)
+    function getSlidesToShow() {
+        const container = document.querySelector('.projects-carousel .carousel-track-container');
+        const firstSlide = carouselSlides[0];
+        if (!container || !firstSlide) return 1; // Возвращаем 1 по умолчанию, если что-то пошло не так
+
+        const containerWidth = container.offsetWidth;
+        const slideWidth = firstSlide.offsetWidth;
+        
+        // Проверка, чтобы избежать деления на ноль
+        if (slideWidth === 0) return 1;
+
+        // 24 - это ваш отступ (gap)
+        return Math.max(1, Math.floor(containerWidth / (slideWidth + 24))); 
+    }
+
+    function getCertsSlidesToShow() {
+        const container = document.querySelector('.certificates-carousel .certificates-track-container');
+        const firstSlide = certificatesSlides[0];
+        if (!container || !firstSlide) return 1;
+
+        const containerWidth = container.offsetWidth;
+        const slideWidth = firstSlide.offsetWidth;
+
+        if (slideWidth === 0) return 1;
+
+        // 30 - это ваш отступ (gap)
+        return Math.max(1, Math.floor(containerWidth / (slideWidth + 30)));
+    }
+
     // Copy email
     if (copyEmailBtn) {
         copyEmailBtn.addEventListener('click', () => {
@@ -233,7 +299,7 @@ window.addEventListener('load', () => {
         });
     };
 
- 
+
 
     // Parallax
     const updateParallax = () => {
@@ -434,6 +500,44 @@ window.addEventListener('load', () => {
         targetX = nearestPanel * panelWidth;
         startAnimation();
     };
+
+    // --- НОВЫЙ БЛОК: ЛОГИКА ПРОСМОТРА СЕРТИФИКАТОВ ---
+
+    const imageViewer = document.getElementById('imageViewer');
+    const viewerContent = imageViewer.querySelector('.image-viewer-content');
+    const viewerCloseBtn = imageViewer.querySelector('.image-viewer-close');
+
+    // Функция для открытия окна просмотра
+    const openImageViewer = (src) => {
+        viewerContent.src = src;
+        imageViewer.classList.add('show');
+    };
+
+    // Функция для закрытия
+    const closeImageViewer = () => {
+        imageViewer.classList.remove('show');
+    };
+
+    // Вешаем один слушатель на всю карусель (делегирование событий)
+    if (certificatesTrack) {
+        certificatesTrack.addEventListener('click', (e) => {
+            // Ищем, был ли клик по картинке внутри слайда
+            const image = e.target.closest('.certificate-image img');
+            if (image) {
+                e.preventDefault(); // Предотвращаем стандартное действие, если картинка обернута в ссылку
+                openImageViewer(image.src);
+            }
+        });
+    }
+
+    // Обработчики закрытия
+    viewerCloseBtn.addEventListener('click', closeImageViewer);
+    imageViewer.addEventListener('click', (e) => {
+        // Закрываем, если клик был по фону, а не по самой картинке
+        if (e.target === imageViewer) {
+            closeImageViewer();
+        }
+    });
 
     // Event listeners
     pageContainer.addEventListener('wheel', handleWheel, { passive: false });
