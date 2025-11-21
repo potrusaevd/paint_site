@@ -28,8 +28,6 @@ app.use(helmet({
 
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
 
-            crossOriginResourcePolicy: false,
-
             imgSrc: ["'self'", "data:", "https://www.iphones.ru", "https://images.unsplash.com", "https://via.placeholder.com/120"],
 
             connectSrc: ["'self'", "https://my-backend.onrender.com/api/login"]
@@ -1187,4 +1185,5 @@ app.listen(port, () => {
     console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
+
 
