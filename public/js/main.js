@@ -1,56 +1,3 @@
-// ==========================================================
-// --- ГЛОБАЛЬНЫЙ МЕНЕДЖЕР ИЗБРАННОГО ---
-// ==========================================================
-window.FavoriteManager = {
-    async syncFavoriteStatus() {
-        if (!localStorage.getItem('accessToken')) return;
-        try {
-            const API_URL = 'http://localhost:3000/api';
-            const response = await fetch(`${API_URL}/favorites/ids`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
-            });
-            if (!response.ok) return;
-            const favoriteIds = await response.json();
-            const favoriteIdSet = new Set(favoriteIds);
-            document.querySelectorAll('.favorite-checkbox').forEach(checkbox => {
-                const productId = parseInt(checkbox.dataset.productId, 10);
-                if (!isNaN(productId)) {
-                    checkbox.checked = favoriteIdSet.has(productId);
-                }
-            });
-        } catch (error) {
-            console.error("Ошибка при синхронизации статуса избранного:", error);
-        }
-    },
-    async toggleFavorite(productId, checkbox) {
-        if (!localStorage.getItem('accessToken')) {
-            showCustomAlert('Пожалуйста, войдите в аккаунт, чтобы управлять избранным.');
-            checkbox.checked = !checkbox.checked;
-            return;
-        }
-        const API_URL = 'http://localhost:3000/api';
-        try {
-            const response = await fetch(`${API_URL}/favorites/toggle`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                },
-                body: JSON.stringify({ productId: productId })
-            });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message || 'Ошибка сервера');
-            
-            document.querySelectorAll(`.favorite-checkbox[data-product-id="${productId}"]`).forEach(cb => {
-                cb.checked = (result.action === 'added');
-            });
-        } catch (error) {
-            console.error('Ошибка при переключении избранного:', error);
-            showCustomAlert('Ошибка: ' + error.message);
-            checkbox.checked = !checkbox.checked;
-        }
-    }
-};
 
 // ==========================================================
 // --- ГЛОБАЛЬНАЯ ФУНКЦИЯ ДОБАВЛЕНИЯ В КОРЗИНУ ---
@@ -124,18 +71,34 @@ window.addToCart = async (productId, event) => {
 // ==========================================================
 document.addEventListener('DOMContentLoaded', () => {
 
-        // Обработчик для кнопки "Оформить заказ"
-    document.querySelector('.btn-checkout')?.addEventListener('click', () => {
-        // Проверяем, есть ли товары в корзине
-        const totalSumText = document.getElementById('cartTotalSum')?.textContent || '0';
-        const totalSum = parseFloat(totalSumText.replace('₽', ''));
-        
-        if (totalSum > 0) {
-            window.location.href = '/checkout';
-        } else {
-            showCustomAlert('Ваша корзина пуста. Добавьте товары, чтобы оформить заказ.');
-        }
-    });
+
+    // --- ОБРАБОТЧИК ДЛЯ КНОПКИ "ОФОРМИТЬ" В КОРЗИНЕ ---
+    const checkoutBtn = document.querySelector('.btn-checkout');
+
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+            // ИЗМЕНЕНИЕ: Проверяем не сумму, а количество товаров
+            const cartItems = document.querySelectorAll('.cart-item');
+            const itemCount = cartItems.length;
+
+            console.log(`[DEBUG] Проверка количества товаров в корзине: ${itemCount}`);
+            
+            if (itemCount > 0) {
+                console.log('[DEBUG] Товары в корзине есть. Перенаправление на /checkout...');
+                window.location.href = '/checkout';
+            } else {
+                console.warn('[DEBUG] Корзина пуста.');
+                if (window.showCustomAlert) {
+                    window.showCustomAlert('Ваша заявка пуста. Добавьте товары, чтобы перейти к оформлению.', 'warning');
+                } else {
+                    alert('Ваша заявка пуста.');
+                }
+            }
+        });
+
+    } else {
+        console.error('[DEBUG] Кнопка .btn-checkout НЕ найдена на странице.');
+    }
 
 
 
@@ -369,19 +332,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+
+
     // --- Первоначальная загрузка корзины ---
     window.CartManager.refreshCart();
 
-    // --- ЕДИНЫЙ ОБРАБОТЧИК ДЛЯ ВСЕХ ЧЕКБОКСОВ ИЗБРАННОГО ---
-    document.body.addEventListener('change', async (e) => {
-        if (!e.target.classList.contains('favorite-checkbox')) return;
-        const checkbox = e.target;
-        const productId = parseInt(checkbox.dataset.productId, 10);
-        if (isNaN(productId)) return;
-        await window.FavoriteManager.toggleFavorite(productId, checkbox);
-    });
 
-    // --- ПЕРВИЧНАЯ СИНХРОНИЗАЦИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ---
-    window.FavoriteManager.syncFavoriteStatus();
-    
 });
