@@ -1,4 +1,8 @@
-/* Center Menu */
+
+    /* ===================================
+   ЦЕНТРАЛЬНОЕ МЕНЮ
+   =================================== */
+
 .center-menu {
     position: fixed;
     top: 24px;
@@ -12,24 +16,6 @@
     padding: 12px 20px;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 999;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);/* ===================================
-   ЦЕНТРАЛЬНОЕ МЕНЮ
-   =================================== */
-
-.center-menu {
-    position: fixed;
-    top: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(15, 23, 42, 0.7); /* Оставляем полупрозрачность */
-    backdrop-filter: blur(20px);
-    padding: 12px 20px;
-    border-radius: 50px;
-    border: 1px solid var(--border-color);
     z-index: 999;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -69,6 +55,20 @@
     display: none;
 }
 
+
+
+.center-menu-btn svg,
+.cart-menu-btn svg {
+    color: var(--text-primary); /* Используем переменную для основного светлого текста */
+    stroke: currentColor; /* Убеждаемся, что цвет обводки наследуется от родителя */
+}
+
+/* При наведении на любую кнопку, иконка внутри нее тоже будет менять цвет */
+.center-menu-btn:hover svg,
+.cart-menu-btn:hover svg {
+    color: var(--primary); /* Используем переменную для акцентного цвета */
+}
+
 /* ===================================
    БЛОК КОРЗИНЫ
    =================================== */
@@ -95,7 +95,7 @@
     align-items: center;
     justify-content: center;
     background: transparent;
-    border: none;
+    border: none; 
     color: var(--text-primary);
     padding: 10px;
     border-radius: 50%;
@@ -186,9 +186,7 @@
     opacity: 1;
     transform: scale(1.1);
 }
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    opacity: 1;
-}
+
 
 .center-menu.search-mode {
     padding: 12px;
@@ -214,38 +212,7 @@
     }
 }
 
-.center-menu-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: transparent;
-    border: none;
-    color: var(--color-text);
-    padding: 8px 16px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.3s;
-    white-space: nowrap;
-}
 
-.center-menu-btn:hover {
-    background: rgba(99, 102, 241, 0.2);
-    color: var(--color-accent);
-}
-
-.center-menu-btn svg {
-    flex-shrink: 0;
-}
-
-.search-btn {
-    padding: 8px;
-}
-
-.search-btn span {
-    display: none;
-}
 
 .cart {
     position: fixed;
@@ -313,7 +280,7 @@
     flex: 1;
     background: transparent;
     border: none;
-    color: var(--color-text);
+    color: var(--text-primary);
     font-size: 16px;
     outline: none;
     padding: 8px;
@@ -338,7 +305,7 @@
 .search-close-btn {
     background: none;
     border: none;
-    color: var(--color-text);
+    color: var(--text-primary);
     cursor: pointer;
     padding: 4px;
     display: flex;
@@ -364,3 +331,28 @@
     transform: scale(1.1);
 }
 
+/* ===================================
+   ЛЕВЫЙ БЛОК (КНОПКА НАЗАД)
+   =================================== */
+
+.header-left {
+    position: fixed;
+    top: 24px;
+    left: 5%; /* Отступ от левого края */
+    z-index: 9999;
+}
+
+.back-to-home-btn {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(20px);
+    padding: 12px 20px;
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Наследуем стили от .center-menu-btn, но можем переопределить при необходимости */
+.back-to-home-btn span {
+    font-weight: 500;
+}
