@@ -332,6 +332,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- НОВЫЙ БЛОК: ЛОГИКА ПЕРЕКЛЮЧАТЕЛЯ ТЕМЫ ---
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme');
+
+    // Применяем сохраненную тему при загрузке страницы
+    if (currentTheme === 'light') {
+        document.body.setAttribute('data-theme', 'light');
+    }
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            let newTheme;
+            // Переключаем атрибут
+            if (document.body.getAttribute('data-theme') === 'light') {
+                document.body.removeAttribute('data-theme');
+                newTheme = 'dark';
+            } else {
+                document.body.setAttribute('data-theme', 'light');
+                newTheme = 'light';
+            }
+            // Сохраняем выбор в localStorage
+            localStorage.setItem('theme', newTheme);
+        });
+    }
+
 
 
     // --- Первоначальная загрузка корзины ---
