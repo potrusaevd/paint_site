@@ -131,33 +131,13 @@ app.get("/profile", (req, res) => {
     });
 });
 
-app.get("/delivery", (req, res) => {
-    res.render("delivery", { 
-        title: "Оплата и доставка — Lime Details",
-        pageStyles: ['/css/info-page.css']
-    });
-});
-
-app.get("/warranty", (req, res) => {
-    res.render("warranty", { 
-        title: "Гарантия — Lime Details",
-        pageStyles: ['/css/info-page.css']
-    });
-});
-
-app.get("/support", (req, res) => {
-    res.render("support", { 
-        title: "Поддержка | Lime Details",
-        pageStyles: ['/css/support.css'],
-        pageScripts: ['/js/support.js']
-    });
-});
 
 app.get("/checkout", (req, res) => {
     res.render("checkout", { 
         title: "Оформление заказа - Lime Details",
         pageStyles: ['/css/checkout.css'],
-        pageScripts: ['/js/checkout.js']
+        pageScripts: ['/js/checkout.js'],
+        bodyClass: 'page-checkout' // <-- ДОБАВИТЬ ЭТОТ КЛАСС
     });
 });
 
@@ -1130,6 +1110,7 @@ app.listen(port, () => {
     console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
+
 
 
 
