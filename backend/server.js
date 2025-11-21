@@ -20,15 +20,15 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"],
 
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js", "https://cdn.skypack.dev/tweakpane@4.0.4", "https://cdn.skypack.dev/gsap@3.13.0/Draggable", "https://cdn.skypack.dev/gsap@3.13.0","https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js","https://cdn.jsdelivr.net/npm/chart.umd.min.js.map", "https://cdn.skypack.dev/tweakpane@4.0.4", "https://cdn.skypack.dev/gsap@3.13.0/Draggable", "https://cdn.skypack.dev/gsap@3.13.0","https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js", "https://cdn.jsdelivr.net/npm/chart.js"],
 
             scriptSrcAttr: ["'unsafe-inline'"],
 
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://unpkg.com/@tremor/react@latest/dist/tremor.css"],
 
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
 
-            imgSrc: ["'self'", "data:", "https://www.iphones.ru", "https://images.unsplash.com"],
+            imgSrc: ["'self'", "data:", "https://www.iphones.ru", "https://images.unsplash.com", "https://via.placeholder.com/120"],
 
             connectSrc: ["'self'", "https://my-backend.onrender.com/api/login"]
         }
@@ -133,6 +133,7 @@ app.get("/checkout", (req, res) => {
         bodyClass: 'page-checkout' // <-- ДОБАВИТЬ ЭТОТ КЛАСС
     });
 });
+
 
 
 // --- ОТКРЫТЫЕ API  ---
@@ -1086,6 +1087,87 @@ app.get('/api/stock-levels', authenticateToken, async (req, res) => {
     }
 });
 
+app.get('/api/analytics/dashboard', authenticateToken, async (req, res) => {
+    const { companyId } = req.user;
+
+    try {
+        const pool = await poolPromise;
+        const request = pool.request().input('CompanyID', sql.Int, companyId);
+
+        // Запрос 1: KPI-метрики
+        const metricsQuery = `
+            SELECT 
+                (SELECT COUNT(*) FROM Orders WHERE CompanyID = @CompanyID AND Status = 'В производстве') as activeOrders,
+                (SELECT SUM(Total) FROM Orders WHERE CompanyID = @CompanyID AND OrderDate >= DATEADD(year, -1, GETDATE())) as totalYearSum,
+                (SELECT AVG(Total) FROM Orders WHERE CompanyID = @CompanyID) as avgCheck;
+        `;
+
+        // Запрос 2: Динамика потребления за 6 месяцев
+        const consumptionQuery = `
+            SELECT 
+                FORMAT(OrderDate, 'MMM yyyy', 'ru-ru') as month,
+                SUM(Total) as total
+            FROM Orders
+            WHERE CompanyID = @CompanyID AND OrderDate >= DATEADD(month, -6, GETDATE())
+            GROUP BY FORMAT(OrderDate, 'MMM yyyy', 'ru-ru'), FORMAT(OrderDate, 'yyyy-MM')
+            ORDER BY FORMAT(OrderDate, 'yyyy-MM');
+        `;
+        
+        // Запрос 3: 3 последних активных заказа
+        const recentOrdersQuery = `
+            SELECT TOP 3 OrderID as id, OrderDate as date, Status as status, Total as total
+            FROM Orders
+            WHERE CompanyID = @CompanyID AND Status IN ('В производстве', 'Отгружен')
+            ORDER BY OrderDate DESC;
+        `;
+        
+        // НОВЫЙ ЗАПРОС 4: Распределение по типам покрытий
+        const coatingDistributionQuery = `
+            SELECT TOP 5 p.CoatingType as name, COUNT(oi.OrderItemID) as value
+            FROM OrderItems oi
+            JOIN Orders o ON oi.OrderID = o.OrderID
+            JOIN Products p ON oi.ProductName = p.ProductName -- Приблизительное соединение по имени
+            WHERE o.CompanyID = @CompanyID
+            GROUP BY p.CoatingType
+            ORDER BY value DESC;
+        `;
+
+        // Выполняем все запросы
+        const [metricsResult, consumptionResult, recentOrdersResult, coatingResult] = await Promise.all([
+            request.query(metricsQuery),
+            request.query(consumptionQuery),
+            request.query(recentOrdersQuery),
+            request.query(coatingDistributionQuery)
+        ]);
+        
+        const dashboardData = {
+        metrics: {
+            activeOrders: Number(metricsResult.recordset[0]?.activeOrders || 0),
+            totalYearSum: parseFloat(metricsResult.recordset[0]?.totalYearSum || 0),
+            avgCheck: parseFloat(metricsResult.recordset[0]?.avgCheck || 0)
+        },
+        // Убеждаемся, что категория называется именно так, как в <BarChart>
+        consumption: consumptionResult.recordset.map(r => ({ 
+            "month": r.month, 
+            "Сумма заказов": parseFloat(r.total || 0) 
+        })),
+        recentOrders: recentOrdersResult.recordset,
+        // Группируем дубликаты, если они есть
+        coatingDistribution: Object.values(coatingResult.recordset.reduce((acc, item) => {
+            acc[item.name] = acc[item.name] || { name: item.name, value: 0 };
+            acc[item.name].value += Number(item.value);
+            return acc;
+        }, {}))
+    };
+
+    res.json(dashboardData);
+
+    } catch (error) {
+        console.error('Ошибка при загрузке данных для дашборда:', error);
+        res.status(500).json({ message: 'Ошибка сервера при загрузке аналитики' });
+    }
+});
+
 
 // ===========================================
 // --- Обработка 404 и запуск сервера ---
@@ -1103,14 +1185,3 @@ app.listen(port, () => {
     console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
-
-
-
-
-
-
-
-
-
-
-
