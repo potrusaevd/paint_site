@@ -169,9 +169,132 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!validateName(e.target.value)) showError(e.target, 'Минимум 2 символа'); else showSuccess(e.target);
     });
 
+    // ==========================================================
+    // --- БЛОК 2: ЛОГИКА ЧЕКБОКСОВ ---
+    // ==========================================================
+    
+    // Функция "Запомнить меня" - сохраняет email в localStorage
+    const rememberMeCheckbox = document.getElementById('rememberMe');
+    const loginEmailInput = loginFormContainer.querySelector('input[name="email"]');
+    
+    // Проверяем, сохранен ли email при загрузке страницы
+    if (rememberMeCheckbox && loginEmailInput) {
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        if (savedEmail) {
+            loginEmailInput.value = savedEmail;
+            rememberMeCheckbox.checked = true;
+        }
+        
+        // Обработчик изменения чекбокса
+        rememberMeCheckbox.addEventListener('change', function() {
+            if (this.checked && loginEmailInput.value) {
+                localStorage.setItem('rememberedEmail', loginEmailInput.value);
+            } else {
+                localStorage.removeItem('rememberedEmail');
+            }
+        });
+        
+        // Сохраняем email при вводе, если чекбокс активен
+        loginEmailInput.addEventListener('input', function() {
+            if (rememberMeCheckbox.checked && this.value) {
+                localStorage.setItem('rememberedEmail', this.value);
+            }
+        });
+    }
+    
+    // Чекбокс условий использования - просто валидация
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    if (termsCheckbox) {
+        termsCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Убираем ошибку, если была
+                clearError(this);
+            }
+        });
+    }
 
     // ==========================================================
-    // --- БЛОК 2: ЛОГИКА РАБОТЫ С API ---
+    // --- БЛОК 3: МОДАЛЬНОЕ ОКНО ВОССТАНОВЛЕНИЯ ПАРОЛЯ ---
+    // ==========================================================
+    
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    
+    window.openForgotPasswordModal = function(event) {
+        event.preventDefault();
+        forgotPasswordModal.classList.add('active');
+    };
+    
+    window.closeForgotPasswordModal = function() {
+        forgotPasswordModal.classList.remove('active');
+        const form = document.getElementById('forgotPasswordForm');
+        if (form) {
+            form.reset();
+            clearAllErrors();
+        }
+    };
+    
+    // Закрытие модального окна по клику на overlay
+    forgotPasswordModal.addEventListener('click', function(event) {
+        if (event.target === forgotPasswordModal) {
+            window.closeForgotPasswordModal();
+        }
+    });
+    
+    // Закрытие по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && forgotPasswordModal.classList.contains('active')) {
+            window.closeForgotPasswordModal();
+        }
+    });
+    
+    // Обработка отправки формы восстановления пароля
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', handleForgotPassword);
+    }
+    
+    async function handleForgotPassword(event) {
+        event.preventDefault();
+        const form = event.target;
+        const emailInput = form.resetEmail;
+        
+        if (!validateEmail(emailInput.value)) {
+            showError(emailInput, 'Введите корректный email');
+            return;
+        }
+        
+        const submitBtn = form.querySelector('.modal-btn-primary');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Отправка...';
+        
+        try {
+            const response = await fetch(`${API_URL}/forgot-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailInput.value }),
+            });
+            const data = await response.json();
+            
+            if (!response.ok) throw new Error(data.message || 'Ошибка отправки');
+            
+            window.showCustomAlert(
+                escapeHTML(data.message || 'Ссылка для восстановления пароля отправлена на ваш email'), 
+                'success'
+            );
+            
+            window.closeForgotPasswordModal();
+            
+        } catch (error) {
+            window.showCustomAlert(escapeHTML(error.message), 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    }
+
+    // ==========================================================
+    // --- БЛОК 4: ЛОГИКА РАБОТЫ С API ---
     // ==========================================================
     
     const API_URL = 'https://paint-site-vty0.onrender.com/api';
@@ -202,18 +325,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email: emailInput.value, password: passwordInput.value }),
             });
             const data = await response.json();
+
             if (!response.ok) throw new Error(data.message || 'Ошибка входа');
 
             localStorage.setItem('accessToken', data.accessToken);
             document.cookie = `userLoggedIn=true; path=/; max-age=86400`;
             document.cookie = `userName=${encodeURIComponent(data.username)}; path=/; max-age=86400`;
             document.cookie = `userEmail=${encodeURIComponent(data.email)}; path=/; max-age=86400`;
+            document.cookie = `companyName=${encodeURIComponent(data.companyName)}; path=/; max-age=86400`;
             if (data.avatarUrl) {
-                document.cookie = `userAvatar=${encodeURIComponent(data.avatarUrl)}; path=/; max-age=86400`;
+                document.cookie = `companyLogo=${encodeURIComponent(data.companyLogoUrl)}; path=/; max-age=86400`;
             }
             
-            // Это сообщение статично и безопасно, экранирование не требуется.
-            window.showCustomAlert('Успешный вход! Перенаправляем...', 'success');
+            // Сохраняем email, если выбрано "Запомнить меня"
+            if (rememberMeCheckbox && rememberMeCheckbox.checked) {
+                localStorage.setItem('rememberedEmail', emailInput.value);
+            } else {
+                localStorage.removeItem('rememberedEmail');
+            }
+            
             
             setTimeout(() => { window.location.href = '/profile'; }, 1500);
 
@@ -277,15 +407,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
