@@ -140,6 +140,7 @@ app.get("/checkout", (req, res) => {
 });
 
 
+
 // --- ОТКРЫТЫЕ API  ---
 app.get('/api/search', async (req, res) => {
     const { query } = req.query; 
@@ -235,7 +236,26 @@ app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     try {
         const pool = await poolPromise;
-        const result = await pool.request().input('Email', sql.NVarChar, email).query('SELECT * FROM Users WHERE Email = @Email');
+        const result = await pool.request()
+            .input('Email', sql.NVarChar, email)
+            .query(`
+                SELECT 
+                    u.UserID, 
+                    u.Username, 
+                    u.Email, 
+                    u.PasswordHash, 
+                    u.IsEmailVerified, 
+                    u.AvatarURL,
+                    u.CompanyID,
+                    c.CompanyName, 
+                    c.LogoURL
+                FROM 
+                    Users u
+                LEFT JOIN 
+                    Companies c ON u.CompanyID = c.CompanyID
+                WHERE 
+                    u.Email = @Email
+            `);
         const user = result.recordset[0];
         if (!user) return res.status(401).json({ message: 'Неверные учетные данные.' });
         if (!user.IsEmailVerified) return res.status(403).json({ message: 'Пожалуйста, подтвердите ваш email перед входом.' });
@@ -254,7 +274,9 @@ app.post('/api/login', async (req, res) => {
         username: user.Username,
         email: user.Email,
         avatarUrl: user.AvatarURL,
-        companyId: user.CompanyID // ИЗМЕНЕНИЕ: Возвращаем companyId на фронтенд
+        companyId: user.CompanyID,
+        companyName: user.CompanyName,
+        companyLogoUrl: user.LogoURL 
     });
     } catch (err) {
         console.error('Ошибка входа:', err);
@@ -592,6 +614,37 @@ app.get('/api/company-info', authenticateToken, async (req, res) => {
     }
 });
 
+// НОВЫЙ ЭНДПОИНТ: ЗАГРУЗКА ЛОГОТИПА КОМПАНИИ
+app.post('/api/company/upload-logo', authenticateToken, upload.single('logo'), async (req, res) => {
+    const { companyId } = req.user;
+
+    if (!req.file) {
+        return res.status(400).json({ message: 'Файл логотипа не был предоставлен.' });
+    }
+    if (!companyId) {
+        return res.status(400).json({ message: 'ID компании не найден.' });
+    }
+
+    try {
+        const filePath = `uploads/${req.file.filename}`;
+        const pool = await poolPromise;
+        
+        await pool.request()
+            .input('LogoURL', sql.NVarChar, filePath)
+            .input('CompanyID', sql.Int, companyId)
+            .query('UPDATE Companies SET LogoURL = @LogoURL WHERE CompanyID = @CompanyID');
+        
+        res.status(200).json({ 
+            message: 'Логотип успешно загружен!', 
+            logoUrl: filePath // Возвращаем относительный путь к файлу
+        });
+
+    } catch (err) {
+        console.error('Ошибка загрузки логотипа:', err);
+        res.status(500).json({ message: 'Ошибка сервера при загрузке логотипа.' });
+    }
+});
+
 // Создать новый заказ из корзины
 app.post('/api/orders/create', authenticateToken, async (req, res) => {
     const { userId, companyId } = req.user;
@@ -829,20 +882,40 @@ app.post('/api/user/change-password', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/orders', authenticateToken, async (req, res) => {
-    const companyId = req.user.companyId; // ИЗМЕНЕНИЕ: Используем companyId
+    const companyId = req.user.companyId;
+    const { status, search, series } = req.query; // <-- Получаем новые параметры из URL
+
     try {
         const pool = await poolPromise;
-        const result = await pool.request()
-            .input('CompanyID', sql.Int, companyId) // ИЗМЕНЕНИЕ: Передаем CompanyID в запрос
-            .query(`
-                SELECT o.OrderID as id, o.OrderDate as date, o.Status as status, o.Total as total,
-                    (SELECT oi.ProductName as name, oi.Quantity as quantity, oi.Price as price, oi.ImageURL as img
-                     FROM OrderItems oi WHERE oi.OrderID = o.OrderID FOR JSON PATH) as items
-                FROM Orders o
-                WHERE o.IsHidden = 0 AND o.CompanyID = @CompanyID -- ИЗМЕНЕНИЕ: Фильтруем по CompanyID
-                ORDER BY CASE o.Status WHEN 'processing' THEN 1 WHEN 'shipped' THEN 2 WHEN 'delivered' THEN 3 WHEN 'cancelled' THEN 4 ELSE 5 END, o.OrderDate DESC
-            `);
+        const request = pool.request().input('CompanyID', sql.Int, companyId);
+        
+        let query = `
+            SELECT o.OrderID as id, o.OrderDate as date, o.Status as status, o.Total as total, o.ProductSeries as series,
+                (SELECT oi.ProductName as name, oi.Quantity as quantity, oi.Price as price, oi.ImageURL as img
+                 FROM OrderItems oi WHERE oi.OrderID = o.OrderID FOR JSON PATH) as items
+            FROM Orders o
+            WHERE o.IsHidden = 0 AND o.CompanyID = @CompanyID
+        `;
+
+        // Динамически добавляем фильтры
+        if (status && status !== 'all') {
+            query += ` AND o.Status = @Status`;
+            request.input('Status', sql.NVarChar, status);
+        }
+        if (search) {
+            query += ` AND CAST(o.OrderID AS NVARCHAR(255)) LIKE @Search`;
+            request.input('Search', sql.NVarChar, `%${search}%`);
+        }
+        if (series) {
+            query += ` AND o.ProductSeries LIKE @Series`;
+            request.input('Series', sql.NVarChar, `%${series}%`);
+        }
+
+        query += ` ORDER BY o.OrderDate DESC`;
+
+        const result = await request.query(query);
         res.json(result.recordset);
+
     } catch (err) {
         console.error('Ошибка получения заказов:', err);
         res.status(500).send(err.message);
@@ -960,6 +1033,48 @@ app.post('/api/addresses', authenticateToken, async (req, res) => {
     }
 });
 
+app.get('/api/filters/options', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+
+        // Запрос для видов покрытий (уже есть)
+        const coatingTypesQuery = `
+            SELECT DISTINCT CoatingType 
+            FROM Products 
+            WHERE CoatingType IS NOT NULL AND CoatingType != '' 
+            ORDER BY CoatingType ASC
+        `;
+        
+        // НОВЫЙ ЗАПРОС для получения уникальных цветов RAL
+        const ralColorsQuery = `
+            SELECT DISTINCT RalColor 
+            FROM Products 
+            WHERE RalColor IS NOT NULL AND RalColor != '' 
+            ORDER BY RalColor ASC
+        `;
+
+        // Выполняем оба запроса параллельно
+        const [coatingTypesResult, ralColorsResult] = await Promise.all([
+            pool.request().query(coatingTypesQuery),
+            pool.request().query(ralColorsQuery)
+        ]);
+
+        // Преобразуем результаты в простые массивы строк
+        const coatingTypes = coatingTypesResult.recordset.map(item => item.CoatingType);
+        const ralColors = ralColorsResult.recordset.map(item => item.RalColor);
+
+        // Отправляем оба массива в ответе
+        res.json({
+            coatingTypes: coatingTypes,
+            ralColors: ralColors // <-- НОВОЕ ПОЛЕ
+        });
+
+    } catch (error) {
+        console.error("Ошибка при получении опций для фильтров:", error);
+        res.status(500).json({ message: "Ошибка сервера при получении опций для фильтров." });
+    }
+});
+
 app.post('/api/addresses', authenticateToken, async (req, res) => {
     const companyId = req.user.companyId;
     const { AddressType, City, Street, House, Apartment, PostalCode } = req.body;
@@ -1027,6 +1142,33 @@ app.delete('/api/addresses/:addressId', authenticateToken, async (req, res) => {
     } catch (err) {
         res.status(500).send(err.message);
     }
+});
+
+app.post('/api/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    
+    // Найти пользователя
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ 
+            message: 'Пользователь с таким email не найден' 
+        });
+    }
+    
+    // Создать токен восстановления
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    
+    // Сохранить токен с временем истечения
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 час
+    await user.save();
+    
+    // Отправить email с ссылкой
+    // await sendEmail(email, resetToken);
+    
+    res.json({ 
+        message: 'Ссылка для восстановления пароля отправлена на ваш email' 
+    });
 });
 
 
@@ -1189,6 +1331,4 @@ app.listen(port, () => {
     console.log("C: app.listen запущен");
     console.log(`Server is running at http://localhost:${port}`);
 });
-
-
 
