@@ -5,6 +5,7 @@
 const API_URL = 'https://paint-site-vty0.onrender.com/api';
 let ALL_ORDERS = [];    // Кэш для заказов
 let ALL_ADDRESSES = []; // Кэш для адресов
+let ALL_STOCK = { reserved: [], free: [] }; // Кэш для остатков
 
 // ===================================
 // УТИЛИТАРНЫЕ ФУНКЦИИ
@@ -12,9 +13,6 @@ let ALL_ADDRESSES = []; // Кэш для адресов
 
 /**
  * Безопасно отправляет fetch-запрос с токеном авторизации.
- * @param {string} url - URL эндпоинта API.
- * @param {object} options - Опции для fetch (method, body, etc.).
- * @returns {Promise<Response>} - Промис с ответом сервера.
  */
 async function fetchWithAuth(url, options = {}) {
     const token = localStorage.getItem('accessToken');
@@ -40,8 +38,6 @@ async function fetchWithAuth(url, options = {}) {
 
 /**
  * Получает значение cookie по имени.
- * @param {string} name - Имя cookie.
- * @returns {string|null} - Значение cookie или null.
  */
 function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -52,7 +48,6 @@ function getCookie(name) {
 
 /**
  * Управляет открытием модального окна.
- * @param {HTMLElement} modalElement - DOM-элемент модального окна.
  */
 function openModal(modalElement) {
     if (!modalElement) return;
@@ -62,7 +57,6 @@ function openModal(modalElement) {
 
 /**
  * Управляет закрытием модального окна.
- * @param {HTMLElement} modalElement - DOM-элемент модального окна.
  */
 function closeModal(modalElement) {
     if (!modalElement) return;
@@ -83,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     initializeProfileInfoAndLogout();
+    initializeLogoUpload();
     initializeNavigationAndTabs();
     
     handleHashChange(); 
@@ -137,41 +132,152 @@ function handleHashChange() {
 // ===================================
 
 function initializeProfileInfoAndLogout() {
-    document.getElementById('companyName').textContent = getCookie('companyName') || 'Компания';
-    document.getElementById('contactPerson').textContent = getCookie('userName') || 'Пользователь';
-    document.getElementById('profileUserEmail').textContent = getCookie('userEmail') || '';
+    // Отображение информации о компании
+    const companyName = getCookie('companyName') || 'Компания';
+    const userName = getCookie('userName') || 'Пользователь';
+    const userEmail = getCookie('userEmail') || '';
     
+    document.getElementById('companyName').textContent = companyName;
+    document.getElementById('contactPerson').textContent = userName;
+    document.getElementById('profileUserEmail').textContent = userEmail;
+    
+    // Кнопка выхода
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         const confirmed = await window.showCustomConfirm('Вы уверены, что хотите выйти из аккаунта?');
         if (confirmed) {
             localStorage.removeItem('accessToken');
-            document.cookie.split(";").forEach(c => { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+            document.cookie.split(";").forEach(c => { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
             window.location.href = '/auth';
         }
     });
 }
 
+async function loadSidebarInfo() {
+    const companyNameEl = document.getElementById('companyName');
+    const contactPersonEl = document.getElementById('contactPerson');
+    const userEmailEl = document.getElementById('profileUserEmail');
 
+    // Сначала ставим данные из cookie как временные заглушки
+    if(companyNameEl) companyNameEl.textContent = getCookie('companyName') || 'Загрузка...';
+    if(contactPersonEl) contactPersonEl.textContent = getCookie('userName') || 'Пользователь';
+    if(userEmailEl) userEmailEl.textContent = getCookie('userEmail') || '';
 
+    try {
+        // Делаем запрос на получение актуальной информации о компании
+        const response = await fetchWithAuth(`${API_URL}/company-info`);
+        if (!response.ok) {
+            // Если запрос не удался, оставляем данные из cookie
+            console.error('Не удалось обновить информацию о компании.');
+            return;
+        }
+        
+        const companyData = await response.json();
+        
+        // Обновляем DOM свежими данными с сервера
+        if(companyNameEl) companyNameEl.textContent = companyData.CompanyName;
+        
+        // Также обновляем cookie на случай, если название компании изменилось
+        document.cookie = `companyName=${encodeURIComponent(companyData.CompanyName)}; path=/; max-age=86400`;
+
+    } catch (error) {
+        console.error("Ошибка при загрузке данных для сайдбара:", error);
+    }
+}
+
+// ===================================
+// ЗАГРУЗКА ЛОГОТИПА
+// ===================================
+
+function initializeLogoUpload() {
+    const logoUploadBtn = document.getElementById('logoUpload');
+    const logoInput = document.getElementById('logoInput');
+    const companyLogo = document.getElementById('companyLogo');
+
+    if (logoUploadBtn && logoInput) {
+        logoUploadBtn.addEventListener('click', () => {
+            logoInput.click();
+        });
+
+        logoInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Проверка типа файла
+            if (!file.type.startsWith('image/')) {
+                window.showCustomAlert('Пожалуйста, выберите изображение', 'error');
+                return;
+            }
+
+            // Проверка размера (макс 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                window.showCustomAlert('Размер файла не должен превышать 5MB', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('logo', file);
+
+            try {
+                const response = await fetchWithAuth(`${API_URL}/company/upload-logo`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Content-Type': undefined } 
+                });
+
+                if (!response.ok) throw new Error('Ошибка загрузки логотипа');
+
+                const result = await response.json();
+                
+                // Обновляем изображение
+                companyLogoImg.src = `/${result.logoUrl}`;
+                window.showCustomAlert('Логотип успешно обновлен', 'success');
+            } catch (error) {
+                console.error(error);
+                window.showCustomAlert('Не удалось загрузить логотип', 'error');
+            }
+        });
+    }
+}
 
 // ===================================
 // ВКЛАДКА: МОИ ЗАКАЗЫ
 // ===================================
 
 async function initializeOrders() {
+    // Вешаем слушатели на фильтры ОДИН РАЗ
+    document.getElementById('orderStatusFilter').addEventListener('change', fetchAndRenderOrders);
+    document.getElementById('orderSearchInput').addEventListener('input', fetchAndRenderOrders);
+    document.getElementById('orderSeriesInput').addEventListener('input', fetchAndRenderOrders); // Слушатель для нового поля
+    
+    document.getElementById('ordersListContainer').addEventListener('click', handleOrderActions);
+    
+    // Запускаем первую загрузку
+    await fetchAndRenderOrders();
+}
+
+// Новая основная функция для загрузки и отрисовки
+async function fetchAndRenderOrders() {
     const container = document.getElementById('ordersListContainer');
     container.innerHTML = '<div class="loading-placeholder">Загрузка заказов...</div>';
     
+    // Собираем значения фильтров
+    const status = document.getElementById('orderStatusFilter').value;
+    const search = document.getElementById('orderSearchInput').value;
+    const series = document.getElementById('orderSeriesInput').value;
+
+    // Формируем URL с параметрами
+    const queryParams = new URLSearchParams();
+    if (status && status !== 'all') queryParams.append('status', status);
+    if (search) queryParams.append('search', search);
+    if (series) queryParams.append('series', series);
+
     try {
-        const response = await fetchWithAuth(`${API_URL}/orders`);
+        const response = await fetchWithAuth(`${API_URL}/orders?${queryParams.toString()}`);
         if (!response.ok) throw new Error('Ошибка загрузки заказов');
-        ALL_ORDERS = await response.json();
-        renderOrders(ALL_ORDERS);
-
-        document.getElementById('orderStatusFilter').addEventListener('change', filterOrders);
-        document.getElementById('orderSearchInput').addEventListener('input', filterOrders);
-        container.addEventListener('click', handleOrderActions);
-
+        const orders = await response.json();
+        renderOrders(orders);
     } catch (error) {
         container.innerHTML = '<p class="loading-placeholder">Не удалось загрузить заказы.</p>';
         console.error(error);
@@ -184,16 +290,25 @@ function renderOrders(orders) {
         container.innerHTML = '<p class="loading-placeholder">Заказов не найдено.</p>';
         return;
     }
+
+    const statusMap = {
+        'processing': { text: 'В производстве', class: 'status-processing' },
+        'shipped': { text: 'Отгружен', class: 'status-shipped' },
+        'delivered': { text: 'Доставлен', class: 'status-delivered' },
+        'cancelled': { text: 'Отменен', class: 'status-cancelled' }
+        // Добавь сюда другие статусы, если они есть, например, из твоего CHECK constraint в БД
+    };
+
     container.innerHTML = orders.map(order => {
         const items = JSON.parse(order.items || '[]');
-        const statusMap = { 'В производстве': { text: 'В производстве', class: 'status-processing' }, 'Отгружен': { text: 'Отгружен', class: 'status-shipped' }, 'Доставлен': { text: 'Доставлен', class: 'status-delivered' }, 'Отменен': { text: 'Отменен', class: 'status-cancelled' }};
-        const status = statusMap[order.status] || { text: order.status, class: '' };
+        const currentStatus = statusMap[order.status] || { text: order.status, class: '' }; // Безопасное получение статуса
+
         return `
             <div class="order-card" data-order-id="${order.id}">
                 <div class="order-header">
                     <div class="order-number">Заказ №${order.id}</div>
                     <div class="order-date">${new Date(order.date).toLocaleDateString('ru-RU')}</div>
-                    <div class="order-status ${status.class}">${status.text}</div>
+                    <div class="order-status ${currentStatus.class}">${currentStatus.text}</div>
                 </div>
                 <div class="order-items">
                     ${items.map(item => `
@@ -210,7 +325,7 @@ function renderOrders(orders) {
                     <span>Итого: ${parseFloat(order.total).toLocaleString('ru-RU')} ₽</span>
                     <div class="order-actions">
                         <button class="btn btn-outline btn-sm btn-repeat-order" data-order-id="${order.id}">Повторить</button>
-                        ${order.status === 'В производстве' ? `<button class="btn btn-danger btn-sm btn-cancel-order" data-order-id="${order.id}">Отменить</button>` : ''}
+                        ${order.status === 'processing' ? `<button class="btn btn-danger btn-sm btn-cancel-order" data-order-id="${order.id}">Отменить</button>` : ''}
                         <button class="btn btn-secondary btn-sm btn-hide-order" data-order-id="${order.id}">Скрыть</button>
                     </div>
                 </div>
@@ -218,14 +333,7 @@ function renderOrders(orders) {
     }).join('');
 }
 
-function filterOrders() {
-    const status = document.getElementById('orderStatusFilter').value;
-    const search = document.getElementById('orderSearchInput').value.toLowerCase();
-    let filtered = ALL_ORDERS;
-    if (status !== 'all') filtered = filtered.filter(o => o.status === status);
-    if (search) filtered = filtered.filter(o => String(o.id).includes(search));
-    renderOrders(filtered);
-}
+
 
 async function handleOrderActions(e) {
     const button = e.target.closest('button.btn[data-order-id]');
@@ -236,7 +344,6 @@ async function handleOrderActions(e) {
         if (button.classList.contains('btn-repeat-order')) {
             const confirmed = await window.showCustomConfirm(`Повторить заказ №${orderId}?`);
             if (confirmed) {
-                // Логика повтора (может потребовать доработки API)
                 window.showCustomAlert('Функция повтора заказа в разработке.', 'info');
             }
         } else if (button.classList.contains('btn-cancel-order')) {
@@ -244,16 +351,16 @@ async function handleOrderActions(e) {
             if (confirmed) {
                 const response = await fetchWithAuth(`${API_URL}/orders/${orderId}/cancel`, { method: 'PUT' });
                 if (!response.ok) throw new Error('Ошибка отмены заказа');
-                window.showCustomAlert('Заказ успешно отменен.', 'info');
-                loadOrders();
+                window.showCustomAlert('Заказ успешно отменен.', 'success');
+                initializeOrders();
             }
         } else if (button.classList.contains('btn-hide-order')) {
             const confirmed = await window.showCustomConfirm(`Скрыть заказ №${orderId} из истории?`);
             if (confirmed) {
                 const response = await fetchWithAuth(`${API_URL}/orders/${orderId}/hide`, { method: 'PUT' });
                 if (!response.ok) throw new Error('Ошибка скрытия заказа');
-                window.showCustomAlert('Заказ скрыт из истории.', 'info');
-                loadOrders();
+                window.showCustomAlert('Заказ скрыт из истории.', 'success');
+                initializeOrders();
             }
         }
     } catch (error) {
@@ -267,6 +374,8 @@ async function handleOrderActions(e) {
 
 function initializeStock() {
     loadStockData('reserved');
+    
+    // Переключение вкладок
     document.querySelectorAll('[data-stock-tab]').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('[data-stock-tab]').forEach(b => b.classList.remove('active'));
@@ -278,6 +387,10 @@ function initializeStock() {
             loadStockData(btn.dataset.stockTab);
         });
     });
+    
+    // Поиск и фильтры
+    document.getElementById('stockSearchInput').addEventListener('input', filterStock);
+    document.getElementById('coatingFilter').addEventListener('change', filterStock);
 }
 
 async function loadStockData(type) {
@@ -289,26 +402,87 @@ async function loadStockData(type) {
         const response = await fetchWithAuth(`${API_URL}/stock-levels`);
         if(!response.ok) throw new Error('Ошибка загрузки остатков');
         const data = await response.json();
-        const stockData = (type === 'reserved') ? data.reserved : data.free;
-
-        if (stockData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="loading-placeholder">Остатков нет.</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = stockData.map(item => `
-            <tr>
-                <td>${item.ProductName}</td>
-                <td>${item.ProductSeries || '-'}</td>
-                <td>${item.RalColor ? `RAL ${item.RalColor}` : '-'}</td>
-                <td>${item.CoatingType}</td>
-                <td>${item.Quantity} кг</td>
-                <td><button class="btn btn-outline btn-sm">В заявку</button></td>
-            </tr>
-        `).join('');
+        
+        ALL_STOCK[type === 'reserved' ? 'reserved' : 'free'] = type === 'reserved' ? data.reserved : data.free;
+        renderStock(type);
     } catch(error) {
         tbody.innerHTML = `<tr><td colspan="6" class="loading-placeholder">Ошибка загрузки.</td></tr>`;
         console.error(error);
+    }
+}
+
+function renderStock(type) {
+    const tableId = type === 'reserved' ? 'reservedStockBody' : 'availableStockBody';
+    const tbody = document.getElementById(tableId);
+    const stockData = ALL_STOCK[type === 'reserved' ? 'reserved' : 'free'];
+
+    if (!stockData || stockData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="loading-placeholder">Остатков нет.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = stockData.map(item => `
+        <tr>
+            <td>${item.ProductName || '-'}</td>
+            <td>${item.ProductSeries || '-'}</td>
+            <td>${item.RalColor ? `RAL ${item.RalColor}` : '-'}</td>
+            <td>${item.CoatingType || '-'}</td>
+            <td>${item.Quantity || 0} кг</td>
+            <td>
+                <button class="btn btn-outline btn-sm btn-add-to-cart" 
+                    data-product-id="${item.ProductID}" 
+                    data-product-name="${item.ProductName}"
+                    data-quantity="${item.Quantity}">
+                    В заявку
+                </button>
+            </td>
+        </tr>
+    `).join('');
+    
+    // Обработчик кнопок "В заявку"
+    tbody.querySelectorAll('.btn-add-to-cart').forEach(btn => {
+        btn.addEventListener('click', handleAddToCart);
+    });
+}
+
+function filterStock() {
+    const activeTab = document.querySelector('[data-stock-tab].active');
+    const type = activeTab ? activeTab.dataset.stockTab : 'reserved';
+    const searchValue = document.getElementById('stockSearchInput').value.toLowerCase().trim();
+    const coatingValue = document.getElementById('coatingFilter').value.toLowerCase();
+    
+    const stockKey = type === 'reserved' ? 'reserved' : 'free';
+    let filtered = [...ALL_STOCK[stockKey]];
+    
+    // Поиск по наименованию
+    if (searchValue) {
+        filtered = filtered.filter(item => 
+            (item.ProductName || '').toLowerCase().includes(searchValue)
+        );
+    }
+    
+    // Фильтр по покрытию
+    if (coatingValue) {
+        filtered = filtered.filter(item => 
+            (item.CoatingType || '').toLowerCase().includes(coatingValue)
+        );
+    }
+    
+    // Временно сохраняем отфильтрованные данные и рендерим
+    const original = ALL_STOCK[stockKey];
+    ALL_STOCK[stockKey] = filtered;
+    renderStock(type);
+    ALL_STOCK[stockKey] = original;
+}
+
+async function handleAddToCart(e) {
+    const button = e.target;
+    const productName = button.dataset.productName;
+    
+    const confirmed = await window.showCustomConfirm(`Добавить "${productName}" в заявку?`);
+    if (confirmed) {
+        // Здесь должна быть логика добавления в корзину
+        window.showCustomAlert('Функция добавления в заявку в разработке', 'info');
     }
 }
 
@@ -320,13 +494,26 @@ function initializeCompany() {
     loadCompanyInfo();
     loadAddresses();
 
+    // Кнопка добавления адреса
     document.getElementById('addAddressBtn').addEventListener('click', () => openAddressModal());
     document.getElementById('closeAddressModalBtn').addEventListener('click', () => closeModal(document.getElementById('addressModalOverlay')));
     document.getElementById('addressModalOverlay').addEventListener('click', (e) => {
         if (e.target.id === 'addressModalOverlay') closeModal(e.target);
     });
+    
+    // Форма адреса
     document.getElementById('modal-addressForm').addEventListener('submit', handleAddressSubmit);
+    
+    // Действия с адресами
     document.getElementById('addressesListContainer').addEventListener('click', handleAddressActions);
+    
+    // Кнопка связи с менеджером
+    const contactBtn = document.getElementById('contactManagerBtn');
+    if (contactBtn) {
+        contactBtn.addEventListener('click', () => {
+            window.showCustomAlert('Функция отправки сообщения менеджеру в разработке', 'info');
+        });
+    }
 }
 
 async function loadCompanyInfo() {
@@ -451,7 +638,7 @@ function openAddressModal(address = null) {
         form.removeAttribute('data-editing-id');
         modalTitle.textContent = 'Новый адрес доставки';
     }
-    modalOverlay.style.display = 'flex';
+    openModal(modalOverlay);
 }
 
 // ===================================
@@ -495,4 +682,3 @@ function initializeSecurity() {
         });
     }
 }
-
