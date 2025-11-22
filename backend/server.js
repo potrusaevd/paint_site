@@ -1177,24 +1177,33 @@ app.post('/api/forgot-password', async (req, res) => {
 // ===========================================
 
 // Получение информации о компании пользователя
-app.get('/api/company-info', authenticateToken, async (req, res) => {
+app.put('/api/company-info', authenticateToken, async (req, res) => {
     const companyId = req.user.companyId;
+    const { CompanyName, TaxID, RegistrationNumber, LegalAddress } = req.body;
+
     try {
         const pool = await poolPromise;
-        const result = await pool.request()
+        await pool.request()
             .input('CompanyID', sql.Int, companyId)
-            .query('SELECT * FROM Companies WHERE CompanyID = @CompanyID');
-        
-        if (result.recordset.length === 0) {
-            return res.status(404).json({ message: 'Компания не найдена.' });
-        }
-        res.json(result.recordset[0]);
+            .input('CompanyName', sql.NVarChar, CompanyName)
+            .input('TaxID', sql.NVarChar, TaxID) // ИНН
+            .input('RegistrationNumber', sql.NVarChar, RegistrationNumber) // КПП
+            .input('LegalAddress', sql.NVarChar, LegalAddress)
+            .query(`
+                UPDATE Companies 
+                SET CompanyName = @CompanyName, 
+                    TaxID = @TaxID, 
+                    RegistrationNumber = @RegistrationNumber, 
+                    LegalAddress = @LegalAddress
+                WHERE CompanyID = @CompanyID
+            `);
+            
+        res.json({ message: 'Реквизиты успешно обновлены' });
     } catch (error) {
-        console.error('Ошибка получения информации о компании:', error);
+        console.error('Ошибка обновления реквизитов:', error);
         res.status(500).json({ message: 'Ошибка сервера' });
     }
 });
-
 
 // Получение остатков на складе
 app.get('/api/stock-levels', authenticateToken, async (req, res) => {
@@ -1202,21 +1211,20 @@ app.get('/api/stock-levels', authenticateToken, async (req, res) => {
     try {
         const pool = await poolPromise;
 
-        // Запрос 1: Получаем зарезервированные остатки для этой компании
-        // (Здесь мы предполагаем, что вы создали и наполнили таблицу StockLevels, как обсуждали)
+        // Зарезервированные (добавлено s.ProductSeries)
         const reservedStockResult = await pool.request()
             .input('CompanyID', sql.Int, companyId)
             .query(`
-                SELECT p.ProductName, p.RalColor, p.CoatingType, s.Quantity 
+                SELECT p.ProductID, p.ProductName, p.RalColor, p.CoatingType, s.Quantity, s.ProductSeries
                 FROM StockLevels s
                 JOIN Products p ON s.ProductID = p.ProductID
                 WHERE s.CompanyID = @CompanyID AND s.StockType = 'Reserved'
             `);
 
-        // Запрос 2: Получаем свободные остатки
+        // Свободные (добавлено s.ProductSeries)
         const freeStockResult = await pool.request()
             .query(`
-                SELECT p.ProductName, p.RalColor, p.CoatingType, s.Quantity 
+                SELECT p.ProductID, p.ProductName, p.RalColor, p.CoatingType, s.Quantity, s.ProductSeries
                 FROM StockLevels s
                 JOIN Products p ON s.ProductID = p.ProductID
                 WHERE s.StockType = 'Free'
