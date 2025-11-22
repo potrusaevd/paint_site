@@ -6,6 +6,7 @@
     const API_URL = 'https://paint-site-vty0.onrender.com/api';
     let consumptionChart = null;
     let coatingChart = null;
+    let currentConsumptionData = []; // Сохраняем данные для переключения режимов
 
     /**
      * Инициализация дашборда
@@ -17,7 +18,6 @@
             return;
         }
 
-        // Показываем загрузку
         dashboardRoot.innerHTML = '<div class="loading-placeholder">Загрузка аналитики...</div>';
 
         try {
@@ -150,7 +150,59 @@
         setTimeout(() => {
             initConsumptionChart(consumption);
             initCoatingChart(coatingDistribution);
+            initChartControls();
         }, 100);
+    }
+
+    /**
+     * Инициализация контролов переключения режимов графика
+     */
+    function initChartControls() {
+        const controls = document.getElementById('chartInterpolationControls');
+        if (!controls) return;
+
+        const buttons = controls.querySelectorAll('.chart-mode-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Снимаем активность со всех кнопок
+                buttons.forEach(b => b.classList.remove('active'));
+                // Активируем текущую
+                btn.classList.add('active');
+                
+                // Получаем режим
+                const mode = btn.dataset.mode;
+                updateChartInterpolation(mode);
+            });
+        });
+    }
+
+    /**
+     * Обновление типа интерполяции графика
+     */
+    function updateChartInterpolation(mode) {
+        if (!consumptionChart || !currentConsumptionData.length) return;
+
+        let tension = 0.4;
+        let stepped = false;
+
+        switch(mode) {
+            case 'monotone':
+                tension = 0.4;
+                stepped = false;
+                break;
+            case 'default':
+                tension = 0;
+                stepped = false;
+                break;
+            case 'stepped':
+                tension = 0;
+                stepped = true;
+                break;
+        }
+
+        consumptionChart.data.datasets[0].tension = tension;
+        consumptionChart.data.datasets[0].stepped = stepped;
+        consumptionChart.update('none'); // Без анимации для быстрого переключения
     }
 
     /**
@@ -189,6 +241,9 @@
             consumptionChart.destroy();
         }
 
+        // Сохраняем данные для переключения режимов
+        currentConsumptionData = data;
+
         const labels = data.map(item => item.month || '');
         const values = data.map(item => item['Сумма заказов'] || 0);
 
@@ -209,7 +264,7 @@
                     borderColor: 'rgba(59, 130, 246, 1)',
                     borderWidth: 3,
                     fill: true,
-                    tension: 0.4, // Плавная кривая (cubic interpolation)
+                    tension: 0.4,
                     pointBackgroundColor: 'rgba(59, 130, 246, 1)',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
@@ -296,7 +351,6 @@
 
         const ctx = canvas.getContext('2d');
 
-        // Уничтожаем предыдущий график если есть
         if (coatingChart) {
             coatingChart.destroy();
         }
@@ -304,11 +358,11 @@
         const labels = data.map(item => item.name || '');
         const values = data.map(item => item.value || 0);
         const colors = [
-            'rgba(59, 130, 246, 0.8)',   // blue
-            'rgba(34, 211, 238, 0.8)',   // cyan
-            'rgba(99, 102, 241, 0.8)',   // indigo
-            'rgba(139, 92, 246, 0.8)',   // violet
-            'rgba(217, 70, 239, 0.8)'    // fuchsia
+            'rgba(59, 130, 246, 0.8)',
+            'rgba(34, 211, 238, 0.8)',
+            'rgba(99, 102, 241, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(217, 70, 239, 0.8)'
         ];
 
         coatingChart = new Chart(ctx, {
@@ -342,7 +396,6 @@
             }
         });
 
-        // Рендерим легенду
         renderCoatingLegend(data, colors);
     }
 
