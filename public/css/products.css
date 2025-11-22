@@ -71,8 +71,8 @@ body {
 
 .filter-title {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: space-between; /* <-- ДОБАВЬ ЭТУ СТРОКУ */
+    align-items: center; /* Это свойство у тебя уже есть, оно выравнивает по вертикали */
     padding: 12px 0;
     cursor: pointer;
     font-weight: 600;
@@ -352,7 +352,9 @@ body {
 
 .product-details-modal {
     width: 90%;
-    max-width: 600px;
+    max-width: 800px;
+    padding: 0;
+    overflow: hidden;
     background: var(--bg-surface);
     border-radius: var(--border-radius-lg);
     border: 1px solid var(--border-color);
@@ -397,13 +399,25 @@ body {
 /* Стили для контента внутри модалки */
 .details-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.2fr;
 }
 .details-image {
     background: var(--bg-main);
+    display: flex; /* Используем flex для простого центрирования */
+    align-items: center;
+    justify-content: center;
     padding: 2rem;
-    display: grid;
-    place-items: center;
+    position: relative; /* Для возможных будущих элементов */
+    min-height: 300px; /* Минимальная высота, чтобы блок не схлопывался */
+}
+
+.details-image img {
+    max-width: 100%;    /* Картинка не может быть шире своего контейнера */
+    max-height: 100%;   /* Картинка не может быть выше своего контейнера */
+    height: auto;       /* Сохраняем пропорции по высоте */
+    width: auto;        /* Сохраняем пропорции по ширине */
+    object-fit: contain; /* Гарантирует, что вся картинка будет видна без обрезки */
+    border-radius: var(--border-radius-sm); /* Небольшое скругление углов */
 }
 .details-info {
     padding: 2rem;
