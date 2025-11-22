@@ -3,116 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Страница не найдена | Lime Details</title>
-    <base href="/">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/404.css">
+    <title>404 - Нет такой страницы</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <div class="logo">
-                <a href="/" onclick="window.location.href='Lime Ditails(osn).html'; return true;">Lime Details</a>
-            </div>
-            <a href="/" class="back-link" onclick="window.location.href='Lime Ditails(osn).html'; return true;">← На главную</a>
-        </div>
-    </header>
 
-    <main class="error-container">
-        <div class="error-wrapper">
-            <div class="error-content-panel">
-                <div class="fuzzy-text-container">
-                    <canvas id="fuzzyCanvas"></canvas>
-                </div>
-                
-                <h2 class="error-subtitle">Страница не найдена</h2>
-                <p class="error-description">
-                    К сожалению, запрашиваемая страница не существует или была перемещена. 
-                    Возможно, вы перешли по устаревшей ссылке или допустили ошибку в адресе.
-                </p>
+    <div class="center-box">
+        <div class="error-number">404</div>
+        <div class="error-text">Страница не найдена</div>
+        
+        <!-- Кнопка Назад (встроенный JS для простоты) -->
+        <button onclick="history.back()" class="btn-back">← Вернуться назад</button>
+        
+        <!-- Ссылка на главную на всякий случай -->
+        <br>
+        <a href="/" class="link-home">На главную</a>
+    </div>
 
-                <div class="error-actions">
-                    <a href="/" class="btn-primary">
-                        На главную страницу
-                    </a>
-                    <a href="javascript:history.back();" class="btn-secondary">
-                        Вернуться назад
-                    </a>
-                </div>
-
-                <div class="help-section">
-                    <h3>Что можно сделать?</h3>
-                    <ul class="help-list">
-                        <li>Перейти на главную страницу</li>
-                        <li>Воспользоваться поиском по каталогу</li>
-                        <li>Связаться с нашей службой поддержки</li>
-                        <li>Проверить правильность введенного адреса</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="error-info-panel">
-                <div class="error-info-content">
-                    <h2>Не расстраивайтесь!</h2>
-                    <p>У нас есть тысячи автозапчастей, которые ждут вас в нашем каталоге.</p>
-
-                    <ul class="features-list">
-                        <li>Поиск по артикулу и VIN-коду</li>
-                        <li>Оригинальные и аналоговые запчасти</li>
-                        <li>Доставка в любую точку страны</li>
-                        <li>Консультация опытных специалистов</li>
-                        <li>Гарантия на все товары</li>
-                        <li>Выгодные цены для постоянных клиентов</li>
-                    </ul>
-
-                    <div class="contact-info">
-                        <h3>Нужна помощь?</h3>
-                        <p>Телефон: <a href="tel:+375291234567">+375 (29) 123-45-67</a></p>
-                        <p>Email: <a href="mailto:support@limedetails.com">support@limedetails.com</a></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <%- include('partials/_modals') %>
-
-    <footer class="footer">
-        <p>&copy; 2025 Lime Details. Все права защищены.</p>
-    </footer>
-
-<script src="/js/userAuth.js" defer></script>
-<script src="/js/global-utils.js" defer></script>
-<script src="/js/404.js" defer></script>
-<script src="/js/clickSpark.js" defer></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        if (typeof initFuzzyText === 'function') {
-            initFuzzyText();
-        }
-    }, 100);
-});
-</script>
-<script>
-    setTimeout(() => {
-        try {
-            if (typeof ClickSpark !== 'undefined') {
-                new ClickSpark(document.body, {
-                    sparkColor: "#4fa690",
-                    sparkSize: 10,
-                    sparkRadius: 20,
-                    sparkCount: 8,
-                    duration: 400,
-                    easing: "ease-out",
-                    extraScale: 1.0,
-                });
-                console.log('ClickSpark initialized with delay.');
-            }
-        } catch (error) {
-            console.error('Error initializing ClickSpark with delay:', error);
-        }
-    }, 2000); 
-</script>
 </body>
 </html>
