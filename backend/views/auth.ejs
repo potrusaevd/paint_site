@@ -4,11 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход - Прайм Топ</title>
+    <link rel="shortcut icon" href="images/icons/logo-white.svg" type="image/x-icon"> 
     <link rel="stylesheet" href="css/root.css">
     <link rel="stylesheet" href="css/ui-elements.css">
     <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
+    <!-- SVG фильтры для чекбоксов -->
+    <svg class="goo-filters" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="goo-light">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+                <feBlend in="SourceGraphic" in2="goo" />
+            </filter>
+        </defs>
+    </svg>
+
     <div class="auth-container">
         <!-- Left Side -->
         <div class="auth-left">
@@ -25,21 +37,21 @@
             </button>
             
             <div class="slider-container">
-                <div class="slide active" style="background-image: url('images/aut1.jpg');">
+                <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1200');">
                     <div class="slide-overlay"></div>
                     <div class="slide-content">
                         <h2>Управление заказами</h2>
                         <p>Отслеживайте производство в режиме реального времени</p>
                     </div>
                 </div>
-                <div class="slide" style="background-image: url('images/auth2.jpg');">
+                <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?w=1200');">
                     <div class="slide-overlay"></div>
                     <div class="slide-content">
                         <h2>Аналитика и отчёты</h2>
                         <p>Визуализация данных для принятия решений</p>
                     </div>
                 </div>
-                <div class="slide" style="background-image: url('images/main3.jpg');">
+                <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1553413077-190dd305871c?w=1200');">
                     <div class="slide-overlay"></div>
                     <div class="slide-content">
                         <h2>Контроль склада</h2>
@@ -89,15 +101,15 @@
 
                     <div class="form-footer">
                         <label class="checkbox-label">
-                        <label class="checkbox">
-                            <input type="checkbox" name="availability" value="free" />
-                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
-                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
-                            </svg>
+                            <label class="checkbox">
+                                <input type="checkbox" name="rememberMe" id="rememberMe" />
+                                <svg viewBox="0 0 21 21">
+                                    <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
+                                </svg>
+                            </label>
+                            <span>Запомнить меня</span>
                         </label>
-                        <span>Запомнить меня</span>
-                        </label>
-                        <a href="#" class="forgot-link">Забыли пароль?</a>
+                        <a href="#" class="forgot-link" onclick="openForgotPasswordModal(event)">Забыли пароль?</a>
                     </div>
 
                     <button type="submit" class="submit-btn">Войти</button>
@@ -168,18 +180,54 @@
 
                     <div class="form-footer">
                         <label class="checkbox-label">
-                        <label class="checkbox">
-                            <input type="checkbox" name="availability" value="free" />
-                            <svg viewBox="0 0 24 24" filter="url(#goo-light)">
-                                <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
-                            </svg>
-                        </label>
+                            <label class="checkbox">
+                                <input type="checkbox" name="terms" id="termsCheckbox" />
+                                <svg viewBox="0 0 21 21">
+                                    <path class="tick" d="M4.5 10L10.5 16L24.5 1" />
+                                </svg>
+                            </label>
                             <span>Я согласен с <a href="#" class="terms-link">условиями использования</a></span>
                         </label>
                     </div>
 
                     <button type="submit" class="submit-btn">Создать аккаунт</button>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно восстановления пароля -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Восстановление пароля</h3>
+                <button type="button" class="modal-close" onclick="closeForgotPasswordModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text">
+                    Введите email, который вы использовали при регистрации. 
+                    Мы отправим вам ссылку для восстановления пароля.
+                </p>
+                <form class="modal-form" id="forgotPasswordForm">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="resetEmail" placeholder="your@email.com" required>
+                        <span class="error-message"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="closeForgotPasswordModal()">
+                    Отмена
+                </button>
+                <button type="submit" form="forgotPasswordForm" class="modal-btn modal-btn-primary">
+                    Отправить ссылку
+                </button>
             </div>
         </div>
     </div>
