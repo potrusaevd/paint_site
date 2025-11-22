@@ -1,3 +1,5 @@
+
+
 /* checkout.css - B2B DESIGN */
 body.page-checkout {
     background: var(--bg-main);
@@ -148,6 +150,13 @@ body.page-checkout {
 .form-group textarea { 
     min-height: 80px; 
     resize: vertical; 
+}
+
+/* СПЕЦИФИЧНЫЕ ПРАВКИ ПО ЗАПРОСУ */
+
+/* Увеличенный отступ сверху для поля "Комментарий к доставке" */
+#deliveryComment {
+    margin-top: 1.5rem;
 }
 
 /* Чекбоксы */
@@ -521,5 +530,154 @@ body.page-checkout {
         grid-column: 2;
         text-align: right;
         margin-top: 0.5rem;
+    }
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: none; /* Скрыто по умолчанию */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-wrapper {
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.modal-content {
+    background: var(--bg-main);
+    width: 100%;
+    max-width: 450px;
+    border-radius: var(--border-radius-lg);
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.modal-header h3 {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.modal-header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Стиль поля ввода внутри модалки */
+#forgotPasswordForm .form-group {
+    margin-bottom: 24px;
+}
+
+#forgotPasswordForm label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+#forgotPasswordForm input {
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 14px 16px;
+    border-radius: var(--border-radius-sm);
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box; /* Важно для отступов */
+}
+
+#forgotPasswordForm input:focus {
+    border-color: var(--primary);
+    background: var(--bg-main);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+}
+
+#forgotPasswordForm input.error {
+    border-color: var(--error);
+}
+
+/* Кнопки модального окна */
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.modal-btn-primary, .modal-btn-secondary {
+    padding: 12px 24px;
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.modal-btn-primary {
+    background: var(--primary);
+    color: #fff;
+    flex: 1;
+}
+
+.modal-btn-primary:hover {
+    background: var(--secondary);
+    transform: translateY(-1px);
+}
+
+.modal-btn-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.modal-btn-secondary:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+/* Адаптив для модалки */
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 20px;
+    }
+    .modal-footer {
+        flex-direction: column-reverse;
+    }
+    .modal-btn-primary, .modal-btn-secondary {
+        width: 100%;
+        text-align: center;
     }
 }

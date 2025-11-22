@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&display=swap');
 
 @font-face {
@@ -803,20 +804,19 @@ body.menu-expanded .page-container {
     backdrop-filter: blur(10px);
     z-index: 10000; /* Максимальный z-index, чтобы быть поверх всего */
     
-    display: flex;
+    /* ИСПРАВЛЕНИЕ: Скрываем полностью, чтобы не перекрывал контент на других страницах */
+    display: none; 
     align-items: center;
     justify-content: center;
     
-    /* Управление видимостью */
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    transition: opacity 0.3s ease;
 }
 
+/* Показываем только при наличии класса .show */
 .image-viewer-overlay.show {
+    display: flex;
     opacity: 1;
-    visibility: visible;
-    transition-delay: 0s;
 }
 
 .image-viewer-close {

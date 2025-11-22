@@ -27,18 +27,34 @@ body {
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-lg);
-    padding: 24px;
-    max-height: calc(100vh - 110px);
+    
+    /* Изменено: разделяем отступы для красивого скролла */
+    padding: 24px 14px 24px 24px; 
+    
+    /* Изменено: чуть уменьшил высоту, чтобы был отступ снизу экрана */
+    max-height: calc(100vh - 120px); 
+    
     overflow-y: auto;
+    
+    /* Предотвращает прокрутку всей страницы, когда крутишь фильтры */
+    overscroll-behavior: contain; 
+    
+    display: flex;
+    flex-direction: column;
 }
 .products-filters::-webkit-scrollbar { 
-    width: 6px; 
+    width: 5px; /* Чуть тоньше */
 }
 .products-filters::-webkit-scrollbar-track { 
-    background: var(--bg-main); border-radius: 3px; 
+    background: transparent; 
+    margin: 10px 0; /* Отступ скроллбара от краев сверху и снизу */
 }
 .products-filters::-webkit-scrollbar-thumb { 
-    background: var(--bg-surface); border-radius: 3px; 
+    background: var(--border-color); 
+    border-radius: 4px; 
+}
+.products-filters::-webkit-scrollbar-thumb:hover { 
+    background: var(--text-secondary); 
 }
 
 .filters-header {
@@ -193,16 +209,49 @@ body {
     background: linear-gradient(135deg, var(--primary), var(--secondary)); 
     color: var(--text-inverted); 
     border: none; 
-    padding: 12px; 
+    padding: 14px; 
     border-radius: var(--border-radius-sm); 
     font-weight: 600; 
     font-size: 14px; 
     cursor: pointer; 
-    margin-top: 20px; 
-    transition: transform var(--transition-speed); 
+    
+    /* Сделали кнопку липкой внизу контейнера */
+    position: sticky;
+    bottom: -1px; /* -1px чтобы перекрыть возможные щели */
+    z-index: 10;
+    margin-top: auto; /* Прижимает к низу, если контента мало */
+    margin-bottom: 0;
+    
+    /* Тени и эффекты */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
 }
 
-.apply-filters-btn:hover { transform: translateY(-2px); }
+.apply-filters-btn:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    filter: brightness(1.05);
+}
+
+/* Эффект нажатия */
+.apply-filters-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Подложка под кнопку, чтобы текст под ней не просвечивал */
+.products-filters::after {
+    content: '';
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px; /* Высота "безопасной зоны" под кнопкой */
+    background: var(--bg-surface);
+    z-index: 9;
+    margin-top: -20px;
+    pointer-events: none;
+}
 
 /* ===================================
    СЕКЦИЯ С ТОВАРАМИ
