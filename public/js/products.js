@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPagination(filteredProducts.length, ITEMS_PER_PAGE, currentPage);
     }
 
-    function renderProducts(productsToRender) {
+   function renderProducts(productsToRender) {
         if (!productsGrid) return;
         if (productsToRender.length === 0) {
             productsGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">По вашему запросу ничего не найдено.</p>';
@@ -245,10 +245,30 @@ document.addEventListener('DOMContentLoaded', () => {
         productsGrid.innerHTML = productsToRender.map(product => {
             const imageSrc = product.ImageURL ? `/${product.ImageURL.replace(/\\/g, '/')}` : '/images/placeholder.png';
             
-            // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: переменные объявлены здесь, внутри map
             const glossValue = product.Gloss60 ? parseFloat(product.Gloss60).toFixed(1) : '–';
             const viscosityValue = product.Viscosity ? parseFloat(product.Viscosity).toFixed(1) : '–';
             const deltaEValue = product.DeltaE ? parseFloat(product.DeltaE).toFixed(2) : '–';
+
+            // --- НОВАЯ ЛОГИКА ЦЕНЫ ---
+            const price = parseFloat(product.Price);
+            let priceHTML;
+
+            if (price && price > 0) {
+                // Форматируем цену (например: 1 200,00 ₽)
+                const formattedPrice = new Intl.NumberFormat('ru-RU', { 
+                    style: 'currency', 
+                    currency: 'RUB',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2 
+                }).format(price);
+
+                // Отображаем цену текстом
+                priceHTML = `<div class="product-price-val" style="font-weight: 700; font-size: 1.1rem; color: var(--text-main);">${formattedPrice} / кг</div>`;
+            } else {
+                // Если цены нет, показываем кнопку-заглушку
+                priceHTML = `<button class="btn btn-price">Цена по запросу</button>`;
+            }
+            // --------------------------
 
             return `
             <div class="product-card" style="cursor: pointer;" data-product-id="${product.ProductID}" data-product-series="${product.ProductSeries}">
@@ -283,8 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <button class="btn btn-price">Цена по запросу</button>
+                <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    ${priceHTML}
                     <button class="btn btn-add" data-product-id="${product.ProductID}">В заявку +</button>
                 </div>
             </div>

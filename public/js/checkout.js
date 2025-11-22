@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'https://paint-site-vty0.onrender.com/api';
 
@@ -43,6 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const stepsIndicators = document.querySelectorAll('.checkout-steps .step');
 
     let currentStep = 1;
+
+    // ========== FIX LAYOUT FOR COMMENTS (Full Width) ==========
+    // Делаем поля комментариев на всю ширину строки
+    [deliveryCommentInput, orderCommentInput].forEach(input => {
+        if (input) {
+            const parentGroup = input.closest('.form-group');
+            if (parentGroup) {
+                parentGroup.style.flexBasis = '100%'; // Растягиваем контейнер на 100%
+            }
+        }
+    });
 
     // ========== MAIN LOAD FUNCTION ==========
     async function loadCheckoutData() {
@@ -157,7 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
         
         const vat = subtotal * 0.20;
-        const total = subtotal; 
+        // FIX: Итоговая сумма должна включать НДС
+        const total = subtotal + vat; 
 
         if (summarySubtotalEl) summarySubtotalEl.textContent = `${subtotal.toFixed(2)} ₽`;
         if (summaryVatEl) summaryVatEl.textContent = `${vat.toFixed(2)} ₽`;
