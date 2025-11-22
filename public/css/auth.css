@@ -13,6 +13,7 @@ body {
 }
 
 .auth-container {
+    margin-left:-13%;
     display: grid;
     grid-template-columns: 1fr 1fr;
     max-width: 1100px;
@@ -258,9 +259,7 @@ body {
     font-size: 14px;
     transition: all var(--transition-speed);
     outline: none;
-    /* ИЗМЕНЕНО: Ширина теперь управляется родительским элементом */
-    width: 100%;
-    box-sizing: border-box; /* Гарантирует, что padding не увеличит общую ширину */
+    width: 95%;
 }
 
 .form-group input:focus {
@@ -285,18 +284,17 @@ body {
 }
 .password-input input { 
     padding-right: 45px; 
+    width: 100%; 
 }
 
-/* ИСПРАВЛЕНО: ширина 100% для консистентности */
 .reg-password { 
     position: relative; 
-    width: 100%; 
+    width: 90%; 
 }
 
 .toggle-password {
     position: absolute; 
-    /* ИЗМЕНЕНО: Более надежное позиционирование */
-    right: 15px; 
+    right: 1%; 
     top: 50%;
     transform: translateY(-50%); 
     background: none; 
@@ -332,7 +330,7 @@ body {
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
-    flex-wrap: wrap; 
+    flex-wrap: wrap;  
     gap: 12px; 
     margin-top: 4px; 
 }
@@ -383,110 +381,27 @@ body {
 }
 
 /* ===================================
-   АДАПТИВНОСТЬ (УЛУЧШЕНО)
+   АДАПТИВНОСТЬ
    =================================== */
 
-/* Планшеты и маленькие десктопы */
 @media (max-width: 968px) {
-    .auth-container { 
-        grid-template-columns: 1fr; 
-        max-width: 500px; 
-        max-height: none; /* Убираем ограничение по высоте */
-    }
-    .auth-left { 
-        min-height: 350px; /* Немного увеличим для лучшего вида */
-        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-    }
-    .auth-right {
-        border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-    }
-    .slide { 
-        padding: 40px 30px; 
-    }
-    .slide-content h2 { 
-        font-size: 26px; /* Чуть крупнее */
-    }
-    .slide-content p { 
-        font-size: 15px; 
-    }
-    .auth-right { 
-        padding: 40px; 
-    }
-    .form-row { 
-        grid-template-columns: 1fr; 
-    }
-    .logo { 
-        top: 25px; left: 25px; 
-    }
-    .back-btn-left { 
-        top: 25px; right: 25px; 
-    }
-    .slider-dots { 
-        left: 30px; bottom: 30px; 
-    }
+    .auth-container { grid-template-columns: 1fr; max-width: 500px; }
+    .auth-left { min-height: 300px; }
+    .slide { padding: 40px 30px; }
+    .slide-content h2 { font-size: 24px; }
+    .slide-content p { font-size: 14px; }
+    .auth-right { padding: 30px; }
+    .form-row { grid-template-columns: 1fr; }
+    .logo { top: 20px; left: 20px; }
+    .back-btn-left { top: 20px; right: 20px; }
+    .slider-dots { left: 30px; bottom: 20px; }
 }
 
-/* Мобильные телефоны */
 @media (max-width: 480px) {
-    body { 
-        padding: 0; 
-        /* ДОБАВЛЕНО: Выравнивание по верху для удобства скролла */
-        align-items: flex-start;
-    }
-    .auth-container { 
-        /* ДОБАВЛЕНО: Убираем скругление для вида "на весь экран" */
-        border-radius: 0;
-        min-height: 100vh;
-        box-shadow: none;
-    }
-    .auth-left {
-        min-height: 300px;
-        border-radius: 0;
-    }
-    .auth-right { 
-        padding: 30px 20px; 
-        border-radius: 0;
-    }
-    .logo-text { 
-        display: none; 
-    }
-    .logo-icon {
-        padding: 10px 14px;
-    }
-    .back-btn-left {
-        font-size: 12px;
-        padding: 8px 16px;
-    }
-    .form-title { 
-        font-size: 28px; 
-        margin-bottom: 8px;
-    }
-    .form-subtitle {
-        font-size: 14px;
-        margin-bottom: 24px;
-    }
-    .slide-content {
-        left: 20px;
-        right: 20px;
-        bottom: 15%;
-    }
-    .slide-content h2 { 
-        font-size: 22px; 
-    }
-    .slide-content p {
-        font-size: 14px;
-    }
-    .slider-dots {
-        left: 20px;
-        bottom: 20px;
-    }
-    .submit-btn {
-        padding: 14px;
-        font-size: 15px;
-    }
-    .form-footer {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-    }
+    body { padding: 10px; }
+    .auth-container { border-radius: var(--border-radius-lg); }
+    .auth-right { padding: 20px; }
+    .form-title { font-size: 24px; }
+    .slide-content h2 { font-size: 20px; }
+    .logo-text { display: none; }
 }
